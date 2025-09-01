@@ -1,0 +1,22 @@
+{
+  "name": "deriv-workflow",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npm -w apps/frontend run dev",
+    "build": "npm -w apps/frontend run build",
+    "install:shared": "npm -w packages/shared i -D typescript rimraf",
+    "install:frontend": "npm -w apps/frontend install"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "tools/*"
+  ]
+}

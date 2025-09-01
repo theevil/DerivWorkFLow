@@ -1,0 +1,17 @@
+node_modules
+.DS_Store
+.env
+.env.*
+.next
+dist
+build
+coverage
+**/.pytest_cache
+**/__pycache__
+**/.mypy_cache
+**/.ruff_cache
+.idea
+.vscode
+**/.venv
+**/venv
+**/*.log
