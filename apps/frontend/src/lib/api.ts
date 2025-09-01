@@ -2,13 +2,14 @@ import type {
   LoginRequest,
   RegisterRequest,
   AuthResponse,
-  UserResponse,
+  User,
   TradePosition,
   TradingStats,
   TradingParametersRequest,
-} from '@deriv-workflow/shared';
+} from '../types/trading';
+import { config } from '../config/env';
 
-const API_URL = 'http://localhost:8000/api/v1';
+const API_URL = config.apiUrl;
 
 class ApiClient {
   private token: string | null = null;
@@ -33,20 +34,40 @@ class ApiClient {
       headers.Authorization = `Bearer ${this.token}`;
     }
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        ...headers,
-        ...options.headers,
-      },
-    });
+    // Create abort controller for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), config.apiTimeout);
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.detail || 'An error occurred');
+    try {
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers: {
+          ...headers,
+          ...options.headers,
+        },
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          throw new Error('Request timeout');
+        }
+        throw error;
+      }
+      
+      throw new Error('An unexpected error occurred');
     }
-
-    return response.json();
   }
 
   async login(data: LoginRequest): Promise<AuthResponse> {
@@ -70,15 +91,15 @@ class ApiClient {
     return response.json();
   }
 
-  async register(data: RegisterRequest): Promise<UserResponse> {
-    return this.fetch<UserResponse>('/auth/register', {
+  async register(data: RegisterRequest): Promise<User> {
+    return this.fetch<User>('/auth/register', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
-  async getCurrentUser(): Promise<UserResponse> {
-    return this.fetch<UserResponse>('/auth/me');
+  async getCurrentUser(): Promise<User> {
+    return this.fetch<User>('/auth/me');
   }
 
   // Trading endpoints

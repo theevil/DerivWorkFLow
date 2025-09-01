@@ -9,8 +9,8 @@ class Database:
 
 db = Database()
 
-async def get_database() -> Database:
-    return db
+async def get_database():
+    return db.get_db()
 
 async def connect_to_mongo():
     db.client = AsyncIOMotorClient(settings.mongodb_uri)

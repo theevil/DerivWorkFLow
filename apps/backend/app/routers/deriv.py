@@ -15,7 +15,7 @@ user_connections: dict[str, DerivWebSocket] = {}
 async def set_deriv_token(
     token: str,
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Set or update a user's Deriv API token"""
     try:
@@ -48,7 +48,7 @@ async def set_deriv_token(
 async def deriv_websocket(
     websocket: WebSocket,
     user_id: str,
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """WebSocket endpoint for real-time Deriv data"""
     await websocket.accept()

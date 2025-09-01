@@ -36,7 +36,7 @@ router = APIRouter()
 async def create_user_trading_parameters(
     params: TradingParametersCreate,
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Create trading parameters for the current user"""
     # Check if parameters already exist
@@ -58,7 +58,7 @@ async def create_user_trading_parameters(
 @router.get("/parameters", response_model=Optional[TradingParameters])
 async def get_trading_parameters(
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Get trading parameters for the current user"""
     params = await get_user_trading_parameters(db, current_user.id)
@@ -76,7 +76,7 @@ async def get_trading_parameters(
 async def update_user_trading_parameters(
     params_update: TradingParametersUpdate,
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Update trading parameters for the current user"""
     updated_params = await update_trading_parameters(db, current_user.id, params_update)
@@ -98,7 +98,7 @@ async def update_user_trading_parameters(
 async def create_position(
     trade: TradePositionCreate,
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Create a new trade position"""
     db_trade = await create_trade_position(db, current_user.id, trade)
@@ -113,7 +113,7 @@ async def create_position(
 async def get_positions(
     status: Optional[str] = None,
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Get trade positions for the current user"""
     positions = await get_user_positions(db, current_user.id, status)
@@ -131,7 +131,7 @@ async def get_positions(
 async def get_position(
     position_id: str,
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Get a specific trade position"""
     position = await get_position_by_id(db, position_id, current_user.id)
@@ -152,7 +152,7 @@ async def get_position(
 async def close_position(
     position_id: str,
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Close a trade position"""
     position = await get_position_by_id(db, position_id, current_user.id)
@@ -179,7 +179,7 @@ async def close_position(
 @router.get("/analysis/{symbol}", response_model=Optional[MarketAnalysis])
 async def get_market_analysis(
     symbol: str,
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Get latest market analysis for a symbol"""
     analysis = await get_latest_market_analysis(db, symbol)
@@ -196,7 +196,7 @@ async def get_market_analysis(
 async def get_analysis_history(
     symbol: str,
     limit: int = 100,
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Get historical market analysis for a symbol"""
     analyses = await get_market_analysis_history(db, symbol, limit)
@@ -214,7 +214,7 @@ async def get_analysis_history(
 async def get_trading_signals(
     executed: Optional[bool] = None,
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Get trading signals for the current user"""
     signals = await get_user_signals(db, current_user.id, executed)
@@ -233,7 +233,7 @@ async def get_trading_signals(
 @router.get("/stats")
 async def get_trading_statistics(
     current_user: User = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     """Get comprehensive trading statistics for the current user"""
     return await get_user_trading_stats(db, current_user.id)

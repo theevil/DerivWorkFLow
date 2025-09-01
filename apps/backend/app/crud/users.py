@@ -7,28 +7,34 @@ from app.models.user import UserCreate, UserInDB, UserUpdate
 
 
 async def get_user(db: AsyncIOMotorDatabase, user_id: str) -> Optional[UserInDB]:
-    if user = await db.users.find_one({"_id": ObjectId(user_id)}):
+    if user := await db.users.find_one({"_id": ObjectId(user_id)}):
         return UserInDB(**user)
     return None
 
 
 async def get_user_by_email(db: AsyncIOMotorDatabase, email: str) -> Optional[UserInDB]:
-    if user = await db.users.find_one({"email": email}):
+    if user := await db.users.find_one({"email": email}):
         return UserInDB(**user)
     return None
 
 
 async def create_user(db: AsyncIOMotorDatabase, user: UserCreate) -> UserInDB:
     hashed_password = get_password_hash(user.password)
-    db_user = UserInDB(
-        email=user.email,
-        name=user.name,
-        hashed_password=hashed_password,
-    )
     
-    result = await db.users.insert_one(db_user.model_dump(by_alias=True, exclude=["id"]))
-    db_user.id = result.inserted_id
-    return db_user
+    # Create user document for MongoDB
+    user_doc = {
+        "email": user.email,
+        "name": user.name,
+        "hashed_password": hashed_password,
+        "deriv_token": None,
+        "created_at": datetime.utcnow(),
+        "updated_at": datetime.utcnow(),
+    }
+    
+    result = await db.users.insert_one(user_doc)
+    user_doc["_id"] = result.inserted_id
+    
+    return UserInDB(**user_doc)
 
 
 async def update_user(

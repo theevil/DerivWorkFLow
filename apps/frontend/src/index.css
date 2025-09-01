@@ -1,0 +1,507 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter', 'Space Grotesk', system-ui, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+
+  /* Paleta Retro Estática */
+  --retro-turquoise: #68C7C1;
+  --retro-gold: #FACAB8;
+  --retro-coral: #F5758B;
+  --retro-red: #DD3341;
+  --retro-brown: #794139;
+  --retro-cream: #F7EDE2;
+  --retro-dark: #2a1810;      /* Fondo oscuro retro */
+  --retro-dark-alt: #3d2818;  /* Variante más clara del oscuro */
+  
+  /* Colores de superficie */
+  --surface-primary: var(--retro-dark);
+  --surface-secondary: var(--retro-dark-alt);
+  --surface-light: var(--retro-cream);
+  --text-primary: var(--retro-cream);
+  --text-secondary: var(--retro-gold);
+  --text-accent: var(--retro-turquoise);
+
+  color: var(--text-primary);
+  background: var(--surface-primary);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Material Design 3 + Retro Components */
+@layer components {
+  /* Botones Retro Estáticos */
+  .btn-primary {
+    @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2;
+    background: var(--retro-turquoise);
+    color: var(--retro-dark);
+    border: 2px solid var(--retro-turquoise);
+  }
+  
+  .btn-primary:hover {
+    background: var(--retro-cream);
+    color: var(--retro-dark);
+    border-color: var(--retro-cream);
+    transform: translateY(-2px);
+  }
+  
+  .btn-secondary {
+    @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2;
+    background: var(--retro-gold);
+    color: var(--retro-dark);
+    border: 2px solid var(--retro-gold);
+  }
+  
+  .btn-secondary:hover {
+    background: var(--retro-cream);
+    border-color: var(--retro-cream);
+    transform: translateY(-2px);
+  }
+  
+  .btn-success {
+    @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2;
+    background: var(--retro-turquoise);
+    color: var(--retro-dark);
+    border: 2px solid var(--retro-turquoise);
+  }
+  
+  .btn-danger {
+    @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2;
+    background: var(--retro-red);
+    color: var(--retro-cream);
+    border: 2px solid var(--retro-red);
+  }
+  
+  .btn-warning {
+    @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2;
+    background: var(--retro-coral);
+    color: var(--retro-cream);
+    border: 2px solid var(--retro-coral);
+  }
+  
+  /* Tarjetas Retro Estáticas */
+  .card {
+    @apply rounded-2xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+    background: var(--surface-secondary);
+    border: 2px solid var(--retro-brown);
+    color: var(--text-primary);
+  }
+  
+  .card-elevated {
+    @apply rounded-2xl shadow-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2;
+    background: var(--retro-cream);
+    color: var(--retro-dark);
+    border: 2px solid var(--retro-gold);
+  }
+  
+  .card-glass {
+    @apply rounded-2xl p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+    background: var(--surface-secondary);
+    border: 2px solid var(--retro-turquoise);
+    color: var(--text-primary);
+  }
+  
+  .card-retro {
+    @apply rounded-2xl p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+    background: var(--retro-red);
+    color: var(--retro-cream);
+    border: 2px solid var(--retro-coral);
+  }
+  
+  /* Inputs Retro */
+  .input-primary {
+    @apply w-full px-4 py-3 rounded-lg shadow-sm focus:outline-none transition-all duration-300;
+    background: var(--retro-cream);
+    color: var(--retro-dark);
+    border: 2px solid var(--retro-brown);
+  }
+  
+  .input-primary:focus {
+    border-color: var(--retro-turquoise);
+    box-shadow: 0 0 0 3px rgba(104, 199, 193, 0.3);
+  }
+  
+  .input-floating {
+    @apply relative;
+  }
+  
+  .input-floating input {
+    @apply w-full px-4 pt-6 pb-2 border-2 border-retro-cream-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-retro-turquoise-400 focus:border-retro-turquoise-400 transition-all duration-300 bg-white/80 backdrop-blur-sm;
+  }
+  
+  /* Aplicar peer manualmente para evitar conflictos con @apply */
+  .input-floating input.peer {
+    /* peer class applied in components */
+  }
+  
+  .input-floating label {
+    @apply absolute left-4 top-4 text-retro-brown-500 transition-all duration-300 pointer-events-none;
+  }
+  
+  .input-floating input:focus + label,
+  .input-floating input:valid + label {
+    @apply top-2 text-xs text-retro-turquoise-600;
+  }
+  
+  /* Estados de Trading */
+  .text-profit {
+    color: #000000 !important;
+    font-weight: bold;
+  }
+  
+  .text-loss {
+    color: #000000 !important;
+    font-weight: bold;
+  }
+  
+  /* Badges Retro */
+  .badge-success {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-retro-turquoise-100 text-retro-turquoise-800 border border-retro-turquoise-200;
+  }
+  
+  .badge-danger {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-retro-red-100 text-retro-red-800 border border-retro-red-200;
+  }
+  
+  .badge-warning {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-retro-coral-100 text-retro-coral-800 border border-retro-coral-200;
+  }
+  
+  .badge-info {
+    @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-retro-gold-100 text-retro-brown-800 border border-retro-gold-200;
+  }
+  
+  /* Efectos de Neumorfismo Suave */
+  .neumorph {
+    @apply rounded-3xl;
+    background: var(--retro-cream);
+    box-shadow: 
+      12px 12px 24px rgba(121, 65, 57, 0.1),
+      -12px -12px 24px rgba(255, 255, 255, 0.9);
+  }
+  
+  .neumorph-inset {
+    @apply rounded-3xl;
+    background: #ffffff;
+    border: 3px solid #8b4513;
+    box-shadow: 
+      inset 2px 2px 4px rgba(0, 0, 0, 0.1),
+      inset -2px -2px 4px rgba(255, 255, 255, 1);
+  }
+}
+
+/* Utilidades Retro Estáticas */
+@layer utilities {
+  .retro-text-primary {
+    color: var(--text-primary);
+  }
+  
+  .retro-text-secondary {
+    color: var(--text-secondary);
+  }
+  
+  .retro-text-accent {
+    color: var(--text-accent);
+  }
+  
+  .retro-bg-primary {
+    background: var(--surface-primary);
+  }
+  
+  .retro-bg-secondary {
+    background: var(--surface-secondary);
+  }
+  
+  .glass-effect {
+    background: var(--surface-secondary);
+    border: 2px solid var(--retro-brown);
+  }
+  
+  .elevation-1 {
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 2px rgba(0, 0, 0, 0.24);
+  }
+  
+  .elevation-2 {
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.23);
+  }
+  
+  .elevation-3 {
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.19), 0px 6px 6px rgba(0, 0, 0, 0.23);
+  }
+}
+
+/* Custom Retro Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--retro-turquoise);
+  border-radius: 4px;
+  border: 1px solid var(--retro-brown);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--retro-coral);
+}
+
+/* Sidebar específico */
+.sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: var(--retro-gold);
+  border-radius: 3px;
+}
+
+/* Material Design 3 Loading Animations */
+.loading-pulse {
+  @apply animate-pulse;
+}
+
+.loading-shimmer {
+  @apply relative overflow-hidden;
+}
+
+.loading-shimmer::before {
+  content: '';
+  @apply absolute inset-0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(104, 199, 193, 0.2),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.loading-spinner {
+  @apply inline-block w-6 h-6 border-2 border-retro-turquoise-200 border-t-retro-turquoise-500 rounded-full;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Floating Action Button */
+.fab {
+  @apply fixed bottom-8 right-8 w-16 h-16 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center transform hover:scale-110 z-50;
+  background: var(--retro-turquoise);
+  border: 3px solid var(--retro-gold);
+  color: var(--retro-dark);
+}
+
+/* Indicadores de colores retro */
+.retro-indicator-turquoise {
+  background: var(--retro-turquoise);
+}
+
+.retro-indicator-coral {
+  background: var(--retro-coral);
+}
+
+.retro-indicator-gold {
+  background: var(--retro-gold);
+}
+
+/* Íconos con fondo retro */
+.retro-icon-turquoise {
+  background: var(--retro-turquoise);
+  border: 3px solid var(--retro-gold);
+  color: var(--retro-dark);
+}
+
+.retro-icon-coral {
+  background: var(--retro-coral);
+  border: 3px solid var(--retro-gold);
+  color: var(--retro-cream);
+}
+
+/* Mejoras de contraste para tarjetas de trading */
+.trading-card-label {
+  color: #000000 !important;
+  font-weight: 700;
+  text-shadow: none;
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trading-card-value {
+  color: #000000 !important;
+  font-weight: 800;
+  text-shadow: none;
+  font-size: 1.125rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Forzar color negro en elementos de trading cards */
+.neumorph-inset p,
+.neumorph-inset span,
+.neumorph-inset div,
+.neumorph-inset * {
+  color: #000000 !important;
+}
+
+/* Forzar color negro específicamente en trading cards */
+.card-elevated .neumorph-inset * {
+  color: #000000 !important;
+}
+
+/* Regla más agresiva para forzar color negro */
+[class*="neumorph-inset"] * {
+  color: #000000 !important;
+}
+
+/* Forzar color negro en todos los elementos de trading */
+.trading-card-value,
+.trading-card-label,
+[class*="trading-card"] {
+  color: #000000 !important;
+}
+
+/* Prevenir márgenes negativos manuales */
+.main-content {
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+}
+
+/* Header elegante */
+.dashboard-header {
+  background: linear-gradient(135deg, var(--surface-secondary) 0%, var(--retro-cream) 100%);
+  border: 2px solid var(--retro-brown);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Modern Page Transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.page-transition-exit {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transform: translateY(-30px) scale(0.95);
+  transition: all 400ms cubic-bezier(0.55, 0.06, 0.68, 0.19);
+}
+
+/* Hero Section Styles */
+.hero-section {
+  @apply min-h-screen relative;
+  background: var(--surface-primary);
+}
+
+.hero-section::before {
+  content: '';
+  @apply absolute inset-0 opacity-5;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(104, 199, 193, 0.1) 10px,
+      rgba(104, 199, 193, 0.1) 20px
+    );
+}
+
+/* Floating Elements Animation */
+.floating {
+  animation: floating 6s ease-in-out infinite;
+}
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.floating-delayed {
+  animation: floating 6s ease-in-out infinite 2s;
+}
+
+/* Tipografía Retro */
+.text-display {
+  @apply text-5xl md:text-7xl font-bold leading-tight;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  color: var(--retro-cream) !important;
+}
+
+.text-headline {
+  @apply text-3xl md:text-4xl font-bold;
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  color: var(--retro-turquoise) !important;
+}
+
+.text-title {
+  @apply text-xl md:text-2xl font-semibold;
+  color: #000000 !important;
+}
+
+.text-body {
+  @apply text-base leading-relaxed;
+  color: var(--text-primary);
+}
+
+.text-caption {
+  @apply text-sm;
+  color: var(--retro-brown);
+  font-weight: 600;
+}
+

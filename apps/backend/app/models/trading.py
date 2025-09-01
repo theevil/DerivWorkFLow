@@ -1,8 +1,7 @@
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Any
 from pydantic import BaseModel, Field
 from bson import ObjectId
-from app.models.user import PyObjectId
 
 
 class TradingParametersBase(BaseModel):
@@ -28,14 +27,16 @@ class TradingParametersUpdate(BaseModel):
 
 
 class TradingParametersInDB(TradingParametersBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    user_id: PyObjectId
+    id: Any = Field(default_factory=Any, alias="_id")
+    user_id: Any
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    class Config:
-        json_encoders = {ObjectId: str}
-        populate_by_name = True
+    model_config = {
+        "json_encoders": {ObjectId: str},
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True
+    }
 
 
 class TradingParameters(TradingParametersBase):
@@ -44,8 +45,9 @@ class TradingParameters(TradingParametersBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "json_encoders": {ObjectId: str}
+    }
 
 
 class TradePositionBase(BaseModel):
@@ -61,8 +63,8 @@ class TradePositionCreate(TradePositionBase):
 
 
 class TradePositionInDB(TradePositionBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    user_id: PyObjectId
+    id: Any = Field(default_factory=Any, alias="_id")
+    user_id: Any
     contract_id: Optional[str] = None
     entry_spot: Optional[float] = None
     exit_spot: Optional[float] = None
@@ -74,9 +76,11 @@ class TradePositionInDB(TradePositionBase):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-    class Config:
-        json_encoders = {ObjectId: str}
-        populate_by_name = True
+    model_config = {
+        "json_encoders": {ObjectId: str},
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True
+    }
 
 
 class TradePosition(TradePositionBase):
@@ -93,8 +97,9 @@ class TradePosition(TradePositionBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "json_encoders": {ObjectId: str}
+    }
 
 
 class MarketAnalysisBase(BaseModel):
@@ -109,14 +114,16 @@ class MarketAnalysisBase(BaseModel):
 
 
 class MarketAnalysisInDB(MarketAnalysisBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: Any = Field(default_factory=Any, alias="_id")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     current_price: float
     price_history: List[float] = Field(default_factory=list)
 
-    class Config:
-        json_encoders = {ObjectId: str}
-        populate_by_name = True
+    model_config = {
+        "json_encoders": {ObjectId: str},
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True
+    }
 
 
 class MarketAnalysis(MarketAnalysisBase):
@@ -125,8 +132,9 @@ class MarketAnalysis(MarketAnalysisBase):
     current_price: float
     price_history: List[float]
 
-    class Config:
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "json_encoders": {ObjectId: str}
+    }
 
 
 class TradingSignalBase(BaseModel):
@@ -139,15 +147,17 @@ class TradingSignalBase(BaseModel):
 
 
 class TradingSignalInDB(TradingSignalBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    user_id: PyObjectId
+    id: Any = Field(default_factory=Any, alias="_id")
+    user_id: Any
     created_at: datetime = Field(default_factory=datetime.utcnow)
     executed: bool = Field(default=False)
-    trade_id: Optional[PyObjectId] = None
+    trade_id: Optional[Any] = None
 
-    class Config:
-        json_encoders = {ObjectId: str}
-        populate_by_name = True
+    model_config = {
+        "json_encoders": {ObjectId: str},
+        "populate_by_name": True,
+        "arbitrary_types_allowed": True
+    }
 
 
 class TradingSignal(TradingSignalBase):
@@ -157,5 +167,6 @@ class TradingSignal(TradingSignalBase):
     executed: bool
     trade_id: Optional[str] = None
 
-    class Config:
-        json_encoders = {ObjectId: str}
+    model_config = {
+        "json_encoders": {ObjectId: str}
+    }

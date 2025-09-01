@@ -18,12 +18,21 @@ email-validator = "*"
 python-multipart = "*"
 websockets = "==12.0"
 numpy = "==1.26.4"
+python-dotenv = "==1.0.0"
 
 [dev-packages]
 pytest = "*"
 httpx = "*"
 pytest-asyncio = "*"
+pytest-mock = "*"
+pytest-cov = "*"
+pytest-env = "*"
+mongomock-motor = "*"
+factory-boy = "*"
+faker = "*"
 
 [scripts]
 start = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
-test = "pytest"
+test = "pytest tests/ -v"
+test-cov = "pytest tests/ --cov=app --cov-report=html --cov-report=term-missing"
+test-watch = "pytest tests/ -v --ff"

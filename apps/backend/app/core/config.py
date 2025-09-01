@@ -1,23 +1,52 @@
+import os
 from pydantic_settings import BaseSettings
 from typing import List
-from datetime import timedelta
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 class Settings(BaseSettings):
+    # App Configuration
     app_name: str = "Deriv Workflow API"
-    environment: str = "development"
+    environment: str = os.getenv("ENVIRONMENT", "development")
     api_v1_prefix: str = "/api/v1"
+    debug: bool = os.getenv("DEBUG", "False").lower() == "true"
+    
+    # CORS Configuration
     backend_cors_origins: List[str] = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
     ]
-    mongodb_uri: str = "mongodb://mongodb:27017"
-    mongodb_db: str = "deriv"
     
-    # Security
-    secret_key: str = "your-secret-key-here"  # Change in production
+    # Database Configuration
+    mongodb_uri: str = os.getenv("MONGODB_URI", "mongodb://mongodb:27017")
+    mongodb_db: str = os.getenv("MONGODB_DB", "deriv")
+    
+    # Security Configuration
+    secret_key: str = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60 * 24  # 24 hours
+    access_token_expire_minutes: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))  # 24 hours
+    
+    # Deriv API Configuration
+    deriv_app_id: str = os.getenv("DERIV_APP_ID", "1089")
+    deriv_api_url: str = os.getenv("DERIV_API_URL", "wss://ws.binaryws.com/websockets/v3")
+    
+    # Logging Configuration
+    log_level: str = os.getenv("LOG_LEVEL", "INFO")
+    log_file: str = os.getenv("LOG_FILE", "app.log")
+    
+    # Rate Limiting
+    rate_limit_requests: int = int(os.getenv("RATE_LIMIT_REQUESTS", "100"))
+    rate_limit_window: int = int(os.getenv("RATE_LIMIT_WINDOW", "60"))  # seconds
+    
+    # AI Analysis Configuration
+    ai_confidence_threshold: float = float(os.getenv("AI_CONFIDENCE_THRESHOLD", "0.6"))
+    ai_analysis_interval: int = int(os.getenv("AI_ANALYSIS_INTERVAL", "30"))  # seconds
+    max_positions_per_user: int = int(os.getenv("MAX_POSITIONS_PER_USER", "10"))
 
     class Config:
         env_file = ".env"

@@ -7,7 +7,7 @@ from jose import JWTError, jwt
 from app.core.config import settings
 from app.core.database import get_database
 from app.core.security import create_access_token
-from app.crud.users import authenticate_user, create_user, get_user_by_email
+from app.crud.users import authenticate_user, create_user, get_user_by_email, get_user
 from app.models.user import User, UserCreate
 
 router = APIRouter()
@@ -16,7 +16,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -45,10 +45,43 @@ async def get_current_user(
     raise credentials_exception
 
 
+async def get_current_user_from_token(token: str) -> User:
+    """Get current user from JWT token (for WebSocket use)"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
+    try:
+        payload = jwt.decode(
+            token, settings.secret_key, algorithms=[settings.algorithm]
+        )
+        user_email: str = payload.get("sub")
+        if user_email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    
+    from app.core.database import get_database
+    db = await get_database()
+    
+    if user := await get_user_by_email(db, user_email):
+        return User(
+            id=str(user.id),
+            email=user.email,
+            name=user.name,
+            deriv_token=user.deriv_token,
+            created_at=user.created_at,
+            updated_at=user.updated_at,
+        )
+    raise credentials_exception
+
+
 @router.post("/token")
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     user = await authenticate_user(db, form_data.username, form_data.password)
     if not user:
@@ -76,7 +109,7 @@ async def login(
 @router.post("/register", response_model=User)
 async def register(
     user: UserCreate,
-    db: AsyncIOMotorDatabase = Depends(get_database),
+    db = Depends(get_database),
 ):
     if await get_user_by_email(db, user.email):
         raise HTTPException(

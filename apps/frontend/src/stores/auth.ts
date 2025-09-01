@@ -1,12 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { UserResponse } from '@deriv-workflow/shared';
+import type { User } from '../types/trading';
 import { api } from '../lib/api';
 
 interface AuthState {
-  user: UserResponse | null;
+  user: User | null;
   token: string | null;
-  setAuth: (token: string, user: UserResponse) => void;
+  setAuth: (token: string, user: User) => void;
   clearAuth: () => void;
   isAuthenticated: boolean;
 }
