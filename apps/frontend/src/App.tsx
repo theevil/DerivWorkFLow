@@ -6,6 +6,7 @@ import { RegisterPage } from './pages/Register';
 import { DashboardPage } from './pages/Dashboard';
 import { TradingPage } from './pages/Trading';
 import { Automation } from './pages/Automation';
+import { SettingsPage } from './pages/Settings';
 import { useAuthStore } from './stores/auth';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -42,6 +43,14 @@ export function App() {
             element={
               <ProtectedRoute>
                 <Automation />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <SettingsPage />
               </ProtectedRoute>
             }
           />
