@@ -40,14 +40,14 @@ async def create_user_trading_parameters(
 ):
     """Create trading parameters for the current user"""
     # Check if parameters already exist
-    existing = await get_user_trading_parameters(db, current_user.id)
+    existing = await get_user_trading_parameters(db, str(current_user.id))
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Trading parameters already exist. Use PUT to update."
         )
     
-    db_params = await create_trading_parameters(db, current_user.id, params)
+    db_params = await create_trading_parameters(db, str(current_user.id), params)
     return TradingParameters(
         id=str(db_params.id),
         user_id=str(db_params.user_id),
@@ -61,7 +61,7 @@ async def get_trading_parameters(
     db = Depends(get_database),
 ):
     """Get trading parameters for the current user"""
-    params = await get_user_trading_parameters(db, current_user.id)
+    params = await get_user_trading_parameters(db, str(current_user.id))
     if not params:
         return None
     
@@ -79,7 +79,7 @@ async def update_user_trading_parameters(
     db = Depends(get_database),
 ):
     """Update trading parameters for the current user"""
-    updated_params = await update_trading_parameters(db, current_user.id, params_update)
+    updated_params = await update_trading_parameters(db, str(current_user.id), params_update)
     if not updated_params:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -101,7 +101,7 @@ async def create_position(
     db = Depends(get_database),
 ):
     """Create a new trade position"""
-    db_trade = await create_trade_position(db, current_user.id, trade)
+    db_trade = await create_trade_position(db, str(current_user.id), trade)
     return TradePosition(
         id=str(db_trade.id),
         user_id=str(db_trade.user_id),
@@ -116,7 +116,7 @@ async def get_positions(
     db = Depends(get_database),
 ):
     """Get trade positions for the current user"""
-    positions = await get_user_positions(db, current_user.id, status)
+    positions = await get_user_positions(db, str(current_user.id), status)
     return [
         TradePosition(
             id=str(pos.id),
@@ -134,7 +134,7 @@ async def get_position(
     db = Depends(get_database),
 ):
     """Get a specific trade position"""
-    position = await get_position_by_id(db, position_id, current_user.id)
+    position = await get_position_by_id(db, position_id, str(current_user.id))
     if not position:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -155,7 +155,7 @@ async def close_position(
     db = Depends(get_database),
 ):
     """Close a trade position"""
-    position = await get_position_by_id(db, position_id, current_user.id)
+    position = await get_position_by_id(db, position_id, str(current_user.id))
     if not position:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -169,7 +169,7 @@ async def close_position(
         )
     
     updated_position = await update_position(
-        db, position_id, current_user.id, {"status": "closed"}
+        db, position_id, str(current_user.id), {"status": "closed"}
     )
     
     return {"message": "Position closed successfully"}
@@ -217,7 +217,7 @@ async def get_trading_signals(
     db = Depends(get_database),
 ):
     """Get trading signals for the current user"""
-    signals = await get_user_signals(db, current_user.id, executed)
+    signals = await get_user_signals(db, str(current_user.id), executed)
     return [
         TradingSignal(
             id=str(signal.id),
@@ -236,4 +236,4 @@ async def get_trading_statistics(
     db = Depends(get_database),
 ):
     """Get comprehensive trading statistics for the current user"""
-    return await get_user_trading_stats(db, current_user.id)
+    return await get_user_trading_stats(db, str(current_user.id))
