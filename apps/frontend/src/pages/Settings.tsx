@@ -389,39 +389,34 @@ export function SettingsPage() {
           <Grid.Col span={{ base: 12, lg: 8 }}>
             <Stack gap={80}>
               {/* Deriv API Configuration */}
-              <Card className="relative p-0 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
+              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
                 {/* Header with icon and title inside card */}
-                <div className="relative p-6 bg-gradient-to-r from-retro-coral-100 to-retro-coral-50 border-b-3 border-retro-brown-200">
-                  <Group justify="space-between" align="center">
-                    <Group gap="lg" align="center">
-                      <div className="p-4 rounded-2xl bg-retro-coral-200 border-3 border-retro-coral-400 shadow-lg">
-                        <IconKey className="text-retro-coral-700" size={32} />
-                      </div>
-                      <div>
-                        <Title order={2} className="text-2xl font-bold text-retro-brown-800 mb-1">
-                          Deriv API Configuration
-                        </Title>
-                        <Text size="md" className="text-retro-brown-600 font-medium">
-                          Connect your Deriv account for live trading
-                        </Text>
-                      </div>
-                    </Group>
-                    {connectionStatus && (
-                      <Badge 
-                        size="xl"
-                        color={connectionStatus === 'success' ? 'green' : 'red'}
-                        variant="filled"
-                        className="px-6 py-3 text-base font-bold shadow-lg"
-                        radius="xl"
-                      >
-                        {connectionStatus === 'success' ? '✓ Connected' : '✗ Error'}
-                      </Badge>
-                    )}
-                  </Group>
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 rounded-xl bg-retro-coral-200 border-2 border-retro-coral-400 shadow-md">
+                      <IconKey className="text-retro-coral-700" size={24} />
+                    </div>
+                    <div>
+                      <Title order={2} className="text-xl font-bold text-retro-brown-800 mb-1">
+                        Deriv API Configuration
+                      </Title>
+                      <Text size="sm" className="text-retro-brown-600 font-medium">
+                        Connect your Deriv account for live trading
+                      </Text>
+                    </div>
+                  </div>
+                  {connectionStatus && (
+                    <Badge 
+                      size="lg"
+                      color={connectionStatus === 'success' ? 'green' : 'red'}
+                      variant="filled"
+                      className="px-4 py-2 text-sm font-bold shadow-lg"
+                      radius="xl"
+                    >
+                      {connectionStatus === 'success' ? '✓ Connected' : '✗ Error'}
+                    </Badge>
+                  )}
                 </div>
-                
-                {/* Content area */}
-                <div className="p-8">
 
                 <Stack gap="xl">
                   <TextInput
@@ -494,13 +489,13 @@ export function SettingsPage() {
                   </Alert>
 
                   {/* Save Button for Deriv Section */}
-                  <div className="flex justify-end pt-6 border-t-3 border-retro-brown-200 bg-retro-cream-50 -mx-8 px-8 py-6 rounded-b-xl">
+                  <div className="flex justify-end pt-6 border-t-2 border-retro-brown-200 mt-6">
                     <Button
                       onClick={() => saveSection('deriv', { derivToken: settings.derivToken, derivAppId: settings.derivAppId })}
                       loading={savingSection === 'deriv'}
-                      size="xl"
-                      className="px-12 py-4 text-lg font-bold shadow-xl"
-                      leftSection={<IconCheck size={20} />}
+                      size="lg"
+                      className="px-8 py-3 text-base font-bold shadow-lg"
+                      leftSection={<IconCheck size={18} />}
                       gradient={{ from: 'teal', to: 'cyan' }}
                       variant="gradient"
                       radius="xl"
@@ -509,30 +504,24 @@ export function SettingsPage() {
                     </Button>
                   </div>
                 </Stack>
-                </div>
               </Card>
 
               {/* Trading Parameters */}
-              <Card className="relative p-0 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
+              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
                 {/* Header with icon and title inside card */}
-                <div className="relative p-6 bg-gradient-to-r from-retro-turquoise-100 to-retro-turquoise-50 border-b-3 border-retro-brown-200">
-                  <Group gap="lg" align="center">
-                    <div className="p-4 rounded-2xl bg-retro-turquoise-200 border-3 border-retro-turquoise-400 shadow-lg">
-                      <IconSettings className="text-retro-turquoise-700" size={32} />
-                    </div>
-                    <div>
-                      <Title order={2} className="text-2xl font-bold text-retro-brown-800 mb-1">
-                        Trading Parameters
-                      </Title>
-                      <Text size="md" className="text-retro-brown-600 font-medium">
-                        Set your risk management and position sizing rules
-                      </Text>
-                    </div>
-                  </Group>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-3 rounded-xl bg-retro-turquoise-200 border-2 border-retro-turquoise-400 shadow-md">
+                    <IconSettings className="text-retro-turquoise-700" size={24} />
+                  </div>
+                  <div>
+                    <Title order={2} className="text-xl font-bold text-retro-brown-800 mb-1">
+                      Trading Parameters
+                    </Title>
+                    <Text size="sm" className="text-retro-brown-600 font-medium">
+                      Set your risk management and position sizing rules
+                    </Text>
+                  </div>
                 </div>
-                
-                {/* Content area */}
-                <div className="p-8">
 
                 <Grid gutter="xl">
                   <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -631,7 +620,7 @@ export function SettingsPage() {
                 </Grid>
 
                 {/* Save Button for Trading Section */}
-                <div className="flex justify-end pt-6 border-t-3 border-retro-brown-200 bg-retro-cream-50 -mx-8 px-8 py-6 rounded-b-xl">
+                <div className="flex justify-end pt-6 border-t-2 border-retro-brown-200 mt-6">
                   <Button
                     onClick={() => saveSection('trading', {
                       profitTop: settings.profitTop,
@@ -642,9 +631,9 @@ export function SettingsPage() {
                       positionSize: settings.positionSize,
                     })}
                     loading={savingSection === 'trading'}
-                    size="xl"
-                    className="px-12 py-4 text-lg font-bold shadow-xl"
-                    leftSection={<IconCheck size={20} />}
+                    size="lg"
+                    className="px-8 py-3 text-base font-bold shadow-lg"
+                    leftSection={<IconCheck size={18} />}
                     gradient={{ from: 'indigo', to: 'purple' }}
                     variant="gradient"
                     radius="xl"
@@ -652,30 +641,24 @@ export function SettingsPage() {
                     Save Trading Parameters
                   </Button>
                 </div>
-                </div>
               </Card>
 
               {/* AI Configuration */}
-              <Card className="relative p-0 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
+              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
                 {/* Header with icon and title inside card */}
-                <div className="relative p-6 bg-gradient-to-r from-retro-violet-100 to-retro-violet-50 border-b-3 border-retro-brown-200">
-                  <Group gap="lg" align="center">
-                    <div className="p-4 rounded-2xl bg-retro-violet-200 border-3 border-retro-violet-400 shadow-lg">
-                      <IconBrain className="text-retro-violet-700" size={32} />
-                    </div>
-                    <div>
-                      <Title order={2} className="text-2xl font-bold text-retro-brown-800 mb-1">
-                        AI Configuration
-                      </Title>
-                      <Text size="md" className="text-retro-brown-600 font-medium">
-                        Configure AI models and analysis parameters
-                      </Text>
-                    </div>
-                  </Group>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-3 rounded-xl bg-retro-violet-200 border-2 border-retro-violet-400 shadow-md">
+                    <IconBrain className="text-retro-violet-700" size={24} />
+                  </div>
+                  <div>
+                    <Title order={2} className="text-xl font-bold text-retro-brown-800 mb-1">
+                      AI Configuration
+                    </Title>
+                    <Text size="sm" className="text-retro-brown-600 font-medium">
+                      Configure AI models and analysis parameters
+                    </Text>
+                  </div>
                 </div>
-                
-                {/* Content area */}
-                <div className="p-8">
 
                 <Stack gap="lg">
                   <PasswordInput
@@ -800,7 +783,7 @@ export function SettingsPage() {
                   />
 
                   {/* Save Button for AI Section */}
-                  <div className="flex justify-end pt-6 border-t-2 border-retro-brown-200">
+                  <div className="flex justify-end pt-6 border-t-2 border-retro-brown-200 mt-6">
                     <Button
                       onClick={() => saveSection('ai', {
                         openaiApiKey: settings.openaiApiKey,
@@ -813,32 +796,35 @@ export function SettingsPage() {
                         aiMaxTokens: settings.aiMaxTokens,
                       })}
                       loading={savingSection === 'ai'}
-                      size="md"
-                      className="px-8"
-                      leftSection={<IconCheck size={16} />}
+                      size="lg"
+                      className="px-8 py-3 text-base font-bold shadow-lg"
+                      leftSection={<IconCheck size={18} />}
+                      gradient={{ from: 'violet', to: 'purple' }}
+                      variant="gradient"
+                      radius="xl"
                     >
                       Save AI Configuration
                     </Button>
                   </div>
                 </Stack>
-                </div>
               </Card>
 
               {/* Risk Management */}
-              <Card className="card p-8 shadow-lg border-2 border-retro-brown-200">
-                <Group className="mb-6">
-                  <div className="p-3 rounded-xl bg-retro-red-100 border-2 border-retro-red-300">
-                    <IconShield className="text-retro-red-600" size={28} />
+              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
+                {/* Header with icon and title inside card */}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="p-3 rounded-xl bg-retro-red-200 border-2 border-retro-red-400 shadow-md">
+                    <IconShield className="text-retro-red-700" size={24} />
                   </div>
                   <div>
-                    <Title order={2} className="text-2xl font-bold text-retro-brown-800 mb-1">
+                    <Title order={2} className="text-xl font-bold text-retro-brown-800 mb-1">
                       Risk Management
                     </Title>
-                    <Text size="sm" className="text-retro-brown-600">
+                    <Text size="sm" className="text-retro-brown-600 font-medium">
                       Configure automatic risk control features
                     </Text>
                   </div>
-                </Group>
+                </div>
 
                 <Grid gutter="xl">
                   <Grid.Col span={{ base: 12, sm: 6 }}>
