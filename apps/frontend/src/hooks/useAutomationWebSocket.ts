@@ -33,7 +33,7 @@ export function useAutomationWebSocket(options: UseAutomationWebSocketOptions = 
 
     try {
       // Construct WebSocket URL (assuming same host as API)
-      const wsUrl = config.apiUrl.replace('http', 'ws') + '/api/v1/ws/automation';
+      const wsUrl = config.apiUrl.replace('http', 'ws') + '/automation';
       
       wsRef.current = new WebSocket(wsUrl);
 

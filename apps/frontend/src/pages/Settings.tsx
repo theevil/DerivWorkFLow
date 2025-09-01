@@ -33,10 +33,16 @@ import {
   IconRefresh,
   IconAlertTriangle,
   IconInfoCircle,
+  IconTrendingUp,
+  IconTarget,
+  IconCalculator,
+  IconStack,
+  IconDeviceFloppy,
 } from '@tabler/icons-react';
 import { Layout } from '../components/Layout';
 import { notifications } from '@mantine/notifications';
 import { api } from '../lib/api';
+import { useAuthStore } from '../stores/auth';
 
 interface UserSettings {
   // Deriv API Configuration
@@ -127,15 +133,15 @@ const inputStyles = {
   label: { 
     fontSize: '16px', 
     fontWeight: 700, 
-    color: '#2D1B0E', 
+    color: '#000000', 
     marginBottom: '8px',
     textShadow: 'none'
   },
   description: { 
     fontSize: '14px', 
-    color: '#5D4037', 
+    color: '#000000', 
     marginBottom: '10px',
-    fontWeight: 500
+    fontWeight: 600
   },
   input: { 
     fontSize: '15px', 
@@ -147,12 +153,12 @@ const inputStyles = {
     backgroundColor: '#FFFFFF',
     boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
     transition: 'all 0.2s ease',
-    color: '#2D1B0E',
+    color: '#000000',
     '&::placeholder': {
-      color: '#8D6E63',
+      color: '#666666',
       fontSize: '14px',
       fontWeight: 400,
-      opacity: 0.8
+      opacity: 1
     },
     '&:focus': { 
       borderColor: '#00BCD4',
@@ -164,10 +170,15 @@ const inputStyles = {
       borderColor: '#6D4C41',
       backgroundColor: '#FAFAFA'
     }
+  },
+  leftSection: {
+    marginLeft: '8px',
+    color: '#8D6E63'
   }
 };
 
 export function SettingsPage() {
+  const { isAuthenticated, token } = useAuthStore();
   const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -178,10 +189,29 @@ export function SettingsPage() {
   const [unsavedChanges, setUnsavedChanges] = useState(false);
 
   useEffect(() => {
-    loadSettings();
-  }, []);
+    if (isAuthenticated && token) {
+      loadSettings();
+    } else if (!isAuthenticated) {
+      notifications.show({
+        title: 'Authentication Required',
+        message: 'Please log in to access settings',
+        color: 'red',
+        icon: <IconX size={16} />,
+      });
+    }
+  }, [isAuthenticated, token]);
 
   const loadSettings = async () => {
+    if (!isAuthenticated || !token) {
+      notifications.show({
+        title: 'Authentication Required',
+        message: 'Please log in to access settings',
+        color: 'red',
+        icon: <IconX size={16} />,
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       // Load user trading parameters
@@ -215,6 +245,16 @@ export function SettingsPage() {
   };
 
   const saveSection = async (sectionName: string, sectionData: any) => {
+    if (!isAuthenticated || !token) {
+      notifications.show({
+        title: 'Authentication Required',
+        message: 'Please log in to save settings',
+        color: 'red',
+        icon: <IconX size={16} />,
+      });
+      return;
+    }
+
     setSavingSection(sectionName);
     try {
       if (sectionName === 'deriv' && sectionData.derivToken) {
@@ -254,6 +294,16 @@ export function SettingsPage() {
   };
 
   const saveSettings = async () => {
+    if (!isAuthenticated || !token) {
+      notifications.show({
+        title: 'Authentication Required',
+        message: 'Please log in to save settings',
+        color: 'red',
+        icon: <IconX size={16} />,
+      });
+      return;
+    }
+
     setSaving(true);
     try {
       // Save Deriv token
@@ -357,6 +407,43 @@ export function SettingsPage() {
     });
   };
 
+  if (!isAuthenticated) {
+    return (
+      <Layout>
+        <div className="p-8 max-w-7xl mx-auto">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <Card className="p-8 max-w-md w-full text-center">
+              <IconX size={48} className="text-red-500 mx-auto mb-4" />
+              <Title order={2} className="text-2xl font-bold text-retro-brown-800 mb-4">
+                Authentication Required
+              </Title>
+              <Text size="lg" className="text-retro-brown-600 mb-6">
+                Please log in to access the settings page.
+              </Text>
+              <Button
+                component="a"
+                href="/login"
+                size="lg"
+                className="w-full"
+                styles={{
+                  root: {
+                    backgroundColor: 'var(--retro-turquoise)',
+                    color: 'var(--retro-dark)',
+                    '&:hover': {
+                      backgroundColor: 'var(--retro-cream)',
+                    }
+                  }
+                }}
+              >
+                Go to Login
+              </Button>
+            </Card>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="p-8 max-w-7xl mx-auto">
@@ -389,7 +476,7 @@ export function SettingsPage() {
           <Grid.Col span={{ base: 12, lg: 8 }}>
             <Stack gap={80}>
               {/* Deriv API Configuration */}
-              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
+              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden rounded-2xl mb-6">
                 {/* Header with icon and title inside card */}
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-4">
@@ -419,56 +506,69 @@ export function SettingsPage() {
                 </div>
 
                 <Stack gap="xl">
-                  <TextInput
-                    size="md"
-                    label="Deriv App ID"
-                    description="Application ID registered in Deriv (default: 1089)"
-                    placeholder="1089"
-                    value={settings.derivAppId}
-                    onChange={(e) => handleSettingChange('derivAppId', e.currentTarget.value)}
-                    leftSection={<IconDatabase size={16} className="text-cyan-600" />}
-                    styles={{
-                      ...inputStyles,
-                      input: { 
-                        ...inputStyles.input,
-                        paddingLeft: '40px'
-                      }
-                    }}
-                  />
+                  <div>
+                    <Text size="sm" className="text-black font-bold mb-2">Deriv App ID</Text>
+                    <Text size="xs" className="text-black font-semibold mb-3">Application ID registered in Deriv (default: 1089)</Text>
+                    <div className="relative">
+                      <TextInput
+                        size="md"
+                        placeholder="1089"
+                        value={settings.derivAppId}
+                        onChange={(e) => handleSettingChange('derivAppId', e.currentTarget.value)}
+                        styles={{
+                          ...inputStyles,
+                          input: { 
+                            ...inputStyles.input,
+                            paddingLeft: '50px',
+                            paddingRight: '16px'
+                          }
+                        }}
+                      />
+                      <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                        <IconDatabase size={20} className="text-cyan-600" />
+                      </div>
+                    </div>
+                  </div>
 
-                  <PasswordInput
-                    size="md"
-                    label="Deriv API Token"
-                    description="Authentication token to connect with Deriv API"
-                    placeholder="Enter your Deriv API token (e.g., a1-xxxxxxxxxxxx)"
-                    value={settings.derivToken}
-                    onChange={(e) => handleSettingChange('derivToken', e.currentTarget.value)}
-                    visible={showApiKeys}
-                    onVisibilityChange={setShowApiKeys}
-                    leftSection={<IconKey size={16} className="text-red-600" />}
-                    rightSection={
-                      <Tooltip label="Test connection">
-                        <ActionIcon
-                          variant="filled"
-                          color="cyan"
-                          size="sm"
-                          onClick={testDerivConnection}
-                          loading={testingConnection}
-                          className="mr-2"
-                        >
-                          <IconTestPipe size={14} />
-                        </ActionIcon>
-                      </Tooltip>
-                    }
-                    styles={{
-                      ...inputStyles,
-                      input: { 
-                        ...inputStyles.input,
-                        paddingLeft: '40px',
-                        paddingRight: '60px'
-                      }
-                    }}
-                  />
+                  <div>
+                    <Text size="sm" className="text-black font-bold mb-2">Deriv API Token</Text>
+                    <Text size="xs" className="text-black font-semibold mb-3">Authentication token to connect with Deriv API</Text>
+                    <div className="relative">
+                      <PasswordInput
+                        size="md"
+                        placeholder="Enter your Deriv API token (e.g., a1-xxxxxxxxxxxx)"
+                        value={settings.derivToken}
+                        onChange={(e) => handleSettingChange('derivToken', e.currentTarget.value)}
+                        visible={showApiKeys}
+                        onVisibilityChange={setShowApiKeys}
+                        rightSection={
+                          <Tooltip label="Test connection">
+                            <ActionIcon
+                              variant="filled"
+                              color="cyan"
+                              size="sm"
+                              onClick={testDerivConnection}
+                              loading={testingConnection}
+                              className="mr-2"
+                            >
+                              <IconTestPipe size={14} />
+                            </ActionIcon>
+                          </Tooltip>
+                        }
+                        styles={{
+                          ...inputStyles,
+                          input: { 
+                            ...inputStyles.input,
+                            paddingLeft: '50px',
+                            paddingRight: '16px'
+                          }
+                        }}
+                      />
+                      <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                        <IconKey size={20} className="text-red-600" />
+                      </div>
+                    </div>
+                  </div>
 
                   <Alert 
                     icon={<IconInfoCircle size={20} />} 
@@ -476,11 +576,11 @@ export function SettingsPage() {
                     className="p-5 rounded-xl border-2 border-blue-200"
                     styles={{
                       root: { backgroundColor: 'rgba(59, 130, 246, 0.1)' },
-                      message: { fontSize: '14px', lineHeight: '1.6' }
+                      message: { fontSize: '14px', lineHeight: '1.6', color: '#000000' }
                     }}
                   >
-                    <Text size="sm" className="leading-relaxed">
-                      <strong className="text-blue-800">How to get your Deriv token:</strong><br />
+                    <Text size="sm" className="leading-relaxed text-black font-semibold">
+                      <strong className="text-blue-800 font-bold">How to get your Deriv token:</strong><br />
                       1. Go to your Deriv account<br />
                       2. Navigate to Settings → Security and privacy → API tokens<br />
                       3. Create a new token with trading permissions<br />
@@ -494,11 +594,32 @@ export function SettingsPage() {
                       onClick={() => saveSection('deriv', { derivToken: settings.derivToken, derivAppId: settings.derivAppId })}
                       loading={savingSection === 'deriv'}
                       size="lg"
-                      className="px-8 py-3 text-base font-bold shadow-lg"
-                      leftSection={<IconCheck size={18} />}
-                      gradient={{ from: 'teal', to: 'cyan' }}
-                      variant="gradient"
-                      radius="xl"
+                      className="px-8 py-3 text-base font-bold shadow-lg flex items-center justify-center"
+                      styles={{
+                        root: {
+                          background: 'var(--retro-turquoise)',
+                          color: 'var(--retro-dark)',
+                          border: '2px solid var(--retro-turquoise)',
+                          borderRadius: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          '&:hover': {
+                            background: 'var(--retro-cream)',
+                            color: 'var(--retro-dark)',
+                            borderColor: 'var(--retro-cream)',
+                            transform: 'translateY(-2px)'
+                          }
+                        },
+                        inner: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }
+                      }}
+                      leftSection={<IconDeviceFloppy size={18} />}
                     >
                       Save Deriv Settings
                     </Button>
@@ -507,17 +628,17 @@ export function SettingsPage() {
               </Card>
 
               {/* Trading Parameters */}
-              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
+              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden rounded-2xl mb-6">
                 {/* Header with icon and title inside card */}
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 rounded-xl bg-retro-turquoise-200 border-2 border-retro-turquoise-400 shadow-md">
                     <IconSettings className="text-retro-turquoise-700" size={24} />
                   </div>
                   <div>
-                    <Title order={2} className="text-xl font-bold text-retro-brown-800 mb-1">
+                    <Title order={2} className="text-xl font-bold text-black mb-1">
                       Trading Parameters
                     </Title>
-                    <Text size="sm" className="text-retro-brown-600 font-medium">
+                    <Text size="sm" className="text-black font-semibold">
                       Set your risk management and position sizing rules
                     </Text>
                   </div>
@@ -525,103 +646,199 @@ export function SettingsPage() {
 
                 <Grid gutter="xl">
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <NumberInput
-                      size="md"
-                      label="Profit Target (%)"
-                      description="Target profit percentage (Recommended: 10-20%)"
-                      value={settings.profitTop}
-                      onChange={(value) => handleSettingChange('profitTop', value || 0)}
-                      min={0.1}
-                      max={100}
-                      step={0.1}
-                      decimalScale={1}
-                      placeholder="15.0"
-                      rightSection={<span className="text-green-600 font-bold text-sm">%</span>}
-                      styles={inputStyles}
-                    />
+                    <div className="flex flex-col">
+                      <Text size="sm" className="text-black font-bold mb-2">Profit Target (%)</Text>
+                      <Text size="xs" className="text-black font-semibold mb-3">Target profit percentage (Recommended: 10-20%)</Text>
+                      <div className="relative">
+                        <NumberInput
+                          size="md"
+                          value={settings.profitTop}
+                          onChange={(value) => handleSettingChange('profitTop', value || 0)}
+                          min={0.1}
+                          max={100}
+                          step={0.1}
+                          decimalScale={1}
+                          placeholder="15.0"
+                          styles={{
+                            ...inputStyles,
+                            input: { 
+                              ...inputStyles.input,
+                              paddingLeft: '50px',
+                              paddingRight: '40px'
+                            }
+                          }}
+                        />
+                        <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                          <span className="text-green-600 font-bold text-sm">%</span>
+                        </div>
+                        <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                          <IconTrendingUp size={20} className="text-green-600" />
+                        </div>
+                      </div>
+                    </div>
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <NumberInput
-                      size="md"
-                      label="Stop Loss (%)"
-                      description="Maximum loss percentage (Recommended: 5-15%)"
-                      value={settings.stopLoss}
-                      onChange={(value) => handleSettingChange('stopLoss', value || 0)}
-                      min={0.1}
-                      max={100}
-                      step={0.1}
-                      decimalScale={1}
-                      placeholder="10.0"
-                      rightSection={<span className="text-red-600 font-bold text-sm">%</span>}
-                      styles={inputStyles}
-                    />
+                    <div className="flex flex-col">
+                      <Text size="sm" className="text-black font-bold mb-2">Stop Loss (%)</Text>
+                      <Text size="xs" className="text-black font-semibold mb-3">Maximum loss percentage (Recommended: 5-15%)</Text>
+                      <div className="relative">
+                        <NumberInput
+                          size="md"
+                          value={settings.stopLoss}
+                          onChange={(value) => handleSettingChange('stopLoss', value || 0)}
+                          min={0.1}
+                          max={100}
+                          step={0.1}
+                          decimalScale={1}
+                          placeholder="10.0"
+                          styles={{
+                            ...inputStyles,
+                            input: { 
+                              ...inputStyles.input,
+                              paddingLeft: '50px',
+                              paddingRight: '40px'
+                            }
+                          }}
+                        />
+                        <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                          <span className="text-red-600 font-bold text-sm">%</span>
+                        </div>
+                        <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                          <IconShield size={20} className="text-red-600" />
+                        </div>
+                      </div>
+                    </div>
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <NumberInput
-                      size="md"
-                      label="Take Profit (%)"
-                      description="Percentage to take profits (Recommended: 20-30%)"
-                      value={settings.takeProfit}
-                      onChange={(value) => handleSettingChange('takeProfit', value || 0)}
-                      min={0.1}
-                      max={100}
-                      step={0.1}
-                      decimalScale={1}
-                      placeholder="25.0"
-                      rightSection={<span className="text-blue-600 font-bold text-sm">%</span>}
-                      styles={inputStyles}
-                    />
+                    <div className="flex flex-col">
+                      <Text size="sm" className="text-black font-bold mb-2">Take Profit (%)</Text>
+                      <Text size="xs" className="text-black font-semibold mb-3">Percentage to take profits (Recommended: 20-30%)</Text>
+                      <div className="relative">
+                        <NumberInput
+                          size="md"
+                          value={settings.takeProfit}
+                          onChange={(value) => handleSettingChange('takeProfit', value || 0)}
+                          min={0.1}
+                          max={100}
+                          step={0.1}
+                          decimalScale={1}
+                          placeholder="25.0"
+                          styles={{
+                            ...inputStyles,
+                            input: { 
+                              ...inputStyles.input,
+                              paddingLeft: '50px',
+                              paddingRight: '40px'
+                            }
+                          }}
+                        />
+                        <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                          <span className="text-blue-600 font-bold text-sm">%</span>
+                        </div>
+                        <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                          <IconTarget size={20} className="text-blue-600" />
+                        </div>
+                      </div>
+                    </div>
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <NumberInput
-                      size="md"
-                      label="Max Daily Loss ($)"
-                      description="Maximum to lose per day (Recommended: $25-100)"
-                      value={settings.maxDailyLoss}
-                      onChange={(value) => handleSettingChange('maxDailyLoss', value || 0)}
-                      min={1}
-                      max={10000}
-                      step={1}
-                      placeholder="50"
-                      leftSection={<span className="text-red-600 font-bold text-sm">$</span>}
-                      styles={{...inputStyles, input: {...inputStyles.input, paddingLeft: '32px'}}}
-                    />
+                    <div className="flex flex-col">
+                      <Text size="sm" className="text-black font-bold mb-2">Max Daily Loss ($)</Text>
+                      <Text size="xs" className="text-black font-semibold mb-3">Maximum to lose per day (Recommended: $25-100)</Text>
+                      <div className="relative">
+                        <NumberInput
+                          size="md"
+                          value={settings.maxDailyLoss}
+                          onChange={(value) => handleSettingChange('maxDailyLoss', value || 0)}
+                          min={1}
+                          max={10000}
+                          step={1}
+                          placeholder="50"
+                          styles={{
+                            ...inputStyles,
+                            input: { 
+                              ...inputStyles.input,
+                              paddingLeft: '50px',
+                              paddingRight: '40px'
+                            }
+                          }}
+                        />
+                        <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                          <span className="text-red-600 font-bold text-sm">$</span>
+                        </div>
+                        <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                          <IconAlertTriangle size={20} className="text-red-600" />
+                        </div>
+                      </div>
+                    </div>
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <NumberInput
-                      size="md"
-                      label="Position Size ($)"
-                      description="Amount to invest per trade (Recommended: $2-10)"
-                      value={settings.positionSize}
-                      onChange={(value) => handleSettingChange('positionSize', value || 0)}
-                      min={1}
-                      max={10000}
-                      step={1}
-                      placeholder="5"
-                      leftSection={<span className="text-green-600 font-bold text-sm">$</span>}
-                      styles={{...inputStyles, input: {...inputStyles.input, paddingLeft: '32px'}}}
-                    />
+                    <div className="flex flex-col">
+                      <Text size="sm" className="text-black font-bold mb-2">Position Size ($)</Text>
+                      <Text size="xs" className="text-black font-semibold mb-3">Amount to invest per trade (Recommended: $2-10)</Text>
+                      <div className="relative">
+                        <NumberInput
+                          size="md"
+                          value={settings.positionSize}
+                          onChange={(value) => handleSettingChange('positionSize', value || 0)}
+                          min={1}
+                          max={10000}
+                          step={1}
+                          placeholder="5"
+                          styles={{
+                            ...inputStyles,
+                            input: { 
+                              ...inputStyles.input,
+                              paddingLeft: '50px',
+                              paddingRight: '40px'
+                            }
+                          }}
+                        />
+                        <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                          <span className="text-green-600 font-bold text-sm">$</span>
+                        </div>
+                        <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                          <IconCalculator size={20} className="text-green-600" />
+                        </div>
+                      </div>
+                    </div>
                   </Grid.Col>
                   <Grid.Col span={{ base: 12, sm: 6 }}>
-                    <NumberInput
-                      size="md"
-                      label="Max Concurrent Positions"
-                      description="Maximum number of open positions (Recommended: 2-5)"
-                      value={settings.maxConcurrentPositions}
-                      onChange={(value) => handleSettingChange('maxConcurrentPositions', value || 0)}
-                      min={1}
-                      max={20}
-                      step={1}
-                      placeholder="3"
-                      rightSection={<span className="text-purple-600 font-bold text-sm">#</span>}
-                      styles={inputStyles}
-                    />
+                    <div className="flex flex-col">
+                      <Text size="sm" className="text-black font-bold mb-2">Max Concurrent Positions</Text>
+                      <Text size="xs" className="text-black font-semibold mb-3">Maximum number of open positions (Recommended: 2-5)</Text>
+                      <div className="relative">
+                        <NumberInput
+                          size="md"
+                          value={settings.maxConcurrentPositions}
+                          onChange={(value) => handleSettingChange('maxConcurrentPositions', value || 0)}
+                          min={1}
+                          max={20}
+                          step={1}
+                          placeholder="3"
+                          styles={{
+                            ...inputStyles,
+                            input: { 
+                              ...inputStyles.input,
+                              paddingLeft: '50px',
+                              paddingRight: '40px'
+                            }
+                          }}
+                        />
+                        <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                          <span className="text-purple-600 font-bold text-sm">#</span>
+                        </div>
+                        <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                          <IconStack size={20} className="text-purple-600" />
+                        </div>
+                      </div>
+                    </div>
                   </Grid.Col>
                 </Grid>
 
                 {/* Save Button for Trading Section */}
                 <div className="flex justify-end pt-6 border-t-2 border-retro-brown-200 mt-6">
-                  <Button
+                                    <Button
                     onClick={() => saveSection('trading', {
                       profitTop: settings.profitTop,
                       profitLoss: settings.profitLoss,
@@ -632,53 +849,81 @@ export function SettingsPage() {
                     })}
                     loading={savingSection === 'trading'}
                     size="lg"
-                    className="px-8 py-3 text-base font-bold shadow-lg"
-                    leftSection={<IconCheck size={18} />}
-                    gradient={{ from: 'indigo', to: 'purple' }}
-                    variant="gradient"
-                    radius="xl"
+                    className="px-8 py-3 text-base font-bold shadow-lg flex items-center justify-center"
+                    styles={{
+                      root: {
+                        background: 'var(--retro-gold)',
+                        color: 'var(--retro-dark)',
+                        border: '2px solid var(--retro-gold)',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        '&:hover': {
+                          background: 'var(--retro-cream)',
+                          color: 'var(--retro-dark)',
+                          borderColor: 'var(--retro-cream)',
+                          transform: 'translateY(-2px)'
+                        }
+                      },
+                      inner: {
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }
+                    }}
+                    leftSection={<IconDeviceFloppy size={18} />}
                   >
                     Save Trading Parameters
-                  </Button>
+                </Button>
                 </div>
               </Card>
 
               {/* AI Configuration */}
-              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
+              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden rounded-2xl mb-6">
                 {/* Header with icon and title inside card */}
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 rounded-xl bg-retro-violet-200 border-2 border-retro-violet-400 shadow-md">
                     <IconBrain className="text-retro-violet-700" size={24} />
                   </div>
                   <div>
-                    <Title order={2} className="text-xl font-bold text-retro-brown-800 mb-1">
+                    <Title order={2} className="text-xl font-bold text-black mb-1">
                       AI Configuration
                     </Title>
-                    <Text size="sm" className="text-retro-brown-600 font-medium">
+                    <Text size="sm" className="text-black font-semibold">
                       Configure AI models and analysis parameters
                     </Text>
                   </div>
                 </div>
 
                 <Stack gap="lg">
-                  <PasswordInput
-                    size="md"
-                    label="OpenAI API Key"
-                    description="OpenAI API key for AI analysis (Required for intelligent trading)"
-                    placeholder="sk-proj-..."
-                    value={settings.openaiApiKey}
-                    onChange={(e) => handleSettingChange('openaiApiKey', e.currentTarget.value)}
-                    visible={showApiKeys}
-                    onVisibilityChange={setShowApiKeys}
-                    leftSection={<IconBrain size={16} className="text-purple-600" />}
-                    styles={{
-                      ...inputStyles,
-                      input: { 
-                        ...inputStyles.input,
-                        paddingLeft: '40px'
-                      }
-                    }}
-                  />
+                  <div className="flex flex-col">
+                    <Text size="sm" className="text-black font-bold mb-2">OpenAI API Key</Text>
+                    <Text size="xs" className="text-black font-semibold mb-3">OpenAI API key for AI analysis (Required for intelligent trading)</Text>
+                    <div className="relative">
+                      <PasswordInput
+                        size="md"
+                        placeholder="sk-proj-..."
+                        value={settings.openaiApiKey}
+                        onChange={(e) => handleSettingChange('openaiApiKey', e.currentTarget.value)}
+                        visible={showApiKeys}
+                        onVisibilityChange={setShowApiKeys}
+                        styles={{
+                          ...inputStyles,
+                          input: { 
+                            ...inputStyles.input,
+                            paddingLeft: '50px',
+                            paddingRight: '16px'
+                          }
+                        }}
+                      />
+                      <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                        <IconBrain size={20} className="text-purple-600" />
+                      </div>
+                    </div>
+                  </div>
 
                   <Grid gutter="xl">
                     <Grid.Col span={{ base: 12, sm: 6 }}>
@@ -690,97 +935,152 @@ export function SettingsPage() {
                         value={settings.aiModel}
                         onChange={(value) => handleSettingChange('aiModel', value || 'gpt-4o-mini')}
                         placeholder="Select AI model"
-                        leftSection={<IconBrain size={16} className="text-indigo-600" />}
-                        styles={{
-                          ...inputStyles,
-                          input: { 
-                            ...inputStyles.input,
-                            paddingLeft: '40px'
-                          }
-                        }}
+                        styles={inputStyles}
+                        dropdownPosition="bottom"
+                        position="bottom"
+                        withinPortal={true}
+                        zIndex={1000}
                       />
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <NumberInput
-                        size="md"
-                        label="Confidence Threshold"
-                        description="Minimum confidence to execute signals (0.6-0.8 recommended)"
-                        value={settings.aiConfidenceThreshold}
-                        onChange={(value) => handleSettingChange('aiConfidenceThreshold', value || 0)}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        decimalScale={1}
-                        placeholder="0.7"
-                        leftSection={<IconBrain size={16} className="text-orange-600" />}
-                        styles={{
-                          ...inputStyles,
-                          input: { 
-                            ...inputStyles.input,
-                            paddingLeft: '40px'
-                          }
-                        }}
-                      />
+                      <div>
+                        <Text size="sm" className="text-black font-bold mb-2">Confidence Threshold</Text>
+                        <Text size="xs" className="text-black font-semibold mb-3">Minimum confidence to execute signals (0.6-0.8 recommended)</Text>
+                        <div className="relative">
+                          <NumberInput
+                            size="md"
+                            value={settings.aiConfidenceThreshold}
+                            onChange={(value) => handleSettingChange('aiConfidenceThreshold', value || 0)}
+                            min={0}
+                            max={1}
+                            step={0.1}
+                            decimalScale={1}
+                            placeholder="0.7"
+                            styles={{
+                              ...inputStyles,
+                              input: { 
+                                ...inputStyles.input,
+                                paddingLeft: '50px',
+                                paddingRight: '16px'
+                              }
+                            }}
+                          />
+                          <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                            <IconBrain size={20} className="text-purple-600" />
+                          </div>
+                        </div>
+                      </div>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <NumberInput
-                        label="Temperatura de IA"
-                        description="Creatividad del modelo (0-1)"
-                        value={settings.aiTemperature}
-                        onChange={(value) => handleSettingChange('aiTemperature', value || 0)}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                        decimalScale={1}
-                      />
+                      <div>
+                        <Text size="sm" className="text-black font-bold mb-2">AI Temperature</Text>
+                        <Text size="xs" className="text-black font-semibold mb-3">Model creativity level (0-1, Recommended: 0.1-0.3)</Text>
+                        <div className="relative">
+                          <NumberInput
+                            size="md"
+                            value={settings.aiTemperature}
+                            onChange={(value) => handleSettingChange('aiTemperature', value || 0)}
+                            min={0}
+                            max={1}
+                            step={0.1}
+                            decimalScale={1}
+                            placeholder="0.2"
+                            styles={{
+                              ...inputStyles,
+                              input: { 
+                                ...inputStyles.input,
+                                paddingLeft: '50px',
+                                paddingRight: '16px'
+                              }
+                            }}
+                          />
+                          <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                            <IconBrain size={20} className="text-orange-600" />
+                          </div>
+                        </div>
+                      </div>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <NumberInput
-                        label="Intervalo de Análisis (seg)"
-                        description="Frecuencia de análisis de mercado"
-                        value={settings.aiAnalysisInterval}
-                        onChange={(value) => handleSettingChange('aiAnalysisInterval', value || 0)}
-                        min={10}
-                        max={300}
-                        step={5}
-                      />
+                      <div>
+                        <Text size="sm" className="text-black font-bold mb-2">Analysis Interval (sec)</Text>
+                        <Text size="xs" className="text-black font-semibold mb-3">Market analysis frequency (Recommended: 30-120 sec)</Text>
+                        <div className="relative">
+                          <NumberInput
+                            size="md"
+                            value={settings.aiAnalysisInterval}
+                            onChange={(value) => handleSettingChange('aiAnalysisInterval', value || 0)}
+                            min={10}
+                            max={300}
+                            step={5}
+                            placeholder="60"
+                            styles={{
+                              ...inputStyles,
+                              input: { 
+                                ...inputStyles.input,
+                                paddingLeft: '50px',
+                                paddingRight: '40px'
+                              }
+                            }}
+                          />
+                          <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                            <span className="text-blue-600 font-bold text-sm">sec</span>
+                          </div>
+                          <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                            <IconRefresh size={20} className="text-blue-600" />
+                          </div>
+                        </div>
+                      </div>
                     </Grid.Col>
                   </Grid>
 
-                  <TextInput
-                    size="md"
-                    label="LangChain API Key"
-                    description="LangChain API key for advanced features"
-                    value={settings.langchainApiKey}
-                    onChange={(e) => handleSettingChange('langchainApiKey', e.currentTarget.value)}
-                    type={showApiKeys ? 'text' : 'password'}
-                    placeholder="lsv2_pt_..."
-                    leftSection={<IconKey size={16} className="text-emerald-600" />}
-                    styles={{
-                      ...inputStyles,
-                      input: { 
-                        ...inputStyles.input,
-                        paddingLeft: '40px'
-                      }
-                    }}
-                  />
+                  <div className="flex flex-col">
+                    <Text size="sm" className="text-black font-bold mb-2">LangChain API Key</Text>
+                    <Text size="xs" className="text-black font-semibold mb-3">LangChain API key for advanced features</Text>
+                    <div className="relative">
+                      <TextInput
+                        size="md"
+                        value={settings.langchainApiKey}
+                        onChange={(e) => handleSettingChange('langchainApiKey', e.currentTarget.value)}
+                        type={showApiKeys ? 'text' : 'password'}
+                        placeholder="lsv2_pt_..."
+                        styles={{
+                          ...inputStyles,
+                          input: { 
+                            ...inputStyles.input,
+                            paddingLeft: '50px',
+                            paddingRight: '16px'
+                          }
+                        }}
+                      />
+                      <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                        <IconKey size={20} className="text-emerald-600" />
+                      </div>
+                    </div>
+                  </div>
 
-                  <TextInput
-                    size="md"
-                    label="LangSmith Project"
-                    description="Project name in LangSmith for tracking"
-                    value={settings.langsmithProject}
-                    onChange={(e) => handleSettingChange('langsmithProject', e.currentTarget.value)}
-                    placeholder="deriv-trading"
-                    leftSection={<IconDatabase size={16} className="text-amber-600" />}
-                    styles={{
-                      ...inputStyles,
-                      input: { 
-                        ...inputStyles.input,
-                        paddingLeft: '40px'
-                      }
-                    }}
-                  />
+                  <div className="flex flex-col">
+                    <Text size="sm" className="text-black font-bold mb-2">LangSmith Project</Text>
+                    <Text size="xs" className="text-black font-semibold mb-3">Project name in LangSmith for tracking</Text>
+                    <div className="relative">
+                      <TextInput
+                        size="md"
+                        value={settings.langsmithProject}
+                        onChange={(e) => handleSettingChange('langsmithProject', e.currentTarget.value)}
+                        placeholder="deriv-trading"
+                        styles={{
+                          ...inputStyles,
+                          input: { 
+                            ...inputStyles.input,
+                            paddingLeft: '50px',
+                            paddingRight: '16px'
+                          }
+                        }}
+                      />
+                      <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                        <IconDatabase size={20} className="text-amber-600" />
+                      </div>
+                    </div>
+                  </div>
 
                   {/* Save Button for AI Section */}
                   <div className="flex justify-end pt-6 border-t-2 border-retro-brown-200 mt-6">
@@ -797,11 +1097,32 @@ export function SettingsPage() {
                       })}
                       loading={savingSection === 'ai'}
                       size="lg"
-                      className="px-8 py-3 text-base font-bold shadow-lg"
-                      leftSection={<IconCheck size={18} />}
-                      gradient={{ from: 'violet', to: 'purple' }}
-                      variant="gradient"
-                      radius="xl"
+                      className="px-8 py-3 text-base font-bold shadow-lg flex items-center justify-center"
+                      styles={{
+                        root: {
+                          background: 'var(--retro-coral)',
+                          color: 'var(--retro-cream)',
+                          border: '2px solid var(--retro-coral)',
+                          borderRadius: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          '&:hover': {
+                            background: 'var(--retro-red)',
+                            color: 'var(--retro-cream)',
+                            borderColor: 'var(--retro-red)',
+                            transform: 'translateY(-2px)'
+                          }
+                        },
+                        inner: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }
+                      }}
+                      leftSection={<IconDeviceFloppy size={18} />}
                     >
                       Save AI Configuration
                     </Button>
@@ -810,17 +1131,17 @@ export function SettingsPage() {
               </Card>
 
               {/* Risk Management */}
-              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden">
+              <Card className="relative p-6 shadow-xl border-3 border-retro-brown-300 bg-gradient-to-br from-white to-retro-cream-50 overflow-hidden rounded-2xl mb-6">
                 {/* Header with icon and title inside card */}
                 <div className="flex items-center gap-4 mb-6">
                   <div className="p-3 rounded-xl bg-retro-red-200 border-2 border-retro-red-400 shadow-md">
                     <IconShield className="text-retro-red-700" size={24} />
                   </div>
                   <div>
-                    <Title order={2} className="text-xl font-bold text-retro-brown-800 mb-1">
+                    <Title order={2} className="text-xl font-bold text-black mb-1">
                       Risk Management
                     </Title>
-                    <Text size="sm" className="text-retro-brown-600 font-medium">
+                    <Text size="sm" className="text-black font-semibold">
                       Configure automatic risk control features
                     </Text>
                   </div>
@@ -899,9 +1220,33 @@ export function SettingsPage() {
                       circuitBreakerEnabled: settings.circuitBreakerEnabled,
                     })}
                     loading={savingSection === 'risk'}
-                    size="md"
-                    className="px-8"
-                    leftSection={<IconCheck size={16} />}
+                    size="lg"
+                    className="px-8 py-3 text-base font-bold shadow-lg flex items-center justify-center"
+                    leftSection={<IconDeviceFloppy size={18} />}
+                    styles={{
+                      root: {
+                        background: 'var(--retro-red)',
+                        color: 'var(--retro-cream)',
+                        border: '2px solid var(--retro-red)',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        '&:hover': {
+                          background: 'var(--retro-coral)',
+                          color: 'var(--retro-cream)',
+                          borderColor: 'var(--retro-coral)',
+                          transform: 'translateY(-2px)'
+                        }
+                      },
+                      inner: {
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px'
+                      }
+                    }}
                   >
                     Save Risk Settings
                   </Button>
@@ -909,7 +1254,7 @@ export function SettingsPage() {
               </Card>
 
               {/* Automation Settings */}
-              <Card className="card p-8 shadow-lg border-2 border-retro-brown-200">
+              <Card className="card p-8 shadow-lg border-2 border-retro-brown-200 rounded-2xl mb-6">
                 <Group className="mb-6">
                   <div className="p-3 rounded-xl bg-retro-yellow-100 border-2 border-retro-yellow-300">
                     <IconRobot className="text-retro-yellow-600" size={28} />
@@ -942,100 +1287,128 @@ export function SettingsPage() {
 
                   <Grid>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <NumberInput
-                        size="md"
-                        label="Market Scan Interval (sec)"
-                        description="Market scanning frequency (30-90 sec recommended)"
-                        value={settings.marketScanInterval}
-                        onChange={(value) => handleSettingChange('marketScanInterval', value || 0)}
-                        min={5}
-                        max={300}
-                        step={5}
-                        placeholder="45"
-                        styles={{
-                          label: { fontSize: '16px', fontWeight: 600, color: '#8B4513', marginBottom: '8px' },
-                          description: { fontSize: '14px', color: '#A0522D', marginBottom: '8px' },
-                          input: { 
-                            fontSize: '15px', 
-                            padding: '12px 16px',
-                            borderWidth: '2px',
-                            borderRadius: '12px',
-                            '&:focus': { borderColor: '#20B2AA' }
-                          }
-                        }}
-                      />
+                      <div>
+                        <Text size="sm" className="text-black font-bold mb-2">Market Scan Interval (sec)</Text>
+                        <Text size="xs" className="text-black font-semibold mb-3">Market scanning frequency (30-90 sec recommended)</Text>
+                        <div className="relative">
+                          <NumberInput
+                            size="md"
+                            value={settings.marketScanInterval}
+                            onChange={(value) => handleSettingChange('marketScanInterval', value || 0)}
+                            min={5}
+                            max={300}
+                            step={5}
+                            placeholder="45"
+                            styles={{
+                              ...inputStyles,
+                              input: { 
+                                ...inputStyles.input,
+                                paddingLeft: '50px',
+                                paddingRight: '40px'
+                              }
+                            }}
+                          />
+                          <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                            <span className="text-yellow-600 font-bold text-sm">sec</span>
+                          </div>
+                          <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                            <IconRefresh size={20} className="text-yellow-600" />
+                          </div>
+                        </div>
+                      </div>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <NumberInput
-                        size="md"
-                        label="Position Monitor Interval (sec)"
-                        description="Position monitoring frequency (10-30 sec recommended)"
-                        value={settings.positionMonitorInterval}
-                        onChange={(value) => handleSettingChange('positionMonitorInterval', value || 0)}
-                        min={1}
-                        max={60}
-                        step={1}
-                        placeholder="15"
-                        styles={{
-                          label: { fontSize: '16px', fontWeight: 600, color: '#8B4513', marginBottom: '8px' },
-                          description: { fontSize: '14px', color: '#A0522D', marginBottom: '8px' },
-                          input: { 
-                            fontSize: '15px', 
-                            padding: '12px 16px',
-                            borderWidth: '2px',
-                            borderRadius: '12px',
-                            '&:focus': { borderColor: '#20B2AA' }
-                          }
-                        }}
-                      />
+                      <div>
+                        <Text size="sm" className="text-black font-bold mb-2">Position Monitor Interval (sec)</Text>
+                        <Text size="xs" className="text-black font-semibold mb-3">Position monitoring frequency (10-30 sec recommended)</Text>
+                        <div className="relative">
+                          <NumberInput
+                            size="md"
+                            value={settings.positionMonitorInterval}
+                            onChange={(value) => handleSettingChange('positionMonitorInterval', value || 0)}
+                            min={1}
+                            max={60}
+                            step={1}
+                            placeholder="15"
+                            styles={{
+                              ...inputStyles,
+                              input: { 
+                                ...inputStyles.input,
+                                paddingLeft: '50px',
+                                paddingRight: '40px'
+                              }
+                            }}
+                          />
+                          <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                            <span className="text-orange-600 font-bold text-sm">sec</span>
+                          </div>
+                          <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                            <IconSettings size={20} className="text-orange-600" />
+                          </div>
+                        </div>
+                      </div>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <NumberInput
-                        size="md"
-                        label="Signal Execution Delay (sec)"
-                        description="Delay before executing signals (2-10 sec recommended)"
-                        value={settings.signalExecutionDelay}
-                        onChange={(value) => handleSettingChange('signalExecutionDelay', value || 0)}
-                        min={0}
-                        max={30}
-                        step={1}
-                        placeholder="3"
-                        styles={{
-                          label: { fontSize: '16px', fontWeight: 600, color: '#8B4513', marginBottom: '8px' },
-                          description: { fontSize: '14px', color: '#A0522D', marginBottom: '8px' },
-                          input: { 
-                            fontSize: '15px', 
-                            padding: '12px 16px',
-                            borderWidth: '2px',
-                            borderRadius: '12px',
-                            '&:focus': { borderColor: '#20B2AA' }
-                          }
-                        }}
-                      />
+                      <div className="flex flex-col">
+                        <Text size="sm" className="text-black font-bold mb-2">Signal Execution Delay (sec)</Text>
+                        <Text size="xs" className="text-black font-semibold mb-3">Delay before executing signals (2-10 sec recommended)</Text>
+                        <div className="relative">
+                          <NumberInput
+                            size="md"
+                            value={settings.signalExecutionDelay}
+                            onChange={(value) => handleSettingChange('signalExecutionDelay', value || 0)}
+                            min={0}
+                            max={30}
+                            step={1}
+                            placeholder="3"
+                            styles={{
+                              ...inputStyles,
+                              input: { 
+                                ...inputStyles.input,
+                                paddingLeft: '50px',
+                                paddingRight: '40px'
+                              }
+                            }}
+                          />
+                          <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                            <span className="text-indigo-600 font-bold text-sm">sec</span>
+                          </div>
+                          <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                            <IconSettings size={20} className="text-indigo-600" />
+                          </div>
+                        </div>
+                      </div>
                     </Grid.Col>
                     <Grid.Col span={{ base: 12, sm: 6 }}>
-                      <NumberInput
-                        size="md"
-                        label="Historical Data Days"
-                        description="Days of historical data for analysis (7-30 recommended)"
-                        value={settings.learningDataLookbackDays}
-                        onChange={(value) => handleSettingChange('learningDataLookbackDays', value || 0)}
-                        min={1}
-                        max={365}
-                        step={1}
-                        placeholder="14"
-                        styles={{
-                          label: { fontSize: '16px', fontWeight: 600, color: '#8B4513', marginBottom: '8px' },
-                          description: { fontSize: '14px', color: '#A0522D', marginBottom: '8px' },
-                          input: { 
-                            fontSize: '15px', 
-                            padding: '12px 16px',
-                            borderWidth: '2px',
-                            borderRadius: '12px',
-                            '&:focus': { borderColor: '#20B2AA' }
-                          }
-                        }}
-                      />
+                      <div className="flex flex-col">
+                        <Text size="sm" className="text-black font-bold mb-2">Historical Data Days</Text>
+                        <Text size="xs" className="text-black font-semibold mb-3">Days of historical data for analysis (7-30 recommended)</Text>
+                        <div className="relative">
+                          <NumberInput
+                            size="md"
+                            value={settings.learningDataLookbackDays}
+                            onChange={(value) => handleSettingChange('learningDataLookbackDays', value || 0)}
+                            min={1}
+                            max={365}
+                            step={1}
+                            placeholder="14"
+                            styles={{
+                              ...inputStyles,
+                              input: { 
+                                ...inputStyles.input,
+                                paddingLeft: '50px',
+                                paddingRight: '40px'
+                              }
+                            }}
+                          />
+                          <div className="absolute pointer-events-none" style={{ left: '76px', top: '13px' }}>
+                            <span className="text-teal-600 font-bold text-sm">days</span>
+                          </div>
+                          <div className="absolute left-6 pointer-events-none flex items-center justify-center" style={{ height: '20px', top: '17px' }}>
+                            <IconDatabase size={20} className="text-teal-600" />
+                          </div>
+                        </div>
+                      </div>
                     </Grid.Col>
                   </Grid>
 
@@ -1058,9 +1431,33 @@ export function SettingsPage() {
                         symbols: ['R_10', 'R_25', 'R_50', 'R_75', 'R_100'],
                       })}
                       loading={savingSection === 'automation'}
-                      size="md"
-                      className="px-8"
-                      leftSection={<IconCheck size={16} />}
+                      size="lg"
+                      className="px-8 py-3 text-base font-bold shadow-lg flex items-center justify-center"
+                      leftSection={<IconDeviceFloppy size={18} />}
+                      styles={{
+                        root: {
+                          background: 'var(--retro-brown)',
+                          color: 'var(--retro-cream)',
+                          border: '2px solid var(--retro-brown)',
+                          borderRadius: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          '&:hover': {
+                            background: 'var(--retro-dark)',
+                            color: 'var(--retro-cream)',
+                            borderColor: 'var(--retro-dark)',
+                            transform: 'translateY(-2px)'
+                          }
+                        },
+                        inner: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }
+                      }}
                     >
                       Save Automation Settings
                     </Button>
@@ -1072,7 +1469,7 @@ export function SettingsPage() {
 
           {/* Sidebar with actions */}
           <Grid.Col span={{ base: 12, lg: 4 }}>
-            <Card className="card p-8 shadow-lg border-2 border-retro-brown-200 sticky top-8">
+            <Card className="card p-8 shadow-lg border-2 border-retro-brown-200 sticky top-8 rounded-2xl">
               <Stack gap="lg">
                 <div className="text-center mb-4">
                   <Title order={3} className="text-xl font-bold text-retro-brown-800 mb-2">
@@ -1088,12 +1485,30 @@ export function SettingsPage() {
                   loading={saving}
                   disabled={!unsavedChanges}
                   size="lg"
-                  className="w-full py-4 text-lg font-semibold"
-                  leftSection={<IconCheck size={20} />}
+                  className="w-full py-4 text-lg font-semibold flex items-center justify-center"
+                  leftSection={<IconDeviceFloppy size={20} />}
                   styles={{
                     root: {
-                      backgroundColor: unsavedChanges ? '#20B2AA' : '#CBD5E0',
-                      '&:hover': { backgroundColor: unsavedChanges ? '#1a9b93' : '#CBD5E0' }
+                      background: unsavedChanges ? 'var(--retro-turquoise)' : 'var(--retro-brown)',
+                      color: 'var(--retro-dark)',
+                      border: '2px solid var(--retro-turquoise)',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      '&:hover': {
+                        background: unsavedChanges ? 'var(--retro-cream)' : 'var(--retro-brown)',
+                        color: 'var(--retro-dark)',
+                        borderColor: 'var(--retro-cream)',
+                        transform: 'translateY(-2px)'
+                      }
+                    },
+                    inner: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
                     }
                   }}
                 >
@@ -1106,13 +1521,26 @@ export function SettingsPage() {
                   loading={testingConnection}
                   disabled={!settings.derivToken}
                   size="lg"
-                  className="w-full py-3 font-semibold border-2"
+                  className="w-full py-3 font-semibold border-2 flex items-center justify-center"
                   leftSection={<IconTestPipe size={18} />}
                   styles={{
                     root: {
-                      borderColor: '#20B2AA',
-                      color: '#20B2AA',
-                      '&:hover': { backgroundColor: '#E6FFFA' }
+                      borderColor: 'var(--retro-turquoise)',
+                      color: 'var(--retro-turquoise)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      '&:hover': { 
+                        backgroundColor: 'var(--retro-cream)',
+                        color: 'var(--retro-dark)',
+                        borderColor: 'var(--retro-turquoise)'
+                      }
+                    },
+                    inner: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
                     }
                   }}
                 >
@@ -1124,14 +1552,23 @@ export function SettingsPage() {
                   color="orange"
                   onClick={resetToDefaults}
                   size="lg"
-                  className="w-full py-3 font-semibold"
+                  className="w-full py-3 font-semibold flex items-center justify-center"
                   leftSection={<IconRefresh size={18} />}
                   styles={{
                     root: {
                       backgroundColor: 'rgba(255, 165, 0, 0.1)',
                       color: '#ea580c',
                       borderColor: '#ea580c',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                       '&:hover': { backgroundColor: 'rgba(255, 165, 0, 0.2)' }
+                    },
+                    inner: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px'
                     }
                   }}
                 >

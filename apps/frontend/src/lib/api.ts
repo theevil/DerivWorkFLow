@@ -143,6 +143,20 @@ class ApiClient {
     });
   }
 
+  async setDerivToken(token: string): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>('/deriv/token', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  async updateSettings(settings: any): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>('/settings/settings', {
+      method: 'PUT',
+      body: JSON.stringify(settings),
+    });
+  }
+
   async closePosition(positionId: string): Promise<{ message: string }> {
     return this.fetch<{ message: string }>(`/trading/positions/${positionId}/close`, {
       method: 'PUT',
