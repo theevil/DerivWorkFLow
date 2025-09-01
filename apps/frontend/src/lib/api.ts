@@ -7,6 +7,19 @@ import type {
   TradingStats,
   TradingParametersRequest,
 } from '../types/trading';
+import type {
+  SystemStatus,
+  AutoTradingConfig,
+  AutomationConfigResponse,
+  EmergencyStopRequest,
+  EmergencyStopResponse,
+  TriggerTaskResponse,
+  TaskStatus,
+  ActiveTask,
+  Alert,
+  AutomationPerformance,
+  HealthCheckResponse,
+} from '../types/automation';
 import { config } from '../config/env';
 
 const API_URL = config.apiUrl;
@@ -134,6 +147,79 @@ class ApiClient {
     return this.fetch<{ message: string }>(`/trading/positions/${positionId}/close`, {
       method: 'PUT',
     });
+  }
+
+  // Automation endpoints
+  async getAutomationStatus(): Promise<SystemStatus> {
+    return this.fetch<SystemStatus>('/automation/status');
+  }
+
+  async getAutoTradingConfig(): Promise<AutomationConfigResponse> {
+    return this.fetch<AutomationConfigResponse>('/automation/auto-trading/config');
+  }
+
+  async configureAutoTrading(config: AutoTradingConfig): Promise<{ message: string; config: AutoTradingConfig; user_id: string }> {
+    return this.fetch<{ message: string; config: AutoTradingConfig; user_id: string }>('/automation/auto-trading/configure', {
+      method: 'POST',
+      body: JSON.stringify(config),
+    });
+  }
+
+  async triggerEmergencyStop(request: EmergencyStopRequest): Promise<EmergencyStopResponse> {
+    return this.fetch<EmergencyStopResponse>('/automation/emergency-stop', {
+      method: 'POST',
+      body: JSON.stringify(request),
+    });
+  }
+
+  async triggerMarketScan(): Promise<TriggerTaskResponse> {
+    return this.fetch<TriggerTaskResponse>('/automation/market-scan/trigger', {
+      method: 'POST',
+    });
+  }
+
+  async triggerPositionMonitor(): Promise<TriggerTaskResponse> {
+    return this.fetch<TriggerTaskResponse>('/automation/position-monitor/trigger', {
+      method: 'POST',
+    });
+  }
+
+  async triggerModelRetrain(): Promise<TriggerTaskResponse> {
+    return this.fetch<TriggerTaskResponse>('/automation/models/retrain', {
+      method: 'POST',
+    });
+  }
+
+  async getTaskStatus(taskId: string): Promise<TaskStatus> {
+    return this.fetch<TaskStatus>(`/automation/tasks/${taskId}/status`);
+  }
+
+  async getActiveTasks(): Promise<{ active_tasks: Record<string, ActiveTask[]>; scheduled_tasks: Record<string, ActiveTask[]>; timestamp: string }> {
+    return this.fetch<{ active_tasks: Record<string, ActiveTask[]>; scheduled_tasks: Record<string, ActiveTask[]>; timestamp: string }>('/automation/tasks/active');
+  }
+
+  async getQueueStats(): Promise<{ queue_lengths: Record<string, { length: number; queue_key: string }>; worker_stats: any; timestamp: string }> {
+    return this.fetch<{ queue_lengths: Record<string, { length: number; queue_key: string }>; worker_stats: any; timestamp: string }>('/automation/queue-stats');
+  }
+
+  async runHealthCheck(): Promise<HealthCheckResponse> {
+    return this.fetch<HealthCheckResponse>('/automation/health-check', {
+      method: 'POST',
+    });
+  }
+
+  async getUserAlerts(): Promise<{ alerts: Alert[]; total_count: number; unacknowledged_count: number }> {
+    return this.fetch<{ alerts: Alert[]; total_count: number; unacknowledged_count: number }>('/automation/alerts');
+  }
+
+  async acknowledgeAlert(alertId: string): Promise<{ message: string; alert_id: string }> {
+    return this.fetch<{ message: string; alert_id: string }>(`/automation/alerts/${alertId}/acknowledge`, {
+      method: 'POST',
+    });
+  }
+
+  async getAutomationPerformance(days: number = 7): Promise<AutomationPerformance> {
+    return this.fetch<AutomationPerformance>(`/automation/performance/summary?days=${days}`);
   }
 }
 

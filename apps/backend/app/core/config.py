@@ -60,6 +60,24 @@ class Settings(BaseSettings):
     learning_data_lookback_days: int = int(os.getenv("LEARNING_DATA_LOOKBACK_DAYS", "30"))
     min_training_samples: int = int(os.getenv("MIN_TRAINING_SAMPLES", "100"))
     model_retrain_interval_hours: int = int(os.getenv("MODEL_RETRAIN_INTERVAL_HOURS", "24"))
+    
+    # Background Tasks Configuration
+    redis_url: str = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    celery_broker_url: str = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+    celery_result_backend: str = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
+    
+    # Automation Configuration
+    auto_trading_enabled: bool = os.getenv("AUTO_TRADING_ENABLED", "False").lower() == "true"
+    market_scan_interval_seconds: int = int(os.getenv("MARKET_SCAN_INTERVAL_SECONDS", "30"))
+    position_monitor_interval_seconds: int = int(os.getenv("POSITION_MONITOR_INTERVAL_SECONDS", "10"))
+    signal_execution_delay_seconds: int = int(os.getenv("SIGNAL_EXECUTION_DELAY_SECONDS", "5"))
+    max_concurrent_positions: int = int(os.getenv("MAX_CONCURRENT_POSITIONS", "5"))
+    
+    # Risk Management Automation
+    auto_stop_loss_enabled: bool = os.getenv("AUTO_STOP_LOSS_ENABLED", "True").lower() == "true"
+    auto_take_profit_enabled: bool = os.getenv("AUTO_TAKE_PROFIT_ENABLED", "True").lower() == "true"
+    emergency_stop_enabled: bool = os.getenv("EMERGENCY_STOP_ENABLED", "True").lower() == "true"
+    circuit_breaker_enabled: bool = os.getenv("CIRCUIT_BREAKER_ENABLED", "True").lower() == "true"
 
     class Config:
         env_file = ".env"

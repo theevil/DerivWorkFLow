@@ -16,10 +16,13 @@ import {
   IconHistory,
   IconTrendingUp,
   IconShield,
-  IconTarget
+  IconTarget,
+  IconRobot
 } from '@tabler/icons-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth';
+import { useAutomationStore } from '../stores/automation';
+import { useAutomationWebSocket } from '../hooks/useAutomationWebSocket';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -59,6 +62,10 @@ export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const { user, clearAuth } = useAuthStore();
 
+  // Automation state for notifications
+  const { unacknowledgedCount } = useAutomationStore();
+  const { isConnected } = useAutomationWebSocket({ enabled: true });
+
   const handleLogout = () => {
     clearAuth();
     navigate('/login');
@@ -79,6 +86,11 @@ export function Layout({ children }: LayoutProps) {
       icon: <IconChartLine size={20} />,
       label: 'Trading',
       href: '/trading',
+    },
+    {
+      icon: <IconRobot size={20} />,
+      label: 'Automation',
+      href: '/automation',
     },
     {
       icon: <IconSettings size={20} />,
@@ -210,10 +222,19 @@ export function Layout({ children }: LayoutProps) {
               {/* Notifications */}
               <Button 
                 variant="subtle" 
+                component={Link}
+                to="/automation"
                 className="relative p-3 rounded-2xl hover:bg-retro-cream-100 text-retro-brown-600"
               >
                 <IconBell size={20} />
-                <span className="absolute -top-1 -right-1 h-3 w-3 bg-retro-red-500 rounded-full animate-pulse"></span>
+                {unacknowledgedCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-retro-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                    {unacknowledgedCount > 9 ? '9+' : unacknowledgedCount}
+                  </span>
+                )}
+                {!isConnected && (
+                  <span className="absolute -bottom-1 -right-1 h-2 w-2 bg-yellow-500 rounded-full"></span>
+                )}
               </Button>
 
               {/* Dark mode toggle */}

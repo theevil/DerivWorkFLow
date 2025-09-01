@@ -4,7 +4,7 @@ from loguru import logger
 
 from app.core.config import settings
 from app.core.database import connect_to_mongo, close_mongo_connection
-from app.routers import health, auth, deriv, trading, websocket, market, ai
+from app.routers import health, auth, deriv, trading, websocket, market, ai, automation
 
 app = FastAPI(title=settings.app_name)
 
@@ -24,6 +24,7 @@ app.include_router(deriv.router, prefix="/api/v1/deriv", tags=["deriv"])
 app.include_router(trading.router, prefix="/api/v1/trading", tags=["trading"])
 app.include_router(market.router, prefix="/api/v1/market", tags=["market"])
 app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])
+app.include_router(automation.router, prefix="/api/v1/automation", tags=["automation"])
 app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
 
 @app.get("/")

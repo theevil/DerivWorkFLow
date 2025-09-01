@@ -18,3 +18,11 @@ async def connect_to_mongo():
 async def close_mongo_connection():
     if db.client:
         db.client.close()
+
+
+async def get_database_sync():
+    """Get database connection for use in sync contexts (like Celery tasks)"""
+    if not db.client:
+        await connect_to_mongo()
+    
+    return db.get_db()

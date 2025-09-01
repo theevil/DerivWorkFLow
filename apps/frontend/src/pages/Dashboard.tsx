@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@mantine/core';
-import { IconRefresh, IconPlus, IconTrendingUp, IconBell, IconMoon, IconUser } from '@tabler/icons-react';
+import { Button, Badge, Card, Group, Text, Alert, ActionIcon, Tooltip, Stack } from '@mantine/core';
+import { IconRefresh, IconPlus, IconTrendingUp, IconBell, IconMoon, IconUser, IconRobot, IconSettings, IconAlertTriangle } from '@tabler/icons-react';
+import { Link } from 'react-router-dom';
 import type { TradePosition, TradingStats } from '../types/trading';
 import { useAuthStore } from '../stores/auth';
 import { api } from '../lib/api';
@@ -8,12 +9,26 @@ import { Layout } from '../components/Layout';
 import { StatsGrid } from '../components/StatsGrid';
 import { TradingCard } from '../components/TradingCard';
 import { PerformanceChart } from '../components/PerformanceChart';
+import { useAutomationStore, automationSelectors } from '../stores/automation';
 
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const [positions, setPositions] = useState<TradePosition[]>([]);
   const [stats, setStats] = useState<TradingStats | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Automation store state
+  const {
+    config: automationConfig,
+    systemStatus,
+    alerts,
+    unacknowledgedCount,
+  } = useAutomationStore();
+
+  // Computed automation values
+  const isAutoTradingEnabled = automationSelectors.isAutoTradingEnabled({ config: automationConfig } as any);
+  const isSystemHealthy = systemStatus ? automationSelectors.isSystemHealthy({ systemStatus } as any) : false;
+  const hasUnacknowledgedAlerts = unacknowledgedCount > 0;
 
   const fetchData = async () => {
     try {
@@ -127,6 +142,105 @@ export function DashboardPage() {
               </Button>
             </div>
           </div>
+        </div>
+
+        {/* Automation Status Alert */}
+        {(hasUnacknowledgedAlerts || !isSystemHealthy) && (
+          <div className="mx-6">
+            <Alert
+              icon={<IconAlertTriangle size={16} />}
+              color="orange"
+              title="Automation System Alerts"
+              variant="light"
+            >
+              <Group justify="space-between" align="center">
+                <Stack gap={4}>
+                  {hasUnacknowledgedAlerts && (
+                    <Text size="sm">
+                      You have {unacknowledgedCount} unacknowledged alert{unacknowledgedCount === 1 ? '' : 's'}
+                    </Text>
+                  )}
+                  {!isSystemHealthy && (
+                    <Text size="sm">
+                      Automation system health issues detected
+                    </Text>
+                  )}
+                </Stack>
+                <Button 
+                  component={Link} 
+                  to="/automation" 
+                  variant="light" 
+                  color="orange"
+                  size="xs"
+                >
+                  View Automation
+                </Button>
+              </Group>
+            </Alert>
+          </div>
+        )}
+
+        {/* Automation Quick Status */}
+        <div className="mx-6">
+          <Card shadow="sm" padding="lg" radius="md" withBorder>
+            <Group justify="space-between" mb="md">
+              <Group gap="sm">
+                <IconRobot size={24} color={isAutoTradingEnabled ? 'green' : 'gray'} />
+                <Text fw={600} size="lg">AI Automation Status</Text>
+              </Group>
+              <Group gap="sm">
+                <Badge 
+                  color={isAutoTradingEnabled ? 'green' : 'gray'} 
+                  variant="filled"
+                >
+                  {isAutoTradingEnabled ? 'ACTIVE' : 'INACTIVE'}
+                </Badge>
+                <ActionIcon 
+                  component={Link} 
+                  to="/automation" 
+                  variant="subtle"
+                  color="blue"
+                >
+                  <IconSettings size={16} />
+                </ActionIcon>
+              </Group>
+            </Group>
+
+            <Group justify="space-between">
+              <Group gap="lg">
+                <div>
+                  <Text size="sm" c="dimmed">System Health</Text>
+                  <Badge 
+                    color={isSystemHealthy ? 'green' : 'red'} 
+                    variant="light"
+                  >
+                    {isSystemHealthy ? 'Healthy' : 'Issues'}
+                  </Badge>
+                </div>
+                
+                <div>
+                  <Text size="sm" c="dimmed">Active Tasks</Text>
+                  <Text fw={500}>{systemStatus?.celery_active_tasks ?? 0}</Text>
+                </div>
+                
+                {systemStatus?.trading_executor && (
+                  <div>
+                    <Text size="sm" c="dimmed">Active Executions</Text>
+                    <Text fw={500}>{systemStatus.trading_executor.active_executions}</Text>
+                  </div>
+                )}
+              </Group>
+
+              <Button 
+                component={Link} 
+                to="/automation" 
+                variant="light"
+                leftSection={<IconRobot size={16} />}
+              >
+                Automation Dashboard
+              </Button>
+            </Group>
+          </Card>
         </div>
 
         {/* Stats Grid */}

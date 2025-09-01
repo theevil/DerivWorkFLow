@@ -3,6 +3,8 @@ import { Button, Select, NumberInput, Badge } from '@mantine/core';
 import { IconTrendingUp, IconTrendingDown, IconRefresh, IconActivity } from '@tabler/icons-react';
 import { Layout } from '../components/Layout';
 import { useWebSocket, useWebSocketEvent } from '../hooks/useWebSocket';
+import { useAutomationStore, automationSelectors } from '../stores/automation';
+import { EmergencyStopButton } from '../components/automation/EmergencyStopButton';
 import { useAuthStore } from '../stores/auth';
 
 interface MarketData {
@@ -41,6 +43,10 @@ export function TradingPage() {
   const [marketData, setMarketData] = useState<Map<string, MarketData>>(new Map());
   const [loading, setLoading] = useState(false);
   const [subscribedSymbols, setSubscribedSymbols] = useState<Set<string>>(new Set());
+
+  // Automation state
+  const { config: automationConfig } = useAutomationStore();
+  const isAutoTradingEnabled = automationSelectors.isAutoTradingEnabled({ config: automationConfig } as any);
 
   // WebSocket connection
   const {
@@ -306,6 +312,17 @@ export function TradingPage() {
                 >
                   {loading ? 'Processing...' : `Buy ${selectedContract} for $${amount}`}
                 </Button>
+
+                {/* Emergency Stop Button - Only show if auto trading is enabled */}
+                {isAutoTradingEnabled && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <EmergencyStopButton 
+                      size="sm" 
+                      variant="light" 
+                      fullWidth
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>

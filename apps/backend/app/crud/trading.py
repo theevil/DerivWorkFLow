@@ -178,6 +178,32 @@ async def update_signal_executed(
 
 
 # Analytics and reporting
+async def get_all_open_positions(db: AsyncIOMotorDatabase) -> List[TradePositionInDB]:
+    """Get all open positions across all users"""
+    try:
+        cursor = db.trade_positions.find({"status": "open"})
+        positions = []
+        async for doc in cursor:
+            positions.append(TradePositionInDB(**doc))
+        return positions
+    except Exception as e:
+        logger.error(f"Error getting all open positions: {e}")
+        return []
+
+
+async def get_all_active_users(db: AsyncIOMotorDatabase) -> List[str]:
+    """Get all active user IDs"""
+    try:
+        cursor = db.users.find({"active": {"$ne": False}}, {"_id": 1})
+        user_ids = []
+        async for doc in cursor:
+            user_ids.append(str(doc["_id"]))
+        return user_ids
+    except Exception as e:
+        logger.error(f"Error getting active users: {e}")
+        return []
+
+
 async def get_user_trading_stats(db: AsyncIOMotorDatabase, user_id: str) -> dict:
     """Get comprehensive trading statistics for a user"""
     pipeline = [

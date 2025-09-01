@@ -5,6 +5,7 @@ import { LoginPage } from './pages/Login';
 import { RegisterPage } from './pages/Register';
 import { DashboardPage } from './pages/Dashboard';
 import { TradingPage } from './pages/Trading';
+import { Automation } from './pages/Automation';
 import { useAuthStore } from './stores/auth';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -33,6 +34,14 @@ export function App() {
             element={
               <ProtectedRoute>
                 <TradingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/automation"
+            element={
+              <ProtectedRoute>
+                <Automation />
               </ProtectedRoute>
             }
           />

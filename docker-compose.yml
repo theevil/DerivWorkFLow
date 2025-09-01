@@ -6,6 +6,15 @@ services:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
+  
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
   backend:
     build:
       context: ./apps/backend
@@ -16,10 +25,50 @@ services:
       - MONGODB_URI=mongodb://mongodb:27017
       - MONGODB_DB=deriv
       - SECRET_KEY=your-super-secret-key-change-in-production-docker
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - mongodb
+      - redis
     ports:
       - '8000:8000'
+  
+  celery-worker:
+    build:
+      context: ./apps/backend
+    env_file:
+      - ./apps/backend/.env
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB=deriv
+      - SECRET_KEY=your-super-secret-key-change-in-production-docker
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - redis
+    command: celery -A app.workers.celery_app worker --loglevel=info --queues=market_scan,position_monitor,trading,risk_monitor,signals,training,analysis
+  
+  celery-beat:
+    build:
+      context: ./apps/backend
+    env_file:
+      - ./apps/backend/.env
+    environment:
+      - ENVIRONMENT=development
+      - MONGODB_URI=mongodb://mongodb:27017
+      - MONGODB_DB=deriv
+      - SECRET_KEY=your-super-secret-key-change-in-production-docker
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - redis
+    command: celery -A app.workers.celery_app beat --loglevel=info
   frontend:
     working_dir: /app
     image: node:20-alpine
@@ -32,5 +81,6 @@ services:
       - backend
 volumes:
   mongo_data:
+  redis_data:
 
 
