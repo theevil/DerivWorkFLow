@@ -27,7 +27,7 @@ class TradingParametersUpdate(BaseModel):
 
 
 class TradingParametersInDB(TradingParametersBase):
-    id: Any = Field(default_factory=Any, alias="_id")
+    id: Any = Field(default_factory=lambda: ObjectId(), alias="_id")
     user_id: Any
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -63,7 +63,7 @@ class TradePositionCreate(TradePositionBase):
 
 
 class TradePositionInDB(TradePositionBase):
-    id: Any = Field(default_factory=Any, alias="_id")
+    id: Any = Field(default_factory=lambda: ObjectId(), alias="_id")
     user_id: Any
     contract_id: Optional[str] = None
     entry_spot: Optional[float] = None
@@ -114,7 +114,7 @@ class MarketAnalysisBase(BaseModel):
 
 
 class MarketAnalysisInDB(MarketAnalysisBase):
-    id: Any = Field(default_factory=Any, alias="_id")
+    id: Any = Field(default_factory=lambda: ObjectId(), alias="_id")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     current_price: float
     price_history: List[float] = Field(default_factory=list)
@@ -147,7 +147,7 @@ class TradingSignalBase(BaseModel):
 
 
 class TradingSignalInDB(TradingSignalBase):
-    id: Any = Field(default_factory=Any, alias="_id")
+    id: Any = Field(default_factory=lambda: ObjectId(), alias="_id")
     user_id: Any
     created_at: datetime = Field(default_factory=datetime.utcnow)
     executed: bool = Field(default=False)

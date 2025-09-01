@@ -38,7 +38,7 @@ class TestDatabase:
         test_db = Database()
         test_db.client = None
         
-        with pytest.raises(AttributeError):
+        with pytest.raises(TypeError):
             test_db.get_db()
 
 

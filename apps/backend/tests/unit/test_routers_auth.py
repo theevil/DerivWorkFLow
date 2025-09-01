@@ -213,15 +213,16 @@ class TestAuthRoutes:
     
     def test_login_empty_credentials(self):
         """Test login with empty credentials."""
-        response = self.client.post(
-            "/token",
-            data={"username": "", "password": ""}
-        )
+        # Mock dependency injection for database 
+        from app.core.database import get_database
         
-        # Should still call authenticate_user, which should return None
-        with patch('app.routers.auth.get_database') as mock_get_db:
+        def override_get_database():
+            return AsyncMock()
+        
+        self.app.dependency_overrides[get_database] = override_get_database
+        
+        try:
             with patch('app.routers.auth.authenticate_user') as mock_auth:
-                mock_get_db.return_value = AsyncMock()
                 mock_auth.return_value = None
                 
                 response = self.client.post(
@@ -230,6 +231,9 @@ class TestAuthRoutes:
                 )
                 
                 assert response.status_code == status.HTTP_401_UNAUTHORIZED
+        finally:
+            # Clean up dependency override
+            self.app.dependency_overrides.clear()
     
     def test_register_success(self):
         """Test successful user registration."""
@@ -452,7 +456,7 @@ class TestOAuth2Scheme:
     
     def test_oauth2_scheme_token_url(self):
         """Test that OAuth2 scheme has correct token URL."""
-        assert oauth2_scheme.tokenUrl == "token"
+        assert oauth2_scheme.model.flows.password.tokenUrl == "token"
     
     def test_oauth2_scheme_type(self):
         """Test OAuth2 scheme type."""

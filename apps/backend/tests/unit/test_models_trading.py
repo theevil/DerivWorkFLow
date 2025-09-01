@@ -90,7 +90,7 @@ class TestTradingParametersBase:
                 max_daily_loss=100.0,
                 position_size=10.0
             )
-        assert "ensure this value is greater than or equal to 0.1" in str(exc_info.value)
+        assert "Input should be greater than or equal to 0.1" in str(exc_info.value)
         
         # Above maximum
         with pytest.raises(ValidationError) as exc_info:
@@ -102,7 +102,7 @@ class TestTradingParametersBase:
                 max_daily_loss=100.0,
                 position_size=10.0
             )
-        assert "ensure this value is less than or equal to 100" in str(exc_info.value)
+        assert "Input should be less than or equal to 100" in str(exc_info.value)
     
     def test_position_size_validation_errors(self):
         """Test position_size field validation errors."""
@@ -116,7 +116,7 @@ class TestTradingParametersBase:
                 max_daily_loss=100.0,
                 position_size=0.5  # Below 1.0
             )
-        assert "ensure this value is greater than or equal to 1" in str(exc_info.value)
+        assert "Input should be greater than or equal to 1" in str(exc_info.value)
         
         # Above maximum
         with pytest.raises(ValidationError) as exc_info:
@@ -128,7 +128,7 @@ class TestTradingParametersBase:
                 max_daily_loss=100.0,
                 position_size=15000.0  # Above 10000.0
             )
-        assert "ensure this value is less than or equal to 10000" in str(exc_info.value)
+        assert "Input should be less than or equal to 10000" in str(exc_info.value)
     
     def test_missing_required_fields(self):
         """Test that all fields are required."""
@@ -141,7 +141,7 @@ class TestTradingParametersBase:
         
         error_msg = str(exc_info.value)
         assert "stop_loss" in error_msg
-        assert "field required" in error_msg
+        assert "Field required" in error_msg
 
 
 class TestTradingParametersCreate:
@@ -202,7 +202,7 @@ class TestTradingParametersUpdate:
         with pytest.raises(ValidationError) as exc_info:
             TradingParametersUpdate(profit_top=150.0)  # Above maximum
         
-        assert "ensure this value is less than or equal to 100" in str(exc_info.value)
+        assert "Input should be less than or equal to 100" in str(exc_info.value)
 
 
 class TestTradingParametersInDB:
@@ -293,7 +293,7 @@ class TestTradePositionBase:
                 amount=0.5,  # Below 1.0
                 duration=5
             )
-        assert "ensure this value is greater than or equal to 1" in str(exc_info.value)
+        assert "Input should be greater than or equal to 1" in str(exc_info.value)
     
     def test_duration_validation(self):
         """Test duration field validation."""
@@ -305,7 +305,7 @@ class TestTradePositionBase:
                 amount=10.0,
                 duration=0  # Below 1
             )
-        assert "ensure this value is greater than or equal to 1" in str(exc_info.value)
+        assert "Input should be greater than or equal to 1" in str(exc_info.value)
 
 
 class TestTradePositionInDB:
@@ -428,7 +428,7 @@ class TestMarketAnalysisBase:
                 symbol="R_10",
                 confidence=-0.1  # Below 0.0
             )
-        assert "ensure this value is greater than or equal to 0" in str(exc_info.value)
+        assert "Input should be greater than or equal to 0" in str(exc_info.value)
         
         # Above maximum
         with pytest.raises(ValidationError) as exc_info:
@@ -436,7 +436,7 @@ class TestMarketAnalysisBase:
                 symbol="R_10",
                 confidence=1.5  # Above 1.0
             )
-        assert "ensure this value is less than or equal to 1" in str(exc_info.value)
+        assert "Input should be less than or equal to 1" in str(exc_info.value)
 
 
 class TestMarketAnalysisInDB:
@@ -545,7 +545,7 @@ class TestTradingSignalBase:
                 recommended_duration=5,
                 reasoning="Test"
             )
-        assert "ensure this value is greater than or equal to 1" in str(exc_info.value)
+        assert "Input should be greater than or equal to 1" in str(exc_info.value)
     
     def test_recommended_duration_validation(self):
         """Test recommended_duration field validation."""
@@ -558,7 +558,7 @@ class TestTradingSignalBase:
                 recommended_duration=0,  # Below 1
                 reasoning="Test"
             )
-        assert "ensure this value is greater than or equal to 1" in str(exc_info.value)
+        assert "Input should be greater than or equal to 1" in str(exc_info.value)
 
 
 class TestTradingSignalInDB:

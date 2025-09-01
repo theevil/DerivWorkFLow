@@ -49,7 +49,7 @@ def client() -> Generator:
 @pytest.fixture(scope="function")
 async def async_client() -> AsyncGenerator:
     """Async test client for API calls."""
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    async with AsyncClient(base_url="http://test") as ac:
         yield ac
 
 

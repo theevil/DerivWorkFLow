@@ -242,10 +242,16 @@ class TestTradePositionsCRUD:
             }
         ]
         
-        # Mock cursor
+        # Mock cursor and chained operations
         mock_cursor = AsyncMock()
         mock_cursor.__aiter__.return_value = iter(position_data)
-        mock_db.trade_positions.find.return_value.sort.return_value = mock_cursor
+        
+        # Create a mock trade_positions that supports method chaining
+        mock_trade_positions = MagicMock()
+        mock_find_result = MagicMock()
+        mock_find_result.sort.return_value = mock_cursor
+        mock_trade_positions.find.return_value = mock_find_result
+        mock_db.trade_positions = mock_trade_positions
         
         result = await get_user_positions(mock_db, user_id)
         
@@ -280,10 +286,16 @@ class TestTradePositionsCRUD:
             }
         ]
         
-        # Mock cursor
+        # Mock cursor and chained operations
         mock_cursor = AsyncMock()
         mock_cursor.__aiter__.return_value = iter(position_data)
-        mock_db.trade_positions.find.return_value.sort.return_value = mock_cursor
+        
+        # Create a mock trade_positions that supports method chaining
+        mock_trade_positions = MagicMock()
+        mock_find_result = MagicMock()
+        mock_find_result.sort.return_value = mock_cursor
+        mock_trade_positions.find.return_value = mock_find_result
+        mock_db.trade_positions = mock_trade_positions
         
         result = await get_user_positions(mock_db, user_id, status)
         
@@ -488,10 +500,18 @@ class TestMarketAnalysisCRUD:
             }
         ]
         
-        # Mock cursor
+        # Mock cursor and chained operations
         mock_cursor = AsyncMock()
         mock_cursor.__aiter__.return_value = iter(analysis_data)
-        mock_db.market_analysis.find.return_value.sort.return_value.limit.return_value = mock_cursor
+        
+        # Create a mock market_analysis that supports method chaining
+        mock_market_analysis = MagicMock()
+        mock_find_result = MagicMock()
+        mock_sort_result = MagicMock()
+        mock_sort_result.limit.return_value = mock_cursor
+        mock_find_result.sort.return_value = mock_sort_result
+        mock_market_analysis.find.return_value = mock_find_result
+        mock_db.market_analysis = mock_market_analysis
         
         result = await get_market_analysis_history(mock_db, symbol, limit=50)
         
@@ -571,10 +591,16 @@ class TestTradingSignalsCRUD:
             }
         ]
         
-        # Mock cursor
+        # Mock cursor and chained operations
         mock_cursor = AsyncMock()
         mock_cursor.__aiter__.return_value = iter(signal_data)
-        mock_db.trading_signals.find.return_value.sort.return_value = mock_cursor
+        
+        # Create a mock trading_signals that supports method chaining
+        mock_trading_signals = MagicMock()
+        mock_find_result = MagicMock()
+        mock_find_result.sort.return_value = mock_cursor
+        mock_trading_signals.find.return_value = mock_find_result
+        mock_db.trading_signals = mock_trading_signals
         
         result = await get_user_signals(mock_db, user_id)
         
@@ -610,10 +636,16 @@ class TestTradingSignalsCRUD:
             }
         ]
         
-        # Mock cursor
+        # Mock cursor and chained operations
         mock_cursor = AsyncMock()
         mock_cursor.__aiter__.return_value = iter(signal_data)
-        mock_db.trading_signals.find.return_value.sort.return_value = mock_cursor
+        
+        # Create a mock trading_signals that supports method chaining
+        mock_trading_signals = MagicMock()
+        mock_find_result = MagicMock()
+        mock_find_result.sort.return_value = mock_cursor
+        mock_trading_signals.find.return_value = mock_find_result
+        mock_db.trading_signals = mock_trading_signals
         
         result = await get_user_signals(mock_db, user_id, executed)
         
@@ -686,9 +718,13 @@ class TestTradingStatistics:
             "max_loss": -15.0
         }
         
+        # Create a proper async mock for aggregation operations
         mock_cursor = AsyncMock()
-        mock_cursor.to_list.return_value = [stats_data]
-        mock_db.trade_positions.aggregate.return_value = mock_cursor
+        mock_cursor.to_list = AsyncMock(return_value=[stats_data])
+        
+        mock_aggregate = MagicMock()
+        mock_aggregate.return_value = mock_cursor
+        mock_db.trade_positions.aggregate = mock_aggregate
         
         result = await get_user_trading_stats(mock_db, user_id)
         
@@ -721,10 +757,13 @@ class TestTradingStatistics:
         mock_db = AsyncMock()
         user_id = "507f1f77bcf86cd799439011"
         
-        # Mock empty aggregation result
+        # Create a proper async mock for empty aggregation result
         mock_cursor = AsyncMock()
-        mock_cursor.to_list.return_value = []
-        mock_db.trade_positions.aggregate.return_value = mock_cursor
+        mock_cursor.to_list = AsyncMock(return_value=[])
+        
+        mock_aggregate = MagicMock()
+        mock_aggregate.return_value = mock_cursor
+        mock_db.trade_positions.aggregate = mock_aggregate
         
         result = await get_user_trading_stats(mock_db, user_id)
         
@@ -756,9 +795,13 @@ class TestTradingStatistics:
             "max_loss": 0
         }
         
+        # Create a proper async mock for aggregation operations
         mock_cursor = AsyncMock()
-        mock_cursor.to_list.return_value = [stats_data]
-        mock_db.trade_positions.aggregate.return_value = mock_cursor
+        mock_cursor.to_list = AsyncMock(return_value=[stats_data])
+        
+        mock_aggregate = MagicMock()
+        mock_aggregate.return_value = mock_cursor
+        mock_db.trade_positions.aggregate = mock_aggregate
         
         result = await get_user_trading_stats(mock_db, user_id)
         

@@ -10,7 +10,13 @@ import {
   IconUser,
   IconBell,
   IconMoon,
-  IconSun
+  IconSun,
+  IconAnalyze,
+  IconCalculator,
+  IconHistory,
+  IconTrendingUp,
+  IconShield,
+  IconTarget
 } from '@tabler/icons-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/auth';
@@ -84,7 +90,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className={`min-h-screen retro-bg-primary flex ${darkMode ? 'dark' : ''}`}>
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-72 bg-surface-secondary border-r-2 border-retro-brown flex flex-col ${
+      <div className={`fixed inset-y-0 left-0 z-50 w-72 border-r-2 border-retro-brown flex flex-col backdrop-blur-xl bg-black/20 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0`}>
         
@@ -124,14 +130,29 @@ export function Layout({ children }: LayoutProps) {
                 Quick Tools
               </h3>
               <div className="space-y-2">
-                <button className="w-full text-left px-4 py-2 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors">
+                <button className="w-full text-left px-4 py-3 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors flex items-center gap-3">
+                  <IconAnalyze size={18} className="retro-text-accent" />
                   Market Analysis
                 </button>
-                <button className="w-full text-left px-4 py-2 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors">
+                <button className="w-full text-left px-4 py-3 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors flex items-center gap-3">
+                  <IconCalculator size={18} className="retro-text-accent" />
                   Risk Calculator
                 </button>
-                <button className="w-full text-left px-4 py-2 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors">
+                <button className="w-full text-left px-4 py-3 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors flex items-center gap-3">
+                  <IconHistory size={18} className="retro-text-accent" />
                   Trade History
+                </button>
+                <button className="w-full text-left px-4 py-3 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors flex items-center gap-3">
+                  <IconTrendingUp size={18} className="retro-text-accent" />
+                  Performance
+                </button>
+                <button className="w-full text-left px-4 py-3 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors flex items-center gap-3">
+                  <IconShield size={18} className="retro-text-accent" />
+                  Risk Management
+                </button>
+                <button className="w-full text-left px-4 py-3 rounded-lg retro-text-primary hover:bg-retro-cream-100 transition-colors flex items-center gap-3">
+                  <IconTarget size={18} className="retro-text-accent" />
+                  Trading Goals
                 </button>
               </div>
             </div>

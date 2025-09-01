@@ -135,3 +135,4 @@ async def get_market_status(current_user: User = Depends(get_current_user)):
         "active_symbols": len(MARKET_DATA),
         "message": "Markets are open for trading"
     }
+

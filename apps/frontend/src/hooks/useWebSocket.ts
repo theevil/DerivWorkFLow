@@ -199,3 +199,4 @@ export const useWebSocketEvent = (eventType: string, handler: (data: any) => voi
     };
   }, [eventType, handler]);
 };
+

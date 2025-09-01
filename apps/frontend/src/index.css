@@ -23,6 +23,7 @@
   /* Colores de superficie */
   --surface-primary: var(--retro-dark);
   --surface-secondary: var(--retro-dark-alt);
+  --surface-secondary-solid: #2a1810;
   --surface-light: var(--retro-cream);
   --text-primary: var(--retro-cream);
   --text-secondary: var(--retro-gold);
@@ -222,6 +223,10 @@
   
   .retro-bg-secondary {
     background: var(--surface-secondary);
+  }
+  
+  .retro-bg-secondary-solid {
+    background: var(--surface-secondary-solid);
   }
   
   .glass-effect {

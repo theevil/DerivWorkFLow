@@ -143,3 +143,4 @@ export function StatsGrid({ stats, loading = false }: StatsGridProps) {
     </div>
   );
 }
+

@@ -278,3 +278,4 @@ async def get_websocket_stats():
         "active_connections": connection_manager.get_user_count(),
         "deriv_connections": len(websocket_manager.connections)
     }
+

@@ -53,7 +53,7 @@ class TestUserBase:
             UserBase(**user_data)
         
         assert "email" in str(exc_info.value)
-        assert "field required" in str(exc_info.value)
+        assert "Field required" in str(exc_info.value)
     
     def test_missing_name(self):
         """Test UserBase with missing name."""
@@ -65,7 +65,7 @@ class TestUserBase:
             UserBase(**user_data)
         
         assert "name" in str(exc_info.value)
-        assert "field required" in str(exc_info.value)
+        assert "Field required" in str(exc_info.value)
     
     def test_empty_name(self):
         """Test UserBase with empty name."""
@@ -117,7 +117,7 @@ class TestUserCreate:
             UserCreate(**user_data)
         
         assert "password" in str(exc_info.value)
-        assert "field required" in str(exc_info.value)
+        assert "Field required" in str(exc_info.value)
     
     def test_empty_password(self):
         """Test UserCreate with empty password."""
