@@ -165,3 +165,22 @@ class MockDerivWebSocket:
 def mock_deriv_websocket():
     """Mock Deriv WebSocket for testing."""
     return MockDerivWebSocket()
+
+
+@pytest.fixture(scope="function")
+def integration_client():
+    """Test client with database dependency override for integration tests."""
+    from app.core.database import get_database
+    from unittest.mock import AsyncMock
+    
+    def override_get_database():
+        return AsyncMock()
+    
+    # Override the database dependency
+    app.dependency_overrides[get_database] = override_get_database
+    
+    with TestClient(app) as c:
+        yield c
+    
+    # Clean up dependency override
+    app.dependency_overrides.clear()
