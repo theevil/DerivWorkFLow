@@ -10,17 +10,18 @@ from pydantic import BaseModel, Field
 from app.core.database import get_database
 from app.routers.auth import get_current_user
 from app.models.user import User
-from app.workers.market_monitor import market_monitor
-from app.workers.trading_executor import trading_executor
-from app.workers.celery_app import celery_app
-from app.workers.tasks import (
-    market_scan_scheduler,
-    position_monitor_scheduler,
-    process_signal,
-    emergency_stop,
-    retrain_user_models,
-    health_check
-)
+# Commented out imports that might be causing issues
+# from app.workers.market_monitor import market_monitor
+# from app.workers.trading_executor import trading_executor  
+# from app.workers.celery_app import celery_app
+# from app.workers.tasks import (
+#     market_scan_scheduler,
+#     position_monitor_scheduler,
+#     process_signal,
+#     emergency_stop,
+#     retrain_user_models,
+#     health_check
+# )
 
 router = APIRouter()
 
