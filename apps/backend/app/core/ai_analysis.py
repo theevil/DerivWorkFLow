@@ -5,6 +5,10 @@ import numpy as np
 from loguru import logger
 
 from app.models.trading import MarketAnalysisInDB, TradingSignalInDB
+from app.ai.market_analyzer import AdvancedMarketAnalyzer
+from app.ai.decision_engine import TradingDecisionEngine
+from app.ai.learning_system import HistoricalLearningSystem
+from app.ai.risk_manager import AIRiskManager
 
 
 class TechnicalIndicators:
@@ -176,11 +180,217 @@ class MarketAnalyzer:
         return float(np.mean(confidence_factors)) if confidence_factors else 0.5
 
 
-class TradingSignalGenerator:
-    """Generate trading signals based on market analysis"""
+class EnhancedTradingSignalGenerator:
+    """Enhanced trading signal generator with AI integration"""
     
     def __init__(self):
         self.analyzer = MarketAnalyzer()
+        self.advanced_analyzer = AdvancedMarketAnalyzer()
+        self.decision_engine = TradingDecisionEngine()
+        self.learning_system = HistoricalLearningSystem()
+        self.risk_manager = AIRiskManager()
+    
+    async def generate_ai_signal(
+        self,
+        user_id: str,
+        symbol: str,
+        price_history: List[float],
+        current_price: float,
+        user_context: Dict[str, Any],
+        account_balance: float,
+        current_positions: List[Any] = None
+    ) -> Optional[TradingSignalInDB]:
+        """
+        Generate trading signal using AI analysis and decision engine
+        
+        Args:
+            user_id: User identifier
+            symbol: Trading symbol
+            price_history: Historical price data
+            current_price: Current market price
+            user_context: User trading context and preferences
+            account_balance: User's account balance
+            current_positions: Current open positions
+            
+        Returns:
+            Enhanced trading signal with AI insights
+        """
+        try:
+            logger.info(f"Generating AI signal for {symbol} (user: {user_id})")
+            
+            # Step 1: Enhanced market analysis
+            market_analysis = await self.advanced_analyzer.analyze_market_advanced(
+                symbol=symbol,
+                price_history=price_history,
+                current_price=current_price,
+                market_context={
+                    "timeframe": "5m",
+                    "session": "active",
+                    "conditions": "normal"
+                }
+            )
+            
+            # Step 2: AI-powered trading decision
+            trading_decision = await self.decision_engine.make_trading_decision(
+                symbol=symbol,
+                price_history=price_history,
+                current_price=current_price,
+                user_context=user_context
+            )
+            
+            # Step 3: Risk assessment
+            portfolio_context = {
+                "position_count": len(current_positions) if current_positions else 0,
+                "total_exposure": sum(pos.amount for pos in current_positions if hasattr(pos, 'amount')) if current_positions else 0,
+                "daily_pnl": 0,  # Would be calculated from actual positions
+                "max_daily_loss": user_context.get("max_daily_loss", 100)
+            }
+            
+            market_data = {
+                "current_price": current_price,
+                "volatility": market_analysis.confidence or 0.2,
+                "trend": market_analysis.trend_direction,
+                "session": "active",
+                "rsi": 50,  # Would come from technical analysis
+                "macd": 0,
+                "bollinger_position": "middle"
+            }
+            
+            risk_assessment = await self.risk_manager.assess_position_risk(
+                symbol=symbol,
+                position_size=trading_decision.position_size,
+                account_balance=account_balance,
+                market_data=market_data,
+                user_context=user_context,
+                portfolio_context=portfolio_context
+            )
+            
+            # Step 4: Apply risk management
+            if risk_assessment.recommended_action in ["halt_trading", "emergency_stop"]:
+                logger.warning(f"Trading halted for {symbol} due to risk: {risk_assessment.reasoning}")
+                return None
+            
+            if trading_decision.action == "HOLD":
+                logger.info(f"AI decision: HOLD for {symbol}")
+                return None
+            
+            # Step 5: Apply ML predictions if available
+            try:
+                # Prepare features for ML prediction
+                ml_features = {
+                    "hour": datetime.utcnow().hour,
+                    "day_of_week": datetime.utcnow().weekday(),
+                    "rsi": 50,  # Would come from technical indicators
+                    "macd": 0,
+                    "bollinger_upper": 0,
+                    "bollinger_lower": 0,
+                    "volatility": market_analysis.confidence or 0.2,
+                    "current_price": current_price,
+                    "confidence": trading_decision.confidence,
+                    "price_change_1": 0,
+                    "price_change_5": 0,
+                    "price_change_10": 0,
+                    "price_std": 0,
+                    "price_mean": current_price,
+                    "success_rate": 0,
+                    "avg_profit": 0
+                }
+                
+                # Get ML predictions
+                ml_signal, ml_confidence = await self.learning_system.predict_signal(ml_features)
+                ml_risk, ml_risk_confidence = await self.learning_system.predict_risk(ml_features)
+                
+                # Combine AI decision with ML predictions
+                if ml_confidence > 0.7 and ml_signal != "HOLD":
+                    # ML has high confidence, use ML signal
+                    final_action = ml_signal
+                    combined_confidence = (trading_decision.confidence + ml_confidence) / 2
+                    logger.info(f"Using ML signal: {ml_signal} (confidence: {ml_confidence:.3f})")
+                else:
+                    # Use AI decision
+                    final_action = trading_decision.action
+                    combined_confidence = trading_decision.confidence
+                    
+            except Exception as e:
+                logger.warning(f"ML prediction failed, using AI decision: {e}")
+                final_action = trading_decision.action
+                combined_confidence = trading_decision.confidence
+            
+            # Step 6: Apply final risk adjustments
+            adjusted_position_size = trading_decision.position_size * risk_assessment.position_size_adjustment
+            
+            # Only generate signal if confidence is above threshold
+            if combined_confidence < 0.6:
+                logger.info(f"Signal confidence too low: {combined_confidence:.3f}")
+                return None
+            
+            # Step 7: Create enhanced trading signal
+            signal = TradingSignalInDB(
+                user_id=user_id,
+                symbol=symbol,
+                signal_type=final_action,
+                confidence=combined_confidence,
+                recommended_amount=adjusted_position_size,
+                recommended_duration=trading_decision.duration // 60,  # Convert to minutes
+                reasoning=self._create_enhanced_reasoning(
+                    market_analysis, trading_decision, risk_assessment, ml_confidence if 'ml_confidence' in locals() else 0
+                )
+            )
+            
+            logger.info(f"AI signal generated: {final_action} for {symbol} with confidence {combined_confidence:.3f}")
+            return signal
+            
+        except Exception as e:
+            logger.error(f"Error generating AI signal: {e}")
+            return None
+    
+    def _create_enhanced_reasoning(self, market_analysis, trading_decision, risk_assessment, ml_confidence: float) -> str:
+        """Create comprehensive reasoning for the trading signal"""
+        
+        reasoning_parts = [
+            f"Market Analysis: {market_analysis.trend_direction} trend with {market_analysis.confidence_score:.2f} confidence",
+            f"AI Decision: {trading_decision.action} based on workflow analysis",
+            f"Risk Level: {risk_assessment.risk_level} ({risk_assessment.risk_score:.2f})",
+        ]
+        
+        if ml_confidence > 0.5:
+            reasoning_parts.append(f"ML Validation: {ml_confidence:.2f} confidence")
+        
+        reasoning_parts.extend([
+            f"Key Insights: {', '.join(market_analysis.key_insights[:2])}",
+            f"Risk Factors: {', '.join(risk_assessment.risk_factors[:2])}"
+        ])
+        
+        return " | ".join(reasoning_parts)
+    
+    async def should_use_ai_signal(self, user_id: str, symbol: str) -> bool:
+        """Determine if AI signal should be used for this user/symbol"""
+        try:
+            # Check if models are available and trained
+            model_key = user_id  # User-specific models
+            
+            # Try to load user-specific models
+            models_loaded = await self.learning_system.load_models(model_key)
+            
+            if not models_loaded:
+                # Try global models
+                models_loaded = await self.learning_system.load_models("global")
+            
+            # Use AI signal if models are available or if basic AI analysis is sufficient
+            return True  # Always try AI signal, fallback to basic if needed
+            
+        except Exception as e:
+            logger.error(f"Error checking AI signal availability: {e}")
+            return False
+
+
+class TradingSignalGenerator:
+    """Generate trading signals based on market analysis (Legacy - kept for compatibility)"""
+    
+    def __init__(self):
+        self.analyzer = MarketAnalyzer()
+        # Initialize enhanced generator for advanced features
+        self.enhanced_generator = EnhancedTradingSignalGenerator()
     
     def generate_signal(
         self,
@@ -217,6 +427,66 @@ class TradingSignalGenerator:
         
         logger.info(f"Generated signal for {symbol}: {signal_type} with confidence {confidence}")
         return signal
+    
+    async def generate_enhanced_signal(
+        self,
+        user_id: str,
+        symbol: str,
+        analysis: MarketAnalysisInDB,
+        trading_params: Dict[str, Any],
+        user_context: Dict[str, Any],
+        account_balance: float,
+        current_positions: List[Any] = None
+    ) -> Optional[TradingSignalInDB]:
+        """
+        Generate enhanced signal using AI if available, fallback to traditional analysis
+        
+        Args:
+            user_id: User identifier
+            symbol: Trading symbol  
+            analysis: Market analysis result
+            trading_params: Trading parameters
+            user_context: User context and preferences
+            account_balance: User's account balance
+            current_positions: Current open positions
+            
+        Returns:
+            Trading signal with enhanced AI analysis if available
+        """
+        try:
+            # Check if we should use AI signal
+            use_ai = await self.enhanced_generator.should_use_ai_signal(user_id, symbol)
+            
+            if use_ai and analysis.price_history and len(analysis.price_history) > 10:
+                # Try to generate AI signal
+                ai_signal = await self.enhanced_generator.generate_ai_signal(
+                    user_id=user_id,
+                    symbol=symbol,
+                    price_history=analysis.price_history,
+                    current_price=analysis.current_price,
+                    user_context=user_context,
+                    account_balance=account_balance,
+                    current_positions=current_positions
+                )
+                
+                if ai_signal:
+                    logger.info(f"Using AI-generated signal for {symbol}")
+                    return ai_signal
+                else:
+                    logger.info(f"AI signal not generated for {symbol}, using traditional analysis")
+            
+            # Fallback to traditional signal generation
+            traditional_signal = self.generate_signal(user_id, symbol, analysis, trading_params)
+            
+            if traditional_signal:
+                logger.info(f"Using traditional signal for {symbol}")
+            
+            return traditional_signal
+            
+        except Exception as e:
+            logger.error(f"Error in enhanced signal generation: {e}")
+            # Final fallback to basic signal
+            return self.generate_signal(user_id, symbol, analysis, trading_params)
     
     def _determine_signal_type(self, analysis: MarketAnalysisInDB) -> str:
         """Determine the type of trading signal"""

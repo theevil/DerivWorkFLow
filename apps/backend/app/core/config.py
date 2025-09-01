@@ -47,6 +47,19 @@ class Settings(BaseSettings):
     ai_confidence_threshold: float = float(os.getenv("AI_CONFIDENCE_THRESHOLD", "0.6"))
     ai_analysis_interval: int = int(os.getenv("AI_ANALYSIS_INTERVAL", "30"))  # seconds
     max_positions_per_user: int = int(os.getenv("MAX_POSITIONS_PER_USER", "10"))
+    
+    # LangChain & LangGraph Configuration
+    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
+    langchain_api_key: str = os.getenv("LANGCHAIN_API_KEY", "")
+    langsmith_project: str = os.getenv("LANGSMITH_PROJECT", "deriv-trading")
+    ai_model: str = os.getenv("AI_MODEL", "gpt-4o-mini")
+    ai_temperature: float = float(os.getenv("AI_TEMPERATURE", "0.1"))
+    ai_max_tokens: int = int(os.getenv("AI_MAX_TOKENS", "1000"))
+    
+    # Historical Learning Configuration
+    learning_data_lookback_days: int = int(os.getenv("LEARNING_DATA_LOOKBACK_DAYS", "30"))
+    min_training_samples: int = int(os.getenv("MIN_TRAINING_SAMPLES", "100"))
+    model_retrain_interval_hours: int = int(os.getenv("MODEL_RETRAIN_INTERVAL_HOURS", "24"))
 
     class Config:
         env_file = ".env"
