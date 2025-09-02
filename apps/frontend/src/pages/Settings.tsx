@@ -64,6 +64,7 @@ interface UserSettings {
   aiModel: string;
   aiTemperature: number;
   aiMaxTokens: number;
+  aiProvider: string; // local, openai, hybrid
 
   // OpenAI Configuration
   openaiApiKey: string;
@@ -101,9 +102,10 @@ const defaultSettings: UserSettings = {
   aiConfidenceThreshold: 0.7, // High confidence threshold (0.6-0.8 range)
   aiAnalysisInterval: 60, // 1 minute analysis (30-120 sec range)
   maxPositionsPerUser: 3, // Conservative concurrent positions (2-5 range)
-  aiModel: 'gpt-4o-mini',
+  aiModel: 'phi-3-mini', // Default to local AI model
   aiTemperature: 0.2, // Low creativity for trading (0.1-0.3 range)
   aiMaxTokens: 1000,
+  aiProvider: 'local', // Default to local AI
   openaiApiKey: '',
   langchainApiKey: '',
   langsmithProject: 'deriv-trading',
@@ -122,10 +124,23 @@ const defaultSettings: UserSettings = {
 };
 
 const aiModelOptions = [
-  { value: 'gpt-4o-mini', label: 'GPT-4o Mini (Recommended)' },
-  { value: 'gpt-4o', label: 'GPT-4o' },
-  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo' },
-  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
+  // Local AI Models (Recommended for microtransactions)
+  { value: 'phi-3-mini', label: 'Phi-3 Mini (Local - Recommended)' },
+  { value: 'gemma-2b', label: 'Gemma 2B (Local)' },
+  { value: 'llama3.1-3b', label: 'Llama 3.1 3B (Local)' },
+  { value: 'llama3.1-8b', label: 'Llama 3.1 8B (Local)' },
+  { value: 'mistral-7b', label: 'Mistral 7B (Local)' },
+  // OpenAI Models
+  { value: 'gpt-4o-mini', label: 'GPT-4o Mini (OpenAI)' },
+  { value: 'gpt-4o', label: 'GPT-4o (OpenAI)' },
+  { value: 'gpt-4-turbo', label: 'GPT-4 Turbo (OpenAI)' },
+  { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo (OpenAI)' },
+];
+
+const aiProviderOptions = [
+  { value: 'local', label: 'Local AI (Recommended)' },
+  { value: 'openai', label: 'OpenAI' },
+  { value: 'hybrid', label: 'Hybrid (Local + OpenAI)' },
 ];
 
 // Common input styles for consistency
@@ -640,6 +655,90 @@ export function SettingsPage() {
       [key]: value,
     }));
     setUnsavedChanges(true);
+  };
+
+  const testLocalAI = async () => {
+    if (!isAuthenticated || !token) {
+      notifications.show({
+        title: 'Authentication Required',
+        message: 'Please log in to test local AI',
+        color: 'orange',
+        icon: <IconAlertTriangle size={16} />,
+      });
+      return;
+    }
+
+    setTestingConnection(true);
+    try {
+      const result = await api.testLocalAI();
+
+      if (result.status === 'available') {
+        notifications.show({
+          title: 'Local AI Test Successful',
+          message: `Found ${result.working_models?.length || 0} working models`,
+          color: 'green',
+          icon: <IconCheck size={16} />,
+        });
+      } else {
+        notifications.show({
+          title: 'Local AI Test Failed',
+          message: result.message || 'No working models found',
+          color: 'red',
+          icon: <IconX size={16} />,
+        });
+      }
+    } catch (error: any) {
+      console.error('Error testing local AI:', error);
+      notifications.show({
+        title: 'Test Error',
+        message: error.message || 'Failed to test local AI',
+        color: 'red',
+        icon: <IconX size={16} />,
+      });
+    } finally {
+      setTestingConnection(false);
+    }
+  };
+
+  const initializeLocalAI = async () => {
+    if (!isAuthenticated || !token) {
+      notifications.show({
+        title: 'Authentication Required',
+        message: 'Please log in to initialize local AI',
+        color: 'orange',
+        icon: <IconAlertTriangle size={16} />,
+      });
+      return;
+    }
+
+    try {
+      // Initialize the default model
+      const result = await api.initializeLocalModel('phi-3-mini');
+
+      if (result.status === 'success') {
+        notifications.show({
+          title: 'Local AI Initialized',
+          message: 'Models initialized successfully',
+          color: 'green',
+          icon: <IconCheck size={16} />,
+        });
+      } else {
+        notifications.show({
+          title: 'Initialization Failed',
+          message: result.message || 'Failed to initialize models',
+          color: 'red',
+          icon: <IconX size={16} />,
+        });
+      }
+    } catch (error: any) {
+      console.error('Error initializing local AI:', error);
+      notifications.show({
+        title: 'Initialization Error',
+        message: error.message || 'Failed to initialize local AI',
+        color: 'red',
+        icon: <IconX size={16} />,
+      });
+    }
   };
 
   const resetToDefaults = async () => {
@@ -1372,44 +1471,162 @@ export function SettingsPage() {
                 </div>
 
                 <Stack gap='lg'>
+                  {/* AI Provider Selection */}
                   <div className='flex flex-col'>
                     <Text size='sm' className='text-black font-bold mb-2'>
-                      OpenAI API Key
+                      AI Provider
                     </Text>
                     <Text size='xs' className='text-black font-semibold mb-3'>
-                      OpenAI API key for AI analysis (Required for intelligent
-                      trading)
+                      Choose your AI provider (Local AI recommended for
+                      microtransactions)
                     </Text>
                     <div className='relative'>
-                      <PasswordInput
-                        size='md'
-                        placeholder='sk-proj-...'
-                        value={settings.openaiApiKey}
+                      <select
+                        value={settings.aiProvider || 'local'}
                         onChange={e =>
-                          handleSettingChange(
-                            'openaiApiKey',
-                            e.currentTarget.value
-                          )
+                          handleSettingChange('aiProvider', e.target.value)
                         }
-                        visible={showApiKeys}
-                        onVisibilityChange={setShowApiKeys}
-                        styles={{
-                          ...inputStyles,
-                          input: {
-                            ...inputStyles.input,
-                            paddingLeft: '50px',
-                            paddingRight: '16px',
-                          },
+                        aria-label='Select AI provider'
+                        className='w-full px-4 py-3 text-base font-medium border-2 border-retro-brown-300 rounded-xl bg-white shadow-md transition-all duration-200 focus:border-cyan-500 focus:shadow-lg focus:outline-none hover:border-retro-brown-400'
+                        style={{
+                          fontSize: '15px',
+                          fontWeight: 500,
+                          color: '#000000',
+                          backgroundColor: '#FFFFFF',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                         }}
-                      />
-                      <div
-                        className='absolute left-6 pointer-events-none flex items-center justify-center'
-                        style={{ height: '20px', top: '17px' }}
                       >
-                        <IconBrain size={20} className='text-purple-600' />
-                      </div>
+                        {aiProviderOptions.map(option => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
+
+                  {/* Local AI Status */}
+                  {(settings.aiProvider === 'local' ||
+                    settings.aiProvider === 'hybrid') && (
+                    <div className='flex flex-col'>
+                      <Text size='sm' className='text-black font-bold mb-2'>
+                        Local AI Status
+                      </Text>
+                      <Text size='xs' className='text-black font-semibold mb-3'>
+                        Local AI models status and configuration
+                      </Text>
+                      <div className='flex gap-4'>
+                        <Button
+                          size='md'
+                          onClick={() => testLocalAI()}
+                          loading={testingConnection}
+                          className='px-6 py-3 text-base font-bold shadow-lg flex items-center justify-center'
+                          styles={{
+                            root: {
+                              background: 'var(--retro-turquoise)',
+                              color: 'var(--retro-dark)',
+                              border: '2px solid var(--retro-turquoise)',
+                              borderRadius: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                              '&:hover': {
+                                background: 'var(--retro-cream)',
+                                color: 'var(--retro-dark)',
+                                borderColor: 'var(--retro-cream)',
+                                transform: 'translateY(-2px)',
+                              },
+                            },
+                            inner: {
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                            },
+                          }}
+                          leftSection={<IconTestPipe size={18} />}
+                        >
+                          Test Local AI
+                        </Button>
+                        <Button
+                          size='md'
+                          onClick={() => initializeLocalAI()}
+                          className='px-6 py-3 text-base font-bold shadow-lg flex items-center justify-center'
+                          styles={{
+                            root: {
+                              background: 'var(--retro-gold)',
+                              color: 'var(--retro-dark)',
+                              border: '2px solid var(--retro-gold)',
+                              borderRadius: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                              '&:hover': {
+                                background: 'var(--retro-cream)',
+                                color: 'var(--retro-dark)',
+                                borderColor: 'var(--retro-cream)',
+                                transform: 'translateY(-2px)',
+                              },
+                            },
+                            inner: {
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '8px',
+                            },
+                          }}
+                          leftSection={<IconRefresh size={18} />}
+                        >
+                          Initialize Models
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* OpenAI API Key (only show if OpenAI or Hybrid is selected) */}
+                  {(settings.aiProvider === 'openai' ||
+                    settings.aiProvider === 'hybrid') && (
+                    <div className='flex flex-col'>
+                      <Text size='sm' className='text-black font-bold mb-2'>
+                        OpenAI API Key
+                      </Text>
+                      <Text size='xs' className='text-black font-semibold mb-3'>
+                        OpenAI API key for AI analysis (Required for OpenAI
+                        provider)
+                      </Text>
+                      <div className='relative'>
+                        <PasswordInput
+                          size='md'
+                          placeholder='sk-proj-...'
+                          value={settings.openaiApiKey}
+                          onChange={e =>
+                            handleSettingChange(
+                              'openaiApiKey',
+                              e.currentTarget.value
+                            )
+                          }
+                          visible={showApiKeys}
+                          onVisibilityChange={setShowApiKeys}
+                          styles={{
+                            ...inputStyles,
+                            input: {
+                              ...inputStyles.input,
+                              paddingLeft: '50px',
+                              paddingRight: '16px',
+                            },
+                          }}
+                        />
+                        <div
+                          className='absolute left-6 pointer-events-none flex items-center justify-center'
+                          style={{ height: '20px', top: '17px' }}
+                        >
+                          <IconBrain size={20} className='text-purple-600' />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className='flex flex-col md:flex-row md:gap-8 gap-4'>
                     <div className='flex-1'>

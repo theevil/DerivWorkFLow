@@ -366,6 +366,55 @@ class ApiClient {
   async getAutomationPerformance(days: number = 7): Promise<AutomationPerformance> {
     return this.fetch<AutomationPerformance>(`/automation/performance/summary?days=${days}`);
   }
+
+  // AI endpoints
+  async testLocalAI(): Promise<{
+    status: string;
+    message: string;
+    models?: any;
+    working_models?: string[];
+  }> {
+    return this.fetch<{
+      status: string;
+      message: string;
+      models?: any;
+      working_models?: string[];
+    }>('/ai/test-local-ai', {
+      method: 'POST',
+    });
+  }
+
+  async initializeLocalModel(modelName: string): Promise<{
+    status: string;
+    message: string;
+    model_name: string;
+  }> {
+    return this.fetch<{
+      status: string;
+      message: string;
+      model_name: string;
+    }>(`/ai/initialize-local-model/${modelName}`, {
+      method: 'POST',
+    });
+  }
+
+  async getAIConfiguration(): Promise<{
+    available_providers: string[];
+    current_provider: string;
+    local_models: string[];
+    openai_models: string[];
+    recommended_model: string;
+    local_ai_status: string;
+  }> {
+    return this.fetch<{
+      available_providers: string[];
+      current_provider: string;
+      local_models: string[];
+      openai_models: string[];
+      recommended_model: string;
+      local_ai_status: string;
+    }>('/ai/ai-configuration');
+  }
 }
 
 export const api = new ApiClient();

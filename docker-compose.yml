@@ -15,6 +15,41 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
+
+  # Ollama service for local AI models
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  # AI Model Manager service
+  ai-model-manager:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile.ai-models
+    restart: unless-stopped
+    environment:
+      - OLLAMA_HOST=ollama:11434
+      - MODEL_DOWNLOAD_ENABLED=true
+    depends_on:
+      - ollama
+    volumes:
+      - ai_models_data:/app/models
+    command: python -m app.ai.model_manager
+
   backend:
     build:
       context: ./apps/backend
@@ -28,9 +63,13 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - OLLAMA_HOST=ollama:11434
+      - LOCAL_AI_ENABLED=true
+      - DEFAULT_AI_MODEL=phi-3-mini
     depends_on:
       - mongodb
       - redis
+      - ollama
     ports:
       - '8000:8000'
 
@@ -47,9 +86,13 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - OLLAMA_HOST=ollama:11434
+      - LOCAL_AI_ENABLED=true
+      - DEFAULT_AI_MODEL=phi-3-mini
     depends_on:
       - mongodb
       - redis
+      - ollama
     command: celery -A app.workers.celery_app worker --loglevel=info --queues=market_scan,position_monitor,trading,risk_monitor,signals,training,analysis
 
   celery-beat:
@@ -65,10 +108,15 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - OLLAMA_HOST=ollama:11434
+      - LOCAL_AI_ENABLED=true
+      - DEFAULT_AI_MODEL=phi-3-mini
     depends_on:
       - mongodb
       - redis
+      - ollama
     command: celery -A app.workers.celery_app beat --loglevel=info
+
   frontend:
     working_dir: /app
     image: node:20-alpine
@@ -76,9 +124,12 @@ services:
       - ./apps/frontend:/app
     command: sh -c "npm install && npm run dev -- --host"
     ports:
-      - '5173:5173'
+      - '3000:3000'
     depends_on:
       - backend
+
 volumes:
   mongo_data:
   redis_data:
+  ollama_data:
+  ai_models_data:

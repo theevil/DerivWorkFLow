@@ -68,7 +68,7 @@ class TestUserWorkflow:
 
                             login_response = self.client.post(
                                 "/api/v1/auth/token",
-                                data={"username": "integration@example.com", "password": "password123"}
+                                data={"username": "integration@example.com", "password": "password123"}  # pragma: allowlist secret
                             )
 
                             assert login_response.status_code == 200

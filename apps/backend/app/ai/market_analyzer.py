@@ -4,7 +4,6 @@ Advanced Market Analyzer using LangChain for intelligent market analysis
 
 from typing import Any, Optional
 
-import numpy as np
 from langchain.chat_models import ChatOpenAI
 from langchain.output_parsers import PydanticOutputParser
 from langchain.prompts import ChatPromptTemplate
@@ -14,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from app.core.config import settings
 from app.core.technical_indicators import TechnicalIndicators
+from app.ai.local_ai_manager import local_ai_manager
 
 
 class MarketAnalysisResult(BaseModel):
@@ -25,15 +25,13 @@ class MarketAnalysisResult(BaseModel):
     recommended_action: str = Field(description="Recommended action: buy_call, buy_put, hold")
     reasoning: str = Field(description="Detailed reasoning for the recommendation")
     technical_summary: str = Field(description="Summary of technical indicators")
+    ai_provider: str = Field(description="AI provider used: local, openai, fallback")
 
 
 class TradingRecommendation(BaseModel):
     """Trading recommendation output"""
-    action: str = Field(description="Trading action: BUY_CALL, BUY_PUT, HOLD")
-    confidence: float = Field(description="Confidence level (0-1)", ge=0, le=1)
-    position_size_multiplier: float = Field(description="Position size adjustment (0.5-2.0)", ge=0.5, le=2.0)
-    time_horizon: str = Field(description="Recommended time horizon: short, medium, long")
-    stop_loss_adjustment: float = Field(description="Stop loss adjustment factor", ge=0.5, le=2.0)
+    action: str = Field(description="Recommended action: buy_call, buy_put, hold")
+    confidence: float = Field(description="Confidence in recommendation (0-1)", ge=0, le=1)
     reasoning: str = Field(description="Detailed reasoning")
 
 
@@ -44,17 +42,22 @@ class AdvancedMarketAnalyzer:
         """Initialize the advanced market analyzer"""
         self.technical_indicators = TechnicalIndicators()
 
-        # Initialize LangChain components
-        if not settings.openai_api_key:
-            logger.warning("OpenAI API key not configured. AI analysis will be limited.")
-            self.llm = None
-        else:
-            self.llm = ChatOpenAI(
+        # Initialize LangChain components for OpenAI
+        if settings.openai_api_key:
+            self.openai_llm = ChatOpenAI(
                 model=settings.ai_model,
                 temperature=settings.ai_temperature,
                 max_tokens=settings.ai_max_tokens,
                 openai_api_key=settings.openai_api_key
             )
+        else:
+            self.openai_llm = None
+            logger.warning("OpenAI API key not configured.")
+
+        # Initialize local AI
+        self.local_ai_enabled = settings.local_ai_enabled
+        if self.local_ai_enabled:
+            logger.info("Local AI enabled for market analysis")
 
         # Setup output parsers
         self.analysis_parser = PydanticOutputParser(pydantic_object=MarketAnalysisResult)
@@ -74,70 +77,53 @@ class AdvancedMarketAnalyzer:
 
     def _get_analysis_system_prompt(self) -> str:
         """Get system prompt for market analysis"""
-        return """You are an expert quantitative analyst specializing in synthetic indices trading on Deriv.
+        return """You are an expert financial analyst specializing in binary options and synthetic indices trading.
 
-        Your expertise includes:
-        - Technical analysis of synthetic indices (R_10, R_25, R_50, etc.)
-        - Pattern recognition in price movements
-        - Risk assessment and volatility analysis
-        - Market sentiment interpretation
+        Your task is to analyze market data and provide structured insights for microtransactions.
 
-        Analyze the provided market data with focus on:
-        1. Current market conditions and trends
-        2. Technical indicator signals and convergence
-        3. Volatility patterns and market sentiment
-        4. Risk factors and potential reversals
-        5. Entry/exit timing considerations
+        Key considerations for microtransactions:
+        - Focus on short-term price movements (1-5 minutes)
+        - Consider volatility and momentum indicators
+        - Assess risk-reward ratios for small position sizes
+        - Provide clear, actionable recommendations
 
-        Provide clear, actionable insights based on data-driven analysis.
-        Be precise about confidence levels and reasoning."""
+        Always respond with valid JSON in the exact format specified."""
 
     def _get_analysis_human_prompt(self) -> str:
-        """Get human prompt template for analysis"""
+        """Get human prompt template for market analysis"""
         return """Analyze the following market data for {symbol}:
 
-        CURRENT PRICE: {current_price}
-        PRICE HISTORY: {price_summary}
+        PRICE DATA:
+        - Current Price: ${current_price}
+        - Price History: {price_summary}
+        - Recent Trend: {trend_direction}
 
         TECHNICAL INDICATORS:
-        - RSI: {rsi} (Oversold: <30, Overbought: >70)
-        - MACD: {macd} (Signal: {macd_signal})
-        - Bollinger Bands: Upper={bb_upper}, Lower={bb_lower}, Current Position={bb_position}
-        - Volatility: {volatility} (Annual)
-        - Recent Trend: {trend}
+        - RSI: {rsi:.2f}
+        - MACD: {macd:.4f}
+        - Bollinger Bands Position: {bb_position}
+        - Volatility: {volatility:.2f}
 
         MARKET CONTEXT:
-        - Time Frame: {timeframe}
-        - Trading Session: {session}
-        - Market Conditions: {market_conditions}
+        - Session: {session}
+        - Timeframe: {timeframe}
+        - Market Conditions: {conditions}
 
         {format_instructions}
 
-        Provide a comprehensive analysis with specific focus on synthetic indices characteristics."""
+        Provide a comprehensive market analysis with specific focus on microtransaction opportunities."""
 
     def _get_recommendation_system_prompt(self) -> str:
         """Get system prompt for trading recommendations"""
-        return """You are a senior trading strategist for synthetic indices on Deriv platform.
+        return """You are a trading advisor specializing in binary options and synthetic indices.
 
-        Your role is to translate market analysis into specific, actionable trading recommendations.
+        Provide specific, actionable trading recommendations based on market analysis.
+        Consider the user's risk tolerance and account balance for position sizing.
 
-        Consider:
-        - Risk-reward ratios for different trade types
-        - Optimal position sizing based on volatility and confidence
-        - Time horizon selection for maximum probability of success
-        - Stop-loss and take-profit level recommendations
-        - Market timing and execution considerations
-
-        Synthetic indices characteristics:
-        - R_10: High frequency, moderate volatility
-        - R_25: Medium frequency, higher volatility
-        - R_50: Lower frequency, highest volatility
-        - BOOM/CRASH: Spike patterns, extreme volatility
-
-        Provide specific, executable recommendations with clear risk management."""
+        Always respond with valid JSON in the exact format specified."""
 
     def _get_recommendation_human_prompt(self) -> str:
-        """Get human prompt for recommendations"""
+        """Get human prompt template for trading recommendations"""
         return """Based on this market analysis, provide a specific trading recommendation:
 
         ANALYSIS SUMMARY:
@@ -167,7 +153,7 @@ class AdvancedMarketAnalyzer:
         market_context: Optional[dict[str, Any]] = None
     ) -> MarketAnalysisResult:
         """
-        Perform advanced market analysis using LangChain
+        Perform advanced market analysis using AI (local or OpenAI)
 
         Args:
             symbol: Trading symbol
@@ -182,8 +168,11 @@ class AdvancedMarketAnalyzer:
             # Calculate technical indicators
             technical_data = self._calculate_comprehensive_indicators(price_history, current_price)
 
-            # If no LLM available, fallback to basic analysis
-            if not self.llm:
+            # Determine AI provider to use
+            ai_provider = self._determine_ai_provider()
+
+            # If no AI available, fallback to basic analysis
+            if ai_provider == "fallback":
                 return self._fallback_analysis(symbol, technical_data, current_price)
 
             # Prepare market context
@@ -203,256 +192,234 @@ class AdvancedMarketAnalyzer:
                     bb_position = "within bands"
 
             # Format the prompt
-            formatted_prompt = self.analysis_template.format(
+            formatted_prompt = self._get_analysis_human_prompt().format(
                 symbol=symbol,
                 current_price=current_price,
                 price_summary=price_summary,
-                rsi=technical_data.get('rsi', 'N/A'),
-                macd=technical_data.get('macd', 'N/A'),
-                macd_signal=technical_data.get('macd_signal', 'N/A'),
-                bb_upper=technical_data.get('bollinger_upper', 'N/A'),
-                bb_lower=technical_data.get('bollinger_lower', 'N/A'),
+                trend_direction=self._determine_trend_direction(price_history),
+                rsi=technical_data.get('rsi', 50),
+                macd=technical_data.get('macd', 0),
                 bb_position=bb_position,
-                volatility=technical_data.get('volatility', 'N/A'),
-                trend=technical_data.get('trend', 'sideways'),
-                timeframe=context.get('timeframe', '5-minute'),
+                volatility=technical_data.get('volatility', 0.2),
                 session=context.get('session', 'active'),
-                market_conditions=context.get('conditions', 'normal'),
+                timeframe=context.get('timeframe', '5m'),
+                conditions=context.get('conditions', 'normal'),
                 format_instructions=self.analysis_parser.get_format_instructions()
             )
 
-            # Get AI analysis
-            response = await self.llm.ainvoke(formatted_prompt.messages)
-            analysis_result = self.analysis_parser.parse(response.content)
+            # Generate analysis using selected AI provider
+            if ai_provider == "local":
+                analysis_result = await self._analyze_with_local_ai(formatted_prompt, symbol)
+            elif ai_provider == "openai":
+                analysis_result = await self._analyze_with_openai(formatted_prompt)
+            else:
+                analysis_result = self._fallback_analysis(symbol, technical_data, current_price)
 
-            logger.info(f"Advanced AI analysis completed for {symbol}: {analysis_result.recommended_action}")
+            # Add AI provider info
+            analysis_result.ai_provider = ai_provider
+
             return analysis_result
 
         except Exception as e:
             logger.error(f"Error in advanced market analysis: {e}")
-            # Fallback to technical analysis
             return self._fallback_analysis(symbol, technical_data, current_price)
 
-    async def get_trading_recommendation(
-        self,
-        analysis: MarketAnalysisResult,
-        user_context: dict[str, Any]
-    ) -> TradingRecommendation:
-        """
-        Get specific trading recommendation based on analysis
+    def _determine_ai_provider(self) -> str:
+        """Determine which AI provider to use based on settings and availability"""
+        # Check user preference
+        if hasattr(settings, 'ai_provider'):
+            preferred_provider = getattr(settings, 'ai_provider', 'local')
+        else:
+            preferred_provider = 'local'
 
-        Args:
-            analysis: Market analysis result
-            user_context: User trading context and preferences
+        # Check availability
+        if preferred_provider == "local" and self.local_ai_enabled:
+            available_models = local_ai_manager.get_available_models()
+            if available_models:
+                return "local"
 
-        Returns:
-            TradingRecommendation with specific actions
-        """
+        if preferred_provider == "openai" and self.openai_llm:
+            return "openai"
+
+        # Fallback logic
+        if self.local_ai_enabled and local_ai_manager.get_available_models():
+            return "local"
+        elif self.openai_llm:
+            return "openai"
+        else:
+            return "fallback"
+
+    async def _analyze_with_local_ai(self, prompt: str, symbol: str) -> MarketAnalysisResult:
+        """Analyze market using local AI"""
         try:
-            if not self.llm:
-                return self._fallback_recommendation(analysis, user_context)
+            system_prompt = self._get_analysis_system_prompt()
 
-            # Prepare analysis summary
-            analysis_summary = f"""
-            Trend: {analysis.trend_direction}
-            Confidence: {analysis.confidence_score:.2f}
-            Risk Level: {analysis.risk_level}
-            Recommended Action: {analysis.recommended_action}
-            Key Insights: {', '.join(analysis.key_insights)}
-            Technical Summary: {analysis.technical_summary}
-            Reasoning: {analysis.reasoning}
-            """
+            # Use the preferred local model
+            preferred_model = settings.default_ai_model
+            if preferred_model not in local_ai_manager.get_available_models():
+                # Fallback to any available model
+                available_models = local_ai_manager.get_available_models()
+                if available_models:
+                    preferred_model = available_models[0]
+                else:
+                    raise Exception("No local AI models available")
 
-            # Format recommendation prompt
-            formatted_prompt = self.recommendation_template.format(
-                analysis_summary=analysis_summary,
-                risk_tolerance=user_context.get('risk_tolerance', 'medium'),
-                account_balance=user_context.get('account_balance', 1000),
-                max_position_size=user_context.get('max_position_size', 100),
-                experience_level=user_context.get('experience_level', 'intermediate'),
-                current_positions=user_context.get('current_positions', 0),
-                time_horizon=user_context.get('time_horizon', 'short'),
-                max_daily_loss=user_context.get('max_daily_loss', 50),
-                profit_target=user_context.get('profit_target', 20),
-                format_instructions=self.recommendation_parser.get_format_instructions()
+            response = await local_ai_manager.generate_response(
+                prompt=prompt,
+                model_name=preferred_model,
+                system_prompt=system_prompt,
+                temperature=settings.ai_temperature,
+                max_tokens=settings.ai_max_tokens
             )
 
-            # Get AI recommendation
-            response = await self.llm.ainvoke(formatted_prompt.messages)
-            recommendation = self.recommendation_parser.parse(response.content)
+            # Parse the response
+            try:
+                # Try to extract JSON from the response
+                import json
+                import re
 
-            logger.info(f"Trading recommendation generated: {recommendation.action}")
-            return recommendation
+                # Look for JSON in the response
+                json_match = re.search(r'\{.*\}', response.content, re.DOTALL)
+                if json_match:
+                    json_str = json_match.group()
+                    data = json.loads(json_str)
+                else:
+                    # If no JSON found, create a basic analysis
+                    data = self._create_basic_analysis_from_text(response.content, symbol)
+
+                return MarketAnalysisResult(**data)
+
+            except Exception as parse_error:
+                logger.warning(f"Failed to parse local AI response: {parse_error}")
+                # Create basic analysis from text response
+                return self._create_basic_analysis_from_text(response.content, symbol)
 
         except Exception as e:
-            logger.error(f"Error generating trading recommendation: {e}")
-            return self._fallback_recommendation(analysis, user_context)
+            logger.error(f"Error in local AI analysis: {e}")
+            raise
 
-    def _calculate_comprehensive_indicators(self, price_history: list[float], current_price: float) -> dict[str, Any]:
-        """Calculate comprehensive technical indicators"""
-        indicators = {}
-
+    async def _analyze_with_openai(self, prompt: str) -> MarketAnalysisResult:
+        """Analyze market using OpenAI"""
         try:
-            # Basic indicators
-            indicators['rsi'] = self.technical_indicators.rsi(price_history)
+            formatted_prompt = self.analysis_template.format_prompt(
+                symbol=prompt.split("symbol: ")[1].split("\n")[0] if "symbol: " in prompt else "UNKNOWN",
+                current_price=0,
+                price_summary="",
+                trend_direction="",
+                rsi=50,
+                macd=0,
+                bb_position="middle",
+                volatility=0.2,
+                session="active",
+                timeframe="5m",
+                conditions="normal",
+                format_instructions=self.analysis_parser.get_format_instructions()
+            )
 
-            macd_data = self.technical_indicators.macd(price_history)
-            if macd_data:
-                indicators.update({
-                    'macd': macd_data['macd'],
-                    'macd_signal': macd_data['signal'],
-                    'macd_histogram': macd_data['histogram']
-                })
-
-            bollinger = self.technical_indicators.bollinger_bands(price_history)
-            if bollinger:
-                indicators.update({
-                    'bollinger_upper': bollinger['upper'],
-                    'bollinger_lower': bollinger['lower'],
-                    'bollinger_middle': bollinger['middle']
-                })
-
-            indicators['volatility'] = self.technical_indicators.calculate_volatility(price_history)
-
-            # Trend analysis
-            indicators['trend'] = self._analyze_trend(price_history)
-
-            # Additional indicators
-            if len(price_history) >= 20:
-                indicators['sma_20'] = np.mean(price_history[-20:])
-            if len(price_history) >= 50:
-                indicators['sma_50'] = np.mean(price_history[-50:])
-
-            # Price momentum
-            if len(price_history) >= 10:
-                indicators['momentum_10'] = (current_price - price_history[-10]) / price_history[-10] * 100
+            response = await self.openai_llm.ainvoke(formatted_prompt.messages)
+            return self.analysis_parser.parse(response.content)
 
         except Exception as e:
-            logger.error(f"Error calculating indicators: {e}")
+            logger.error(f"Error in OpenAI analysis: {e}")
+            raise
 
-        return indicators
+    def _create_basic_analysis_from_text(self, text: str, symbol: str) -> dict:
+        """Create basic analysis from text response when JSON parsing fails"""
+        # Extract key information from text response
+        text_lower = text.lower()
 
-    def _analyze_trend(self, prices: list[float]) -> str:
-        """Analyze price trend"""
-        if len(prices) < 10:
-            return "sideways"
-
-        # Short-term trend (last 10 periods)
-        recent_prices = prices[-10:]
-        short_slope = np.polyfit(range(len(recent_prices)), recent_prices, 1)[0]
-
-        # Medium-term trend (last 20 periods if available)
-        if len(prices) >= 20:
-            medium_prices = prices[-20:]
-            medium_slope = np.polyfit(range(len(medium_prices)), medium_prices, 1)[0]
+        # Determine trend
+        if "bullish" in text_lower or "up" in text_lower or "buy" in text_lower:
+            trend = "bullish"
+        elif "bearish" in text_lower or "down" in text_lower or "sell" in text_lower:
+            trend = "bearish"
         else:
-            medium_slope = short_slope
+            trend = "sideways"
 
-        # Combine trends
-        if short_slope > 0.001 and medium_slope > 0.001:
-            return "strong_bullish"
-        elif short_slope > 0.001:
-            return "bullish"
-        elif short_slope < -0.001 and medium_slope < -0.001:
-            return "strong_bearish"
-        elif short_slope < -0.001:
-            return "bearish"
+        # Determine action
+        if "buy" in text_lower and "call" in text_lower:
+            action = "buy_call"
+        elif "buy" in text_lower and "put" in text_lower:
+            action = "buy_put"
         else:
-            return "sideways"
-
-    def _create_price_summary(self, price_history: list[float]) -> str:
-        """Create a summary of price history"""
-        if len(price_history) < 5:
-            return "Insufficient data"
-
-        recent = price_history[-10:]
-        high = max(recent)
-        low = min(recent)
-        change = ((recent[-1] - recent[0]) / recent[0]) * 100
-
-        return f"Recent range: {low:.5f} - {high:.5f}, Change: {change:.2f}%"
-
-    def _fallback_analysis(self, symbol: str, technical_data: dict, current_price: float) -> MarketAnalysisResult:
-        """Fallback analysis when LLM is not available"""
-
-        # Basic analysis using technical indicators
-        rsi = technical_data.get('rsi', 50)
-        trend = technical_data.get('trend', 'sideways')
-        volatility = technical_data.get('volatility', 0.2)
-
-        # Determine trend direction
-        if 'bullish' in trend:
-            trend_direction = "bullish"
-        elif 'bearish' in trend:
-            trend_direction = "bearish"
-        else:
-            trend_direction = "sideways"
-
-        # Calculate confidence
-        confidence = 0.5
-        if rsi and (rsi < 30 or rsi > 70):
-            confidence += 0.2
-        if 'strong' in trend:
-            confidence += 0.2
-        if volatility and volatility < 0.3:
-            confidence += 0.1
-
-        confidence = min(confidence, 1.0)
+            action = "hold"
 
         # Determine risk level
-        risk_level = "medium"
-        if volatility and volatility > 0.4:
-            risk_level = "high"
-        elif volatility and volatility < 0.2:
-            risk_level = "low"
+        if "high" in text_lower and "risk" in text_lower:
+            risk = "high"
+        elif "low" in text_lower and "risk" in text_lower:
+            risk = "low"
+        else:
+            risk = "medium"
 
-        # Generate recommendation
-        if rsi and rsi < 30 and 'bullish' in trend:
+        return {
+            "trend_direction": trend,
+            "confidence_score": 0.6,
+            "risk_level": risk,
+            "key_insights": [text[:100] + "..." if len(text) > 100 else text],
+            "recommended_action": action,
+            "reasoning": text,
+            "technical_summary": "Analysis based on AI response",
+            "ai_provider": "local"
+        }
+
+    def _fallback_analysis(self, symbol: str, technical_data: dict, current_price: float) -> MarketAnalysisResult:
+        """Fallback analysis when AI is not available"""
+        trend = self._determine_trend_direction([current_price] + list(technical_data.get('price_history', [])))
+
+        # Basic trend-based recommendation
+        if trend == "bullish":
             action = "buy_call"
-        elif rsi and rsi > 70 and 'bearish' in trend:
+        elif trend == "bearish":
             action = "buy_put"
         else:
             action = "hold"
 
         return MarketAnalysisResult(
-            trend_direction=trend_direction,
-            confidence_score=confidence,
-            risk_level=risk_level,
-            key_insights=[
-                f"RSI: {rsi:.1f}" if rsi else "RSI: Not available",
-                f"Trend: {trend}",
-                f"Volatility: {volatility:.3f}" if volatility else "Volatility: Not available"
-            ],
+            trend_direction=trend,
+            confidence_score=0.5,
+            risk_level="medium",
+            key_insights=["Basic technical analysis", "No AI insights available"],
             recommended_action=action,
-            reasoning=f"Technical analysis suggests {action} based on RSI ({rsi:.1f}) and trend ({trend})",
-            technical_summary=f"RSI: {rsi:.1f}, Trend: {trend}, Volatility: {volatility:.3f}" if all([rsi, volatility]) else "Limited technical data available"
+            reasoning=f"Basic analysis based on {trend} trend",
+            technical_summary="Fallback analysis using technical indicators only",
+            ai_provider="fallback"
         )
 
-    def _fallback_recommendation(self, analysis: MarketAnalysisResult, user_context: dict) -> TradingRecommendation:
-        """Fallback recommendation when LLM is not available"""
+    def _calculate_comprehensive_indicators(self, price_history: list[float], current_price: float) -> dict:
+        """Calculate comprehensive technical indicators"""
+        if len(price_history) < 10:
+            return {"price_history": price_history}
 
-        action_map = {
-            "buy_call": "BUY_CALL",
-            "buy_put": "BUY_PUT",
-            "hold": "HOLD"
+        return {
+            "rsi": self.technical_indicators.rsi(price_history),
+            "macd": self.technical_indicators.macd(price_history),
+            "bollinger_bands": self.technical_indicators.bollinger_bands(price_history),
+            "volatility": self.technical_indicators.calculate_volatility(price_history),
+            "price_history": price_history
         }
 
-        action = action_map.get(analysis.recommended_action, "HOLD")
+    def _create_price_summary(self, price_history: list[float]) -> str:
+        """Create a summary of price history"""
+        if len(price_history) < 2:
+            return "Insufficient price data"
 
-        # Adjust position size based on confidence and risk
-        size_multiplier = analysis.confidence_score
-        if analysis.risk_level == "high":
-            size_multiplier *= 0.7
-        elif analysis.risk_level == "low":
-            size_multiplier *= 1.2
+        recent_prices = price_history[-20:]  # Last 20 prices
+        min_price = min(recent_prices)
+        max_price = max(recent_prices)
+        avg_price = sum(recent_prices) / len(recent_prices)
 
-        size_multiplier = max(0.5, min(2.0, size_multiplier))
+        return f"Range: ${min_price:.4f}-${max_price:.4f}, Avg: ${avg_price:.4f}"
 
-        return TradingRecommendation(
-            action=action,
-            confidence=analysis.confidence_score,
-            position_size_multiplier=size_multiplier,
-            time_horizon="short",
-            stop_loss_adjustment=1.0,
-            reasoning=f"Based on technical analysis: {analysis.reasoning}"
-        )
+    def _determine_trend_direction(self, prices: list[float]) -> str:
+        """Determine trend direction from price history"""
+        if len(prices) < 5:
+            return "sideways"
+
+        recent_prices = prices[-5:]
+        if recent_prices[-1] > recent_prices[0]:
+            return "bullish"
+        elif recent_prices[-1] < recent_prices[0]:
+            return "bearish"
+        else:
+            return "sideways"

@@ -34,10 +34,10 @@ class TestSettings:
         test_settings = Settings()
 
         expected_origins = [
-            "http://localhost:5173",
-            "http://127.0.0.1:5173",
             "http://localhost:3000",
             "http://127.0.0.1:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
         ]
 
         assert test_settings.backend_cors_origins == expected_origins
@@ -63,7 +63,7 @@ class TestSettings:
 
         assert test_settings.environment == "production"
         assert test_settings.debug is True
-        assert test_settings.secret_key == "prod-secret-key"
+        assert test_settings.secret_key == "prod-secret-key"  # pragma: allowlist secret
         assert test_settings.mongodb_uri == "mongodb://prod-db:27017"
         assert test_settings.mongodb_db == "deriv_prod"
         assert test_settings.access_token_expire_minutes == 120

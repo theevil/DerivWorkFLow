@@ -276,7 +276,7 @@ class TestAuthRoutes:
         user_create_data = {
             "email": "existing@example.com",
             "name": "Existing User",
-            "password": "password123"
+            "password": "password123"  # pragma: allowlist secret
         }
 
         existing_user = UserInDB(
@@ -304,7 +304,7 @@ class TestAuthRoutes:
         user_create_data = {
             "email": "invalid-email",
             "name": "User",
-            "password": "password123"
+            "password": "password123"  # pragma: allowlist secret
         }
 
         response = self.client.post("/register", json=user_create_data)
@@ -318,14 +318,14 @@ class TestAuthRoutes:
         # Missing email
         response = self.client.post("/register", json={
             "name": "User",
-            "password": "password123"
+            "password": "password123"  # pragma: allowlist secret
         })
         assert response.status_code == 422
 
         # Missing name
         response = self.client.post("/register", json={
             "email": "test@example.com",
-            "password": "password123"
+            "password": "password123"  # pragma: allowlist secret
         })
         assert response.status_code == 422
 
@@ -341,7 +341,7 @@ class TestAuthRoutes:
         user_create_data = {
             "email": "",
             "name": "",
-            "password": ""
+            "password": ""  # pragma: allowlist secret
         }
 
         response = self.client.post("/register", json=user_create_data)
@@ -363,7 +363,7 @@ class TestAuthRouterIntegration:
         user_data = {
             "email": "testuser@example.com",
             "name": "Test User",
-            "password": "password123"
+            "password": "password123"  # pragma: allowlist secret
         }
 
         created_user = UserInDB(
@@ -395,7 +395,7 @@ class TestAuthRouterIntegration:
 
                             login_response = self.client.post(
                                 "/token",
-                                data={"username": "testuser@example.com", "password": "password123"}
+                                data={"username": "testuser@example.com", "password": "password123"}  # pragma: allowlist secret
                             )
 
                             assert login_response.status_code == 200

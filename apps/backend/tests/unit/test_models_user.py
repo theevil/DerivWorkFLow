@@ -318,7 +318,7 @@ class TestUser:
     def test_valid_user(self):
         """Test creating a valid User instance."""
         user_data = {
-            "id": "507f1f77bcf86cd799439011",
+            "id": "507f1f77bcf86cd799439011",  # pragma: allowlist secret
             "email": "test@example.com",
             "name": "Test User",
             "deriv_token": "token_123",
@@ -328,7 +328,7 @@ class TestUser:
 
         user = User(**user_data)
 
-        assert user.id == "507f1f77bcf86cd799439011"
+        assert user.id == "507f1f77bcf86cd799439011"  # pragma: allowlist secret
         assert user.email == "test@example.com"
         assert user.name == "Test User"
         assert user.deriv_token == "token_123"
@@ -338,7 +338,7 @@ class TestUser:
     def test_no_hashed_password(self):
         """Test that User model doesn't expose hashed_password."""
         user_data = {
-            "id": "507f1f77bcf86cd799439011",
+            "id": "507f1f77bcf86cd799439011",  # pragma: allowlist secret
             "email": "test@example.com",
             "name": "Test User",
             "created_at": datetime(2023, 1, 1, 12, 0, 0),
@@ -353,7 +353,7 @@ class TestUser:
     def test_string_id(self):
         """Test that User uses string ID instead of ObjectId."""
         user_data = {
-            "id": "507f1f77bcf86cd799439011",
+            "id": "507f1f77bcf86cd799439011",  # pragma: allowlist secret
             "email": "test@example.com",
             "name": "Test User",
             "created_at": datetime(2023, 1, 1, 12, 0, 0),
@@ -363,12 +363,12 @@ class TestUser:
         user = User(**user_data)
 
         assert isinstance(user.id, str)
-        assert user.id == "507f1f77bcf86cd799439011"
+        assert user.id == "507f1f77bcf86cd799439011"  # pragma: allowlist secret
 
     def test_none_deriv_token(self):
         """Test User with None deriv_token."""
         user_data = {
-            "id": "507f1f77bcf86cd799439011",
+            "id": "507f1f77bcf86cd799439011",  # pragma: allowlist secret
             "email": "test@example.com",
             "name": "Test User",
             "deriv_token": None,
@@ -382,7 +382,7 @@ class TestUser:
     def test_inherits_from_user_base(self):
         """Test that User inherits from UserBase."""
         user_data = {
-            "id": "507f1f77bcf86cd799439011",
+            "id": "507f1f77bcf86cd799439011",  # pragma: allowlist secret
             "email": "test@example.com",
             "name": "Test User",
             "created_at": datetime(2023, 1, 1, 12, 0, 0),
@@ -414,7 +414,7 @@ class TestUserModelInteroperability:
         create_data = {
             "email": "test@example.com",
             "name": "Test User",
-            "password": "plainpassword"
+            "password": "plainpassword"  # pragma: allowlist secret
         }
 
         user_create = UserCreate(**create_data)

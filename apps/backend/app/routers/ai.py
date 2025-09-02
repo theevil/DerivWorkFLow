@@ -3,7 +3,6 @@ AI Router for managing AI analysis, learning, and risk management endpoints
 """
 
 
-from typing import Any
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 
 from app.models import (
@@ -16,11 +15,13 @@ from app.models import (
 from app.ai.decision_engine import TradingDecision, TradingDecisionEngine
 from app.ai.learning_system import HistoricalLearningSystem
 from app.ai.market_analyzer import AdvancedMarketAnalyzer, MarketAnalysisResult
-from app.ai.risk_manager import AIRiskManager, PortfolioRisk, RiskAssessment
+from app.ai.risk_manager import AIRiskManager, RiskAssessment
+from app.ai.local_ai_manager import local_ai_manager
 from app.core.ai_analysis import EnhancedTradingSignalGenerator
 from app.core.database import get_database
 from app.crud.trading import get_user_positions, get_user_trading_parameters
 from app.models.user import User
+from app.models.settings import AIConfiguration
 from app.routers.auth import get_current_user
 
 router = APIRouter()
@@ -68,20 +69,11 @@ async def make_trading_decision(
     Generate comprehensive trading decision using AI workflow
     """
     try:
-        user_context = {
-            "account_balance": request.account_balance,
-            "risk_tolerance": request.risk_tolerance,
-            "experience_level": request.experience_level,
-            "max_daily_loss": request.max_daily_loss,
-            "max_position_size": request.max_position_size,
-            "current_positions": 0  # Would be fetched from database
-        }
-
         decision = await decision_engine.make_trading_decision(
             symbol=request.symbol,
             price_history=request.price_history,
             current_price=request.current_price,
-            user_context=user_context
+            user_context=request.user_context
         )
 
         return decision
@@ -89,49 +81,26 @@ async def make_trading_decision(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in trading decision: {str(e)}"
+            detail=f"Error generating trading decision: {str(e)}"
         )
 
 
-@router.post("/assess-risk", response_model=RiskAssessment)
-async def assess_position_risk(
+@router.post("/risk-assessment", response_model=RiskAssessment)
+async def assess_risk(
     request: RiskAssessmentRequest,
-    current_user: User = Depends(get_current_user),
-    db = Depends(get_database)
+    current_user: User = Depends(get_current_user)
 ):
     """
-    Assess risk for a potential trading position
+    Perform AI-powered risk assessment
     """
     try:
-        # Get user's current positions for portfolio context
-        positions = await get_user_positions(db, str(current_user.id))
-
-        market_data = {
-            "current_price": request.current_price,
-            "volatility": request.volatility,
-            "trend": "sideways",  # Would be determined from analysis
-            "session": "active"
-        }
-
-        user_context = {
-            "risk_tolerance": request.risk_tolerance,
-            "experience_level": request.experience_level,
-            "account_balance": request.account_balance
-        }
-
-        portfolio_context = {
-            "position_count": len(positions),
-            "total_exposure": sum(pos.amount for pos in positions if pos.status == "open"),
-            "daily_pnl": 0  # Would be calculated from actual P&L
-        }
-
         risk_assessment = await risk_manager.assess_position_risk(
             symbol=request.symbol,
             position_size=request.position_size,
             account_balance=request.account_balance,
-            market_data=market_data,
-            user_context=user_context,
-            portfolio_context=portfolio_context
+            market_data=request.market_data,
+            user_context=request.user_context,
+            portfolio_context=request.portfolio_context
         )
 
         return risk_assessment
@@ -143,118 +112,36 @@ async def assess_position_risk(
         )
 
 
-@router.get("/portfolio-risk", response_model=PortfolioRisk)
-async def assess_portfolio_risk(
-    current_user: User = Depends(get_current_user),
-    db = Depends(get_database)
-):
-    """
-    Assess overall portfolio risk for the current user
-    """
-    try:
-        # Get user's positions and trading parameters
-        positions = await get_user_positions(db, str(current_user.id))
-        trading_params = await get_user_trading_parameters(db, str(current_user.id))
-
-        if not trading_params:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Trading parameters not found. Please configure trading parameters first."
-            )
-
-        # Estimate account balance (would be fetched from actual account data)
-        account_balance = 1000.0  # Default, should be fetched from user's account
-
-        portfolio_risk = await risk_manager.assess_portfolio_risk(
-            positions=positions,
-            account_balance=account_balance,
-            trading_params=trading_params
-        )
-
-        return portfolio_risk
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error in portfolio risk assessment: {str(e)}"
-        )
-
-
 @router.post("/train-models")
-async def train_ai_models(
+async def train_models(
     request: TrainingRequest,
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     db = Depends(get_database)
 ):
     """
-    Train AI models using historical data (background task)
+    Train AI models with historical data
     """
     try:
-        user_id = str(current_user.id) if request.user_specific else None
-
-        # Add training task to background
+        # Add training task to background queue
         background_tasks.add_task(
-            learning_system.train_models,
-            db,
-            user_id
+            learning_system.train_user_models,
+            str(current_user.id),
+            request.symbol,
+            request.lookback_days
         )
 
         return {
-            "message": "Model training started in background",
-            "user_specific": request.user_specific,
-            "user_id": user_id
+            "message": "Training started in background",
+            "user_id": str(current_user.id),
+            "symbol": request.symbol,
+            "lookback_days": request.lookback_days
         }
 
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error starting model training: {str(e)}"
-        )
-
-
-@router.get("/model-performance")
-async def get_model_performance(
-    current_user: User = Depends(get_current_user)
-):
-    """
-    Get current AI model performance metrics
-    """
-    try:
-        performance = learning_system.get_model_performance()
-
-        return {
-            "models": list(performance.keys()),
-            "performance": performance,
-            "last_training": learning_system.last_training_time.get(str(current_user.id), "Never")
-        }
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error retrieving model performance: {str(e)}"
-        )
-
-
-@router.get("/trading-patterns")
-async def analyze_trading_patterns(
-    current_user: User = Depends(get_current_user),
-    db = Depends(get_database)
-):
-    """
-    Analyze user's trading patterns for insights
-    """
-    try:
-        patterns = await learning_system.analyze_trading_patterns(db, str(current_user.id))
-
-        return patterns
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error analyzing trading patterns: {str(e)}"
+            detail=f"Error starting training: {str(e)}"
         )
 
 
@@ -268,73 +155,29 @@ async def generate_ai_signal(
     Generate AI-powered trading signal
     """
     try:
-        # Get user context
-        trading_params = await get_user_trading_parameters(db, str(current_user.id))
-        positions = await get_user_positions(db, str(current_user.id))
+        # Get user positions and trading parameters
+        positions = await get_user_positions(str(current_user.id), db)
+        await get_user_trading_parameters(str(current_user.id), db)
 
-        if not trading_params:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Trading parameters not found"
-            )
-
-        user_context: dict[str, Any] = {
-            "risk_tolerance": "medium",  # Would be stored in user profile
-            "experience_level": "intermediate",  # Would be stored in user profile
-            "account_balance": 1000.0,  # Would be fetched from account
-            "max_daily_loss": trading_params.max_daily_loss,
-            "max_position_size": trading_params.position_size
-        }
-
-        if request.use_ai:
-            signal = await enhanced_generator.generate_ai_signal(
-                user_id=str(current_user.id),
-                symbol=request.symbol,
-                price_history=request.price_history,
-                current_price=request.current_price,
-                user_context=user_context,
-                account_balance=user_context["account_balance"],
-                current_positions=positions
-            )
-        else:
-            # Use traditional signal generation
-            from app.core.ai_analysis import MarketAnalyzer, TradingSignalGenerator
-
-            analyzer = MarketAnalyzer()
-            signal_generator = TradingSignalGenerator()
-
-            # Create market analysis
-            analysis = analyzer.analyze_market(
-                symbol=request.symbol,
-                price_history=request.price_history,
-                current_price=request.current_price
-            )
-
-            signal = signal_generator.generate_signal(
-                user_id=str(current_user.id),
-                symbol=request.symbol,
-                analysis=analysis,
-                trading_params=trading_params.dict()
-            )
+        # Generate signal
+        signal = await enhanced_generator.generate_ai_signal(
+            user_id=str(current_user.id),
+            symbol=request.symbol,
+            price_history=request.price_history,
+            current_price=request.current_price,
+            user_context=request.user_context,
+            account_balance=request.account_balance,
+            current_positions=positions
+        )
 
         if signal:
-            return {
-                "signal_generated": True,
-                "signal_type": signal.signal_type,
-                "confidence": signal.confidence,
-                "recommended_amount": signal.recommended_amount,
-                "reasoning": signal.reasoning,
-                "ai_powered": request.use_ai
-            }
+            return signal
         else:
-            return {
-                "signal_generated": False,
-                "message": "No trading signal generated",
-                "ai_powered": request.use_ai
-            }
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Unable to generate trading signal"
+            )
 
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -354,25 +197,28 @@ async def get_ai_status(
         from app.core.config import settings
 
         ai_available = bool(settings.openai_api_key)
+        local_ai_available = settings.local_ai_enabled and bool(local_ai_manager.get_available_models())
 
         # Try to load models
         user_models_loaded = await learning_system.load_models(str(current_user.id))
         global_models_loaded = await learning_system.load_models("global")
 
         status_info = {
-            "ai_analysis_available": ai_available,
-            "langchain_configured": ai_available,
+            "ai_analysis_available": ai_available or local_ai_available,
+            "openai_configured": ai_available,
+            "local_ai_configured": local_ai_available,
+            "local_ai_models": local_ai_manager.get_available_models(),
             "user_models_loaded": user_models_loaded,
             "global_models_loaded": global_models_loaded,
             "models_available": list(learning_system.models.keys()),
             "model_performance": learning_system.get_model_performance(),
             "should_retrain": learning_system.should_retrain(str(current_user.id)),
             "features": {
-                "advanced_market_analysis": ai_available,
-                "ai_decision_workflow": ai_available,
+                "advanced_market_analysis": ai_available or local_ai_available,
+                "ai_decision_workflow": ai_available or local_ai_available,
                 "risk_management": True,
                 "historical_learning": len(learning_system.models) > 0,
-                "adaptive_signals": ai_available or len(learning_system.models) > 0
+                "adaptive_signals": ai_available or local_ai_available or len(learning_system.models) > 0
             }
         }
 
@@ -385,6 +231,127 @@ async def get_ai_status(
         )
 
 
+@router.get("/ai-configuration", response_model=AIConfiguration)
+async def get_ai_configuration(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get AI configuration options and current settings
+    """
+    try:
+        from app.core.config import settings
+
+        # Test local AI availability
+        local_ai_status = "unavailable"
+        if settings.local_ai_enabled:
+            available_models = local_ai_manager.get_available_models()
+            if available_models:
+                local_ai_status = "available"
+            else:
+                local_ai_status = "testing"
+
+        return AIConfiguration(
+            available_providers=["local", "openai", "hybrid"],
+            current_provider=getattr(settings, 'ai_provider', 'local'),
+            local_models=local_ai_manager.get_available_models(),
+            openai_models=[
+                "gpt-4o-mini",
+                "gpt-4o",
+                "gpt-4-turbo",
+                "gpt-3.5-turbo"
+            ],
+            recommended_model=settings.default_ai_model,
+            local_ai_status=local_ai_status
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error getting AI configuration: {str(e)}"
+        )
+
+
+@router.post("/test-local-ai")
+async def test_local_ai(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Test local AI model connectivity and functionality
+    """
+    try:
+        available_models = local_ai_manager.get_available_models()
+
+        if not available_models:
+            return {
+                "status": "unavailable",
+                "message": "No local AI models available",
+                "models": []
+            }
+
+        # Test each available model
+        test_results = {}
+        for model_name in available_models:
+            try:
+                is_working = await local_ai_manager.test_model_connection(model_name)
+                test_results[model_name] = {
+                    "available": True,
+                    "working": is_working,
+                    "status": "working" if is_working else "error"
+                }
+            except Exception as e:
+                test_results[model_name] = {
+                    "available": True,
+                    "working": False,
+                    "status": "error",
+                    "error": str(e)
+                }
+
+        working_models = [name for name, result in test_results.items() if result["working"]]
+
+        return {
+            "status": "available" if working_models else "error",
+            "message": f"Found {len(working_models)} working models" if working_models else "No working models found",
+            "models": test_results,
+            "working_models": working_models
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error testing local AI: {str(e)}"
+        )
+
+
+@router.post("/initialize-local-model/{model_name}")
+async def initialize_local_model(
+    model_name: str,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Initialize a specific local AI model
+    """
+    try:
+        success = await local_ai_manager.initialize_model(model_name)
+
+        if success:
+            return {
+                "status": "success",
+                "message": f"Model {model_name} initialized successfully",
+                "model_name": model_name
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to initialize model {model_name}"
+            )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error initializing model: {str(e)}"
+        )
+
+
 @router.post("/retrain-check")
 async def check_retrain_needed(
     background_tasks: BackgroundTasks,
@@ -392,30 +359,32 @@ async def check_retrain_needed(
     db = Depends(get_database)
 ):
     """
-    Check if models need retraining and optionally start retraining
+    Check if models need retraining and start if needed
     """
     try:
         user_id = str(current_user.id)
-        should_retrain = learning_system.should_retrain(user_id)
 
-        result = {
-            "should_retrain": should_retrain,
-            "last_training": learning_system.last_training_time.get(user_id, "Never"),
-            "retrain_interval_hours": 24
-        }
+        # Check if retraining is needed
+        needs_retraining = learning_system.should_retrain(user_id)
 
-        if should_retrain:
+        if needs_retraining:
             # Start retraining in background
             background_tasks.add_task(
-                learning_system.train_models,
-                db,
+                learning_system.retrain_user_models,
                 user_id
             )
-            result["retraining_started"] = True
-        else:
-            result["retraining_started"] = False
 
-        return result
+            return {
+                "retraining_needed": True,
+                "message": "Retraining started in background",
+                "user_id": user_id
+            }
+        else:
+            return {
+                "retraining_needed": False,
+                "message": "Models are up to date",
+                "user_id": user_id
+            }
 
     except Exception as e:
         raise HTTPException(

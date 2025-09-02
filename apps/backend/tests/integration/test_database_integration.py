@@ -457,7 +457,7 @@ class TestDatabasePerformance:
         user_create = UserCreate(
             email="performance@example.com",
             name="Performance User",
-            password="password123"
+            password="password123"  # pragma: allowlist secret
         )
         user = await create_user(self.db, user_create)
 

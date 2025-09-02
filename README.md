@@ -8,6 +8,7 @@ A comprehensive synthetic trading investment platform that integrates with Deriv
 - **Authentication**: JWT-based authentication with MongoDB user management
 - **Deriv API Integration**: Real-time WebSocket connection to Deriv trading platform
 - **AI Analysis Engine**: Technical indicators (RSI, MACD, Bollinger Bands) and signal generation
+- **Local AI Support**: Complete local AI integration with Ollama for privacy and cost-free operation
 - **Trading Management**: Position tracking, parameter configuration, and risk management
 - **Real-time Monitoring**: WebSocket endpoints for live trading data
 - **Comprehensive API**: RESTful endpoints for all trading operations
@@ -16,6 +17,7 @@ A comprehensive synthetic trading investment platform that integrates with Deriv
 - **Modern UI**: Mantine-based component library with responsive design
 - **Authentication Flow**: Secure login/register with form validation
 - **Trading Dashboard**: Real-time position monitoring and performance analytics
+- **AI Configuration**: Easy setup for local AI models and OpenAI integration
 - **Parameter Configuration**: User-friendly controls for trading parameters
 - **Real-time Updates**: Live data updates via WebSocket connections
 
@@ -73,6 +75,7 @@ DerivWorkFLow/
 - **Docker Compose**: Containerized development environment
 - **MongoDB**: Database storage
 - **WebSocket**: Real-time data streaming
+- **Ollama**: Local AI model management
 
 ## 🚀 Getting Started
 
@@ -97,7 +100,7 @@ ENVIRONMENT=development
 MONGODB_URI=mongodb://mongodb:27017
 MONGODB_DB=deriv
 SECRET_KEY=your-secret-key-change-in-production
-BACKEND_CORS_ORIGINS=["http://localhost:5173"]
+BACKEND_CORS_ORIGINS=["http://localhost:3000"]
 ```
 
 ### 3. Development with Docker (Recommended)
@@ -110,7 +113,7 @@ docker compose up --build
 This will start:
 - MongoDB on port 27017
 - Backend API on port 8000
-- Frontend on port 5173
+- Frontend on port 3000
 
 ### 4. Local Development
 
@@ -199,11 +202,22 @@ Once the backend is running, visit:
 - **Max Daily Loss**: Maximum daily loss amount
 - **Position Size**: Base position size in USD
 
+### AI Configuration
+- **Local AI**: Use local models with Ollama (recommended for microtransactions)
+- **OpenAI**: Use OpenAI models (requires API key)
+- **Hybrid**: Combine both local and OpenAI models
+- **Model Selection**: Choose from Phi-3 Mini, Gemma 2B, Llama 3.1, Mistral 7B
+- **Temperature**: Control model creativity (0.1-0.3 recommended for trading)
+- **Confidence Threshold**: Minimum confidence for signal execution
+
 ### Deriv API Setup
 1. Create a Deriv account at https://deriv.com
 2. Generate an API token in your account settings
 3. Note your App ID
 4. Configure in the application settings
+
+### Local AI Setup
+For detailed instructions on setting up local AI models, see [LOCAL_AI_SETUP.md](LOCAL_AI_SETUP.md).
 
 ## 🧪 Testing
 

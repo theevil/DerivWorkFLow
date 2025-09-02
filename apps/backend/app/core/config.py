@@ -16,10 +16,10 @@ class Settings(BaseSettings):
 
     # CORS Configuration
     backend_cors_origins: list[str] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
     ]
 
     # Database Configuration
@@ -56,6 +56,14 @@ class Settings(BaseSettings):
     ai_model: str = os.getenv("AI_MODEL", "gpt-4o-mini")
     ai_temperature: float = float(os.getenv("AI_TEMPERATURE", "0.1"))
     ai_max_tokens: int = int(os.getenv("AI_MAX_TOKENS", "1000"))
+
+    # Local AI Configuration
+    local_ai_enabled: bool = os.getenv("LOCAL_AI_ENABLED", "True").lower() == "true"
+    ollama_host: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+    default_ai_model: str = os.getenv("DEFAULT_AI_MODEL", "phi-3-mini")
+    local_ai_fallback_enabled: bool = os.getenv("LOCAL_AI_FALLBACK_ENABLED", "True").lower() == "true"
+    local_ai_timeout: int = int(os.getenv("LOCAL_AI_TIMEOUT", "30"))  # seconds
+    local_ai_max_retries: int = int(os.getenv("LOCAL_AI_MAX_RETRIES", "3"))
 
     # Historical Learning Configuration
     learning_data_lookback_days: int = int(os.getenv("LEARNING_DATA_LOOKBACK_DAYS", "30"))

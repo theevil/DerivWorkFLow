@@ -21,6 +21,12 @@ class UserSettings(BaseModel):
     langchain_api_key: Optional[str] = None
     langsmith_project: str = Field(default="deriv-trading")
 
+    # Local AI Configuration
+    local_ai_enabled: bool = Field(default=True)
+    local_ai_model: str = Field(default="phi-3-mini")
+    local_ai_fallback_enabled: bool = Field(default=True)
+    ai_provider: str = Field(default="local")  # local, openai, hybrid
+
     # Risk Management
     auto_stop_loss_enabled: bool = Field(default=True)
     auto_take_profit_enabled: bool = Field(default=True)
@@ -59,6 +65,12 @@ class SettingsUpdate(BaseModel):
     langchain_api_key: Optional[str] = None
     langsmith_project: Optional[str] = None
 
+    # Local AI Configuration
+    local_ai_enabled: Optional[bool] = None
+    local_ai_model: Optional[str] = None
+    local_ai_fallback_enabled: Optional[bool] = None
+    ai_provider: Optional[str] = None
+
     # Risk Management
     auto_stop_loss_enabled: Optional[bool] = None
     auto_take_profit_enabled: Optional[bool] = None
@@ -76,3 +88,24 @@ class SettingsUpdate(BaseModel):
     learning_data_lookback_days: Optional[int] = Field(None, ge=1, le=365)
     min_training_samples: Optional[int] = Field(None, ge=10, le=1000)
     retrain_interval_hours: Optional[int] = Field(None, ge=1, le=168)
+
+
+class AIConfiguration(BaseModel):
+    """AI configuration model for frontend"""
+    available_providers: list[str] = Field(default=["local", "openai", "hybrid"])
+    current_provider: str = Field(default="local")
+    local_models: list[str] = Field(default=[
+        "phi-3-mini",
+        "gemma-2b",
+        "llama3.1-3b",
+        "llama3.1-8b",
+        "mistral-7b"
+    ])
+    openai_models: list[str] = Field(default=[
+        "gpt-4o-mini",
+        "gpt-4o",
+        "gpt-4-turbo",
+        "gpt-3.5-turbo"
+    ])
+    recommended_model: str = Field(default="phi-3-mini")
+    local_ai_status: str = Field(default="unknown")  # available, unavailable, testing

@@ -589,7 +589,7 @@ class HistoricalLearningSystem:
                 return {"message": "No trading history available"}
 
             # Analyze patterns
-            patterns = {
+            patterns: dict[str, Any] = {
                 "total_trades": len(positions),
                 "profitable_trades": len([p for p in positions if p.profit_loss and p.profit_loss > 0]),
                 "losing_trades": len([p for p in positions if p.profit_loss and p.profit_loss < 0]),
@@ -601,16 +601,17 @@ class HistoricalLearningSystem:
 
             # Win rate
             if patterns["total_trades"] > 0:
-                patterns["win_rate"] = patterns["profitable_trades"] / patterns["total_trades"]
+                win_rate = float(patterns["profitable_trades"]) / float(patterns["total_trades"])
+                patterns["win_rate"] = win_rate
             else:
-                patterns["win_rate"] = 0
+                patterns["win_rate"] = 0.0
 
             # Symbol analysis
             symbol_performance = {}
             for position in positions:
                 symbol = position.symbol
                 if symbol not in symbol_performance:
-                    symbol_performance[symbol] = {"trades": 0, "profit": 0}
+                    symbol_performance[symbol] = {"trades": 0, "profit": 0.0}
                 symbol_performance[symbol]["trades"] += 1
                 if position.profit_loss:
                     symbol_performance[symbol]["profit"] += float(position.profit_loss)
