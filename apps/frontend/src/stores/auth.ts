@@ -6,28 +6,54 @@ import { api } from '../lib/api';
 interface AuthState {
   user: User | null;
   token: string | null;
-  setAuth: (token: string, user: User) => void;
+  refreshToken: string | null;
+  setAuth: (token: string, refreshToken: string, user: User) => void;
   clearAuth: () => void;
   isAuthenticated: boolean;
+  initializeAuth: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
+      refreshToken: null,
       isAuthenticated: false,
-      setAuth: (token, user) => {
+      setAuth: (token, refreshToken, user) => {
         api.setToken(token);
-        set({ token, user, isAuthenticated: true });
+        set({ token, refreshToken, user, isAuthenticated: true });
       },
       clearAuth: () => {
         api.clearToken();
-        set({ token: null, user: null, isAuthenticated: false });
+        set({
+          token: null,
+          refreshToken: null,
+          user: null,
+          isAuthenticated: false,
+        });
+      },
+      initializeAuth: () => {
+        const { token, refreshToken } = get();
+        if (token) {
+          api.setToken(token);
+        }
+        if (refreshToken) {
+          api.setRefreshToken(refreshToken);
+        }
       },
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => state => {
+        // When store is rehydrated from localStorage, set the tokens in API client
+        if (state?.token) {
+          api.setToken(state.token);
+        }
+        if (state?.refreshToken) {
+          api.setRefreshToken(state.refreshToken);
+        }
+      },
     }
   )
 );

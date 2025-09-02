@@ -19,27 +19,28 @@ export function RetroCard({
   padding = 'md',
   className = '',
   onClick,
-  hoverable = false
+  hoverable = false,
 }: RetroCardProps) {
   const baseClasses = 'rounded-2xl transition-all duration-300';
-  
+
   const variantClasses = {
     default: 'card',
     elevated: 'card-elevated',
     glass: 'card-glass',
-    neumorph: 'neumorph-inset'
+    neumorph: 'neumorph-inset',
   };
 
   const paddingClasses = {
     sm: 'p-4',
     md: 'p-6',
     lg: 'p-8',
-    xl: 'p-10'
+    xl: 'p-10',
   };
 
-  const interactiveClasses = onClick || hoverable 
-    ? 'cursor-pointer hover:shadow-xl hover:-translate-y-2' 
-    : '';
+  const interactiveClasses =
+    onClick || hoverable
+      ? 'cursor-pointer hover:shadow-xl hover:-translate-y-2'
+      : '';
 
   return (
     <div

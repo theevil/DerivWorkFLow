@@ -11,13 +11,14 @@ This module contains all background workers and tasks for:
 from .celery_app import celery_app
 from .market_monitor import MarketMonitorWorker
 from .trading_executor import TradingExecutorWorker
-from .risk_monitor import RiskMonitorWorker
-from .signal_processor import SignalProcessorWorker
+
+# from .risk_monitor import RiskMonitorWorker
+# from .signal_processor import SignalProcessorWorker
 
 __all__ = [
     "celery_app",
     "MarketMonitorWorker",
-    "TradingExecutorWorker", 
-    "RiskMonitorWorker",
-    "SignalProcessorWorker"
+    "TradingExecutorWorker",
+    # "RiskMonitorWorker",
+    # "SignalProcessorWorker"
 ]

@@ -30,47 +30,43 @@ export function MetricCard({
   iconVariant = 'turquoise',
   badge,
   onClick,
-  className = ''
+  className = '',
 }: MetricCardProps) {
   return (
-    <RetroCard 
-      variant="neumorph" 
-      padding="md" 
+    <RetroCard
+      variant='neumorph'
+      padding='md'
       onClick={onClick}
       hoverable={!!onClick}
       className={`metric-card ${className}`}
     >
-      <Group justify="space-between" mb="xs">
-        <RetroIcon variant={iconVariant} size="md">
+      <Group justify='space-between' mb='xs'>
+        <RetroIcon variant={iconVariant} size='md'>
           {icon}
         </RetroIcon>
         {badge && (
-          <RetroBadge variant={badge.variant} size="sm">
+          <RetroBadge variant={badge.variant} size='sm'>
             {badge.text}
           </RetroBadge>
         )}
         {!badge && typeof value !== 'object' && (
-          <Text size="xl" fw={900} className="text-title">
+          <Text size='xl' fw={900} className='text-title'>
             {value}
           </Text>
         )}
       </Group>
-      
-      <Text fw={700} size="sm" mb="xs" className="text-title">
+
+      <Text fw={700} size='sm' mb='xs' className='text-title'>
         {title}
       </Text>
-      
+
       {subtitle && (
-        <Text size="xs" className="text-caption">
+        <Text size='xs' className='text-caption'>
           {subtitle}
         </Text>
       )}
-      
-      {typeof value === 'object' && (
-        <div className="mt-2">
-          {value}
-        </div>
-      )}
+
+      {typeof value === 'object' && <div className='mt-2'>{value}</div>}
     </RetroCard>
   );
 }

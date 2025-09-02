@@ -1,11 +1,11 @@
 import random
 import time
-from typing import Dict, List
+
 from fastapi import APIRouter, Depends
 from loguru import logger
 
-from app.routers.auth import get_current_user
 from app.models.user import User
+from app.routers.auth import get_current_user
 
 router = APIRouter()
 
@@ -23,25 +23,25 @@ MARKET_DATA = {
 }
 
 
-def generate_tick_data(symbol: str) -> Dict:
+def generate_tick_data(symbol: str) -> dict:
     """Generate simulated tick data for a symbol"""
     if symbol not in MARKET_DATA:
         symbol = 'R_10'  # Default fallback
-    
+
     base_data = MARKET_DATA[symbol]
     base_price = base_data['base_price']
     volatility = base_data['volatility']
-    
+
     # Generate random price movement
     change = random.uniform(-volatility, volatility)
     new_price = base_price + change
-    
+
     # Ensure price doesn't go negative
     new_price = max(new_price, base_price * 0.1)
-    
+
     # Update base price for next tick (random walk)
     MARKET_DATA[symbol]['base_price'] = new_price
-    
+
     return {
         'symbol': symbol,
         'tick': round(new_price, 5),
@@ -67,10 +67,10 @@ async def get_current_tick(symbol: str, current_user: User = Depends(get_current
     """Get current tick data for a symbol"""
     if symbol not in MARKET_DATA:
         return {"error": "Symbol not found"}
-    
+
     tick_data = generate_tick_data(symbol)
     logger.info(f"Generated tick for {symbol}: {tick_data['tick']}")
-    
+
     return tick_data
 
 
@@ -80,7 +80,7 @@ async def get_all_ticks(current_user: User = Depends(get_current_user)):
     ticks = {}
     for symbol in MARKET_DATA.keys():
         ticks[symbol] = generate_tick_data(symbol)
-    
+
     return {
         "ticks": ticks,
         "timestamp": int(time.time())
@@ -89,34 +89,34 @@ async def get_all_ticks(current_user: User = Depends(get_current_user)):
 
 @router.get("/history/{symbol}")
 async def get_price_history(
-    symbol: str, 
+    symbol: str,
     limit: int = 100,
     current_user: User = Depends(get_current_user)
 ):
     """Get historical price data for a symbol (simulated)"""
     if symbol not in MARKET_DATA:
         return {"error": "Symbol not found"}
-    
+
     # Generate simulated historical data
     base_data = MARKET_DATA[symbol]
     base_price = base_data['base_price']
     volatility = base_data['volatility']
-    
+
     history = []
     current_time = int(time.time())
-    
+
     for i in range(limit):
         timestamp = current_time - (limit - i) * 60  # 1 minute intervals
         change = random.uniform(-volatility, volatility)
         price = base_price + change + random.uniform(-volatility * 0.5, volatility * 0.5)
         price = max(price, base_price * 0.5)  # Ensure reasonable bounds
-        
+
         history.append({
             "timestamp": timestamp,
             "price": round(price, 5),
             "volume": random.randint(10, 1000)
         })
-    
+
     return {
         "symbol": symbol,
         "history": history,
@@ -135,4 +135,3 @@ async def get_market_status(current_user: User = Depends(get_current_user)):
         "active_symbols": len(MARKET_DATA),
         "message": "Markets are open for trading"
     }
-

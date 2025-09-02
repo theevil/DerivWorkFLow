@@ -65,7 +65,7 @@ export class WebSocketClient {
       this.isConnecting = true;
 
       const wsUrl = `${config.wsUrl}/ws/${this.token}`.replace('http', 'ws');
-      
+
       try {
         this.ws = new WebSocket(wsUrl);
 
@@ -89,13 +89,13 @@ export class WebSocketClient {
         this.ws.onclose = (event) => {
           this.isConnecting = false;
           console.log('WebSocket disconnected:', event.code, event.reason);
-          this.emit('disconnection', { 
-            type: 'disconnection', 
+          this.emit('disconnection', {
+            type: 'disconnection',
             status: 'disconnected',
             code: event.code,
-            reason: event.reason 
+            reason: event.reason
           });
-          
+
           // Auto-reconnect unless it was a manual close
           if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
             this.scheduleReconnect();
@@ -105,9 +105,9 @@ export class WebSocketClient {
         this.ws.onerror = (error) => {
           this.isConnecting = false;
           console.error('WebSocket error:', error);
-          this.emit('error', { 
-            type: 'error', 
-            message: 'WebSocket connection error' 
+          this.emit('error', {
+            type: 'error',
+            message: 'WebSocket connection error'
           });
           reject(error);
         };
@@ -140,7 +140,7 @@ export class WebSocketClient {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
       console.log(`Scheduling reconnect attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
-      
+
       setTimeout(() => {
         if (this.reconnectAttempts <= this.maxReconnectAttempts) {
           this.connect().catch(console.error);
@@ -275,4 +275,3 @@ export const disconnectWebSocket = () => {
     webSocketClient = null;
   }
 };
-

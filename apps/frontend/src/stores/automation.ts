@@ -22,35 +22,35 @@ interface AutomationActions {
   // Configuration actions
   loadConfig: () => Promise<void>;
   updateConfig: (config: AutoTradingConfig) => Promise<void>;
-  
+
   // System status actions
   loadSystemStatus: () => Promise<void>;
   refreshSystemStatus: () => Promise<void>;
-  
+
   // Task management actions
   loadActiveTasks: () => Promise<void>;
   triggerMarketScan: () => Promise<string>;
   triggerPositionMonitor: () => Promise<string>;
   triggerModelRetrain: () => Promise<string>;
   getTaskStatus: (taskId: string) => Promise<TaskStatus>;
-  
+
   // Alert actions
   loadAlerts: () => Promise<void>;
   acknowledgeAlert: (alertId: string) => Promise<void>;
-  
+
   // Performance actions
   loadPerformance: (days?: number) => Promise<void>;
-  
+
   // Emergency actions
   triggerEmergencyStop: (request: EmergencyStopRequest) => Promise<void>;
-  
+
   // Health check
   runHealthCheck: () => Promise<void>;
-  
+
   // Real-time updates
   setConnected: (connected: boolean) => void;
   updateLastUpdate: () => void;
-  
+
   // Reset actions
   reset: () => void;
 }
@@ -59,31 +59,31 @@ const initialState: AutomationState = {
   // Configuration
   config: null,
   isConfigLoading: false,
-  
+
   // System status
   systemStatus: null,
   isStatusLoading: false,
   lastStatusUpdate: null,
-  
+
   // Tasks
   activeTasks: {},
   taskHistory: [],
   isTasksLoading: false,
-  
+
   // Alerts
   alerts: [],
   unacknowledgedCount: 0,
   isAlertsLoading: false,
-  
+
   // Performance
   performance: null,
   performanceHistory: [],
   isPerformanceLoading: false,
-  
+
   // Queue stats
   queueStats: {},
   isQueueStatsLoading: false,
-  
+
   // Real-time updates
   isConnected: false,
   lastUpdate: null,
@@ -118,10 +118,10 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
         set({ isConfigLoading: true });
         try {
           await api.configureAutoTrading(config);
-          
+
           // Reload config to get updated values
           await get().loadConfig();
-          
+
           // Refresh system status to reflect changes
           await get().refreshSystemStatus();
         } catch (error) {
@@ -180,18 +180,18 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
       triggerMarketScan: async () => {
         try {
           const response = await api.triggerMarketScan();
-          
+
           // Add to task history
           const newTask: TaskStatus = {
             task_id: response.task_id,
             status: 'STARTED',
             timestamp: new Date().toISOString(),
           };
-          
+
           set(state => ({
             taskHistory: [newTask, ...state.taskHistory.slice(0, 49)], // Keep last 50
           }));
-          
+
           return response.task_id;
         } catch (error) {
           console.error('Failed to trigger market scan:', error);
@@ -202,17 +202,17 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
       triggerPositionMonitor: async () => {
         try {
           const response = await api.triggerPositionMonitor();
-          
+
           const newTask: TaskStatus = {
             task_id: response.task_id,
             status: 'STARTED',
             timestamp: new Date().toISOString(),
           };
-          
+
           set(state => ({
             taskHistory: [newTask, ...state.taskHistory.slice(0, 49)],
           }));
-          
+
           return response.task_id;
         } catch (error) {
           console.error('Failed to trigger position monitor:', error);
@@ -223,17 +223,17 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
       triggerModelRetrain: async () => {
         try {
           const response = await api.triggerModelRetrain();
-          
+
           const newTask: TaskStatus = {
             task_id: response.task_id,
             status: 'STARTED',
             timestamp: new Date().toISOString(),
           };
-          
+
           set(state => ({
             taskHistory: [newTask, ...state.taskHistory.slice(0, 49)],
           }));
-          
+
           return response.task_id;
         } catch (error) {
           console.error('Failed to trigger model retrain:', error);
@@ -244,14 +244,14 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
       getTaskStatus: async (taskId: string) => {
         try {
           const taskStatus = await api.getTaskStatus(taskId);
-          
+
           // Update task in history
           set(state => ({
             taskHistory: state.taskHistory.map(task =>
               task.task_id === taskId ? taskStatus : task
             ),
           }));
-          
+
           return taskStatus;
         } catch (error) {
           console.error('Failed to get task status:', error);
@@ -279,7 +279,7 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
       acknowledgeAlert: async (alertId: string) => {
         try {
           await api.acknowledgeAlert(alertId);
-          
+
           // Update local state
           set(state => ({
             alerts: state.alerts.map(alert =>
@@ -298,25 +298,32 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
         set({ isPerformanceLoading: true });
         try {
           const performance = await api.getAutomationPerformance(days);
-          
+
           // Generate chart data from performance stats
           const chartData: PerformanceChartData[] = [];
           const endDate = new Date();
-          
+
           for (let i = days - 1; i >= 0; i--) {
             const date = new Date(endDate);
             date.setDate(date.getDate() - i);
-            
+
             // In a real implementation, this would come from detailed daily data
             // For now, we'll simulate it based on the overall performance
             chartData.push({
               date: date.toISOString().split('T')[0],
-              profit: performance.trading_stats.total_profit / days + (Math.random() - 0.5) * 20,
-              trades: Math.round(performance.trading_stats.total_trades / days + Math.random() * 3),
-              win_rate: performance.trading_stats.win_rate + (Math.random() - 0.5) * 0.2,
+              profit:
+                performance.trading_stats.total_profit / days +
+                (Math.random() - 0.5) * 20,
+              trades: Math.round(
+                performance.trading_stats.total_trades / days +
+                  Math.random() * 3
+              ),
+              win_rate:
+                performance.trading_stats.win_rate +
+                (Math.random() - 0.5) * 0.2,
             });
           }
-          
+
           set({
             performance,
             performanceHistory: chartData,
@@ -333,21 +340,21 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
       triggerEmergencyStop: async (request: EmergencyStopRequest) => {
         try {
           const response = await api.triggerEmergencyStop(request);
-          
+
           // Add to task history
           const newTask: TaskStatus = {
             task_id: response.task_id,
             status: 'STARTED',
             timestamp: new Date().toISOString(),
           };
-          
+
           set(state => ({
             taskHistory: [newTask, ...state.taskHistory.slice(0, 49)],
           }));
-          
+
           // Refresh system status
           await get().refreshSystemStatus();
-          
+
           // Reload alerts to see the emergency alert
           await get().loadAlerts();
         } catch (error) {
@@ -360,13 +367,15 @@ export const useAutomationStore = create<AutomationState & AutomationActions>()(
       runHealthCheck: async () => {
         try {
           const response = await api.runHealthCheck();
-          
+
           // Update system status based on health check
           set(state => ({
-            systemStatus: state.systemStatus ? {
-              ...state.systemStatus,
-              redis_connected: response.system_status === 'healthy',
-            } : null,
+            systemStatus: state.systemStatus
+              ? {
+                  ...state.systemStatus,
+                  redis_connected: response.system_status === 'healthy',
+                }
+              : null,
             lastStatusUpdate: new Date().toISOString(),
           }));
         } catch (error) {
@@ -400,29 +409,29 @@ export const automationActions = {
   // Auto-refresh system status every 30 seconds
   startAutoRefresh: () => {
     const store = useAutomationStore.getState();
-    
+
     const interval = setInterval(() => {
       store.refreshSystemStatus();
     }, 30000);
-    
+
     return () => clearInterval(interval);
   },
-  
+
   // Check for alerts periodically
   startAlertPolling: () => {
     const store = useAutomationStore.getState();
-    
+
     const interval = setInterval(() => {
       store.loadAlerts();
     }, 60000); // Check every minute
-    
+
     return () => clearInterval(interval);
   },
-  
+
   // Initialize automation store
   initialize: async () => {
     const store = useAutomationStore.getState();
-    
+
     try {
       // Load initial data in parallel
       await Promise.all([
@@ -431,7 +440,7 @@ export const automationActions = {
         store.loadAlerts(),
         store.loadPerformance(),
       ]);
-      
+
       // Start auto-refresh
       automationActions.startAutoRefresh();
       automationActions.startAlertPolling();
@@ -445,36 +454,36 @@ export const automationActions = {
 export const automationSelectors = {
   isSystemHealthy: (state: AutomationState) => {
     if (!state.systemStatus) return false;
-    
+
     return (
       state.systemStatus.redis_connected &&
       state.systemStatus.market_monitor.active &&
       state.systemStatus.trading_executor.redis_connected
     );
   },
-  
+
   isAutoTradingEnabled: (state: AutomationState) => {
     return state.config?.auto_trading_enabled ?? false;
   },
-  
+
   hasUnacknowledgedAlerts: (state: AutomationState) => {
     return state.unacknowledgedCount > 0;
   },
-  
+
   getActiveTaskCount: (state: AutomationState) => {
     return Object.values(state.activeTasks).reduce(
       (total, tasks) => total + tasks.length,
       0
     );
   },
-  
+
   getRecentTasksCount: (state: AutomationState) => {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     return state.taskHistory.filter(
       task => new Date(task.timestamp) > oneHourAgo
     ).length;
   },
-  
+
   isLoading: (state: AutomationState) => {
     return (
       state.isConfigLoading ||

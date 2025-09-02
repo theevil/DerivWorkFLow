@@ -11,15 +11,15 @@
   font-weight: 400;
 
   /* Paleta Retro Estática */
-  --retro-turquoise: #68C7C1;
-  --retro-gold: #FACAB8;
-  --retro-coral: #F5758B;
-  --retro-red: #DD3341;
+  --retro-turquoise: #68c7c1;
+  --retro-gold: #facab8;
+  --retro-coral: #f5758b;
+  --retro-red: #dd3341;
   --retro-brown: #794139;
-  --retro-cream: #F7EDE2;
-  --retro-dark: #2a1810;      /* Fondo oscuro retro */
-  --retro-dark-alt: #3d2818;  /* Variante más clara del oscuro */
-  
+  --retro-cream: #f7ede2;
+  --retro-dark: #2a1810; /* Fondo oscuro retro */
+  --retro-dark-alt: #3d2818; /* Variante más clara del oscuro */
+
   /* Colores de superficie */
   --surface-primary: var(--retro-dark);
   --surface-secondary: var(--retro-dark-alt);
@@ -50,48 +50,48 @@
     color: var(--retro-dark);
     border: 2px solid var(--retro-turquoise);
   }
-  
+
   .btn-primary:hover {
     background: var(--retro-cream);
     color: var(--retro-dark);
     border-color: var(--retro-cream);
     transform: translateY(-2px);
   }
-  
+
   .btn-secondary {
     @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2;
     background: var(--retro-gold);
     color: var(--retro-dark);
     border: 2px solid var(--retro-gold);
   }
-  
+
   .btn-secondary:hover {
     background: var(--retro-cream);
     border-color: var(--retro-cream);
     transform: translateY(-2px);
   }
-  
+
   .btn-success {
     @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2;
     background: var(--retro-turquoise);
     color: var(--retro-dark);
     border: 2px solid var(--retro-turquoise);
   }
-  
+
   .btn-danger {
     @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2;
     background: var(--retro-red);
     color: var(--retro-cream);
     border: 2px solid var(--retro-red);
   }
-  
+
   .btn-warning {
     @apply font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2;
     background: var(--retro-coral);
     color: var(--retro-cream);
     border: 2px solid var(--retro-coral);
   }
-  
+
   /* Tarjetas Retro Estáticas */
   .card {
     @apply rounded-2xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
@@ -99,28 +99,28 @@
     border: 2px solid var(--retro-brown);
     color: var(--text-primary);
   }
-  
+
   .card-elevated {
     @apply rounded-2xl shadow-2xl p-8 transition-all duration-300 hover:shadow-2xl hover:-translate-y-2;
     background: var(--retro-cream);
     color: var(--retro-dark);
     border: 2px solid var(--retro-gold);
   }
-  
+
   .card-glass {
     @apply rounded-2xl p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
     background: var(--surface-secondary);
     border: 2px solid var(--retro-turquoise);
     color: var(--text-primary);
   }
-  
+
   .card-retro {
     @apply rounded-2xl p-8 transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
     background: var(--retro-red);
     color: var(--retro-cream);
     border: 2px solid var(--retro-coral);
   }
-  
+
   /* Inputs Retro */
   .input-primary {
     @apply w-full px-4 py-3 rounded-lg shadow-sm focus:outline-none transition-all duration-300;
@@ -128,76 +128,76 @@
     color: var(--retro-dark);
     border: 2px solid var(--retro-brown);
   }
-  
+
   .input-primary:focus {
     border-color: var(--retro-turquoise);
     box-shadow: 0 0 0 3px rgba(104, 199, 193, 0.3);
   }
-  
+
   .input-floating {
     @apply relative;
   }
-  
+
   .input-floating input {
     @apply w-full px-4 pt-6 pb-2 border-2 border-retro-cream-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-retro-turquoise-400 focus:border-retro-turquoise-400 transition-all duration-300 bg-white/80 backdrop-blur-sm;
   }
-  
+
   /* Aplicar peer manualmente para evitar conflictos con @apply */
   .input-floating input.peer {
     /* peer class applied in components */
   }
-  
+
   .input-floating label {
     @apply absolute left-4 top-4 text-retro-brown-500 transition-all duration-300 pointer-events-none;
   }
-  
+
   .input-floating input:focus + label,
   .input-floating input:valid + label {
     @apply top-2 text-xs text-retro-turquoise-600;
   }
-  
+
   /* Estados de Trading */
   .text-profit {
     color: #000000 !important;
     font-weight: bold;
   }
-  
+
   .text-loss {
     color: #000000 !important;
     font-weight: bold;
   }
-  
+
   /* Badges Retro */
   .badge-success {
     @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-retro-turquoise-100 text-retro-turquoise-800 border border-retro-turquoise-200;
   }
-  
+
   .badge-danger {
     @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-retro-red-100 text-retro-red-800 border border-retro-red-200;
   }
-  
+
   .badge-warning {
     @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-retro-coral-100 text-retro-coral-800 border border-retro-coral-200;
   }
-  
+
   .badge-info {
     @apply inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold bg-retro-gold-100 text-retro-brown-800 border border-retro-gold-200;
   }
-  
+
   /* Efectos de Neumorfismo Suave */
   .neumorph {
     @apply rounded-3xl;
     background: var(--retro-cream);
-    box-shadow: 
+    box-shadow:
       12px 12px 24px rgba(121, 65, 57, 0.1),
       -12px -12px 24px rgba(255, 255, 255, 0.9);
   }
-  
+
   .neumorph-inset {
     @apply rounded-3xl;
     background: #ffffff;
     border: 3px solid #8b4513;
-    box-shadow: 
+    box-shadow:
       inset 2px 2px 4px rgba(0, 0, 0, 0.1),
       inset -2px -2px 4px rgba(255, 255, 255, 1);
   }
@@ -208,42 +208,48 @@
   .retro-text-primary {
     color: var(--text-primary);
   }
-  
+
   .retro-text-secondary {
     color: var(--text-secondary);
   }
-  
+
   .retro-text-accent {
     color: var(--text-accent);
   }
-  
+
   .retro-bg-primary {
     background: var(--surface-primary);
   }
-  
+
   .retro-bg-secondary {
     background: var(--surface-secondary);
   }
-  
+
   .retro-bg-secondary-solid {
     background: var(--surface-secondary-solid);
   }
-  
+
   .glass-effect {
     background: var(--surface-secondary);
     border: 2px solid var(--retro-brown);
   }
-  
+
   .elevation-1 {
-    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12), 0px 1px 2px rgba(0, 0, 0, 0.24);
+    box-shadow:
+      0px 1px 3px rgba(0, 0, 0, 0.12),
+      0px 1px 2px rgba(0, 0, 0, 0.24);
   }
-  
+
   .elevation-2 {
-    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.16), 0px 3px 6px rgba(0, 0, 0, 0.23);
+    box-shadow:
+      0px 3px 6px rgba(0, 0, 0, 0.16),
+      0px 3px 6px rgba(0, 0, 0, 0.23);
   }
-  
+
   .elevation-3 {
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.19), 0px 6px 6px rgba(0, 0, 0, 0.23);
+    box-shadow:
+      0px 10px 20px rgba(0, 0, 0, 0.19),
+      0px 6px 6px rgba(0, 0, 0, 0.23);
   }
 }
 
@@ -266,6 +272,61 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--retro-coral);
+}
+
+/* Fix for Mantine Notifications and Portal Elements */
+.mantine-Notifications-root {
+  position: fixed !important;
+  z-index: 1000 !important;
+  max-width: 400px !important;
+  overflow: visible !important;
+}
+
+.mantine-Notifications-root[data-position='bottom-left'],
+.mantine-Notifications-root[data-position='bottom-center'] {
+  bottom: 20px !important;
+  left: 20px !important;
+  right: auto !important;
+  top: auto !important;
+}
+
+.mantine-Notifications-root[data-position='top-right'] {
+  top: 20px !important;
+  right: 20px !important;
+  left: auto !important;
+  bottom: auto !important;
+}
+
+/* Hide problematic browser extension elements */
+protonpass-root,
+[data-protonpass-role='root'] {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  z-index: -1 !important;
+}
+
+/* Control portal elements */
+div[data-portal='true'] {
+  position: fixed !important;
+  z-index: 999 !important;
+  pointer-events: none !important;
+}
+
+div[data-portal='true']:empty {
+  display: none !important;
+}
+
+/* Prevent overflow issues */
+body {
+  overflow-x: hidden !important;
+}
+
+#root {
+  overflow-x: hidden !important;
+  position: relative !important;
 }
 
 /* Sidebar específico */
@@ -395,14 +456,14 @@
 }
 
 /* Regla más agresiva para forzar color negro */
-[class*="neumorph-inset"] * {
+[class*='neumorph-inset'] * {
   color: #000000 !important;
 }
 
 /* Forzar color negro en todos los elementos de trading */
 .trading-card-value,
 .trading-card-label,
-[class*="trading-card"] {
+[class*='trading-card'] {
   color: #000000 !important;
 }
 
@@ -414,9 +475,13 @@
 
 /* Header elegante */
 .dashboard-header {
-  background: linear-gradient(135deg, var(--surface-secondary) 0%, var(--retro-cream) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--surface-secondary) 0%,
+    var(--retro-cream) 100%
+  );
   border: 2px solid var(--retro-brown);
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
@@ -453,14 +518,13 @@
 .hero-section::before {
   content: '';
   @apply absolute inset-0 opacity-5;
-  background-image: 
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 10px,
-      rgba(104, 199, 193, 0.1) 10px,
-      rgba(104, 199, 193, 0.1) 20px
-    );
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(104, 199, 193, 0.1) 10px,
+    rgba(104, 199, 193, 0.1) 20px
+  );
 }
 
 /* Floating Elements Animation */
@@ -469,7 +533,8 @@
 }
 
 @keyframes floating {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
   50% {
@@ -512,7 +577,11 @@
 
 /* Automation Dashboard Specific Classes */
 .gradient-header {
-  background: linear-gradient(135deg, var(--retro-brown) 0%, var(--retro-dark-alt) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--retro-brown) 0%,
+    var(--retro-dark-alt) 100%
+  );
   color: var(--retro-cream);
   border: 2px solid var(--retro-gold);
 }
@@ -561,4 +630,3 @@
   box-shadow: 0 6px 20px rgba(121, 65, 57, 0.15);
   border-color: var(--retro-turquoise) !important;
 }
-

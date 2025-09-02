@@ -33,26 +33,30 @@ export function RetroButton({
   type = 'button',
   className = '',
   ariaLabel,
-  title
+  title,
 }: RetroButtonProps) {
-  const baseClasses = 'font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2';
-  
+  const baseClasses =
+    'font-semibold rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 flex items-center justify-center gap-2';
+
   const variantClasses = {
     primary: 'btn-primary',
-    secondary: 'btn-secondary', 
+    secondary: 'btn-secondary',
     success: 'btn-success',
     danger: 'btn-danger',
-    warning: 'btn-warning'
+    warning: 'btn-warning',
   };
 
   const sizeClasses = {
     sm: 'py-2 px-4 text-sm',
     md: 'py-3 px-6 text-base',
-    lg: 'py-4 px-8 text-lg'
+    lg: 'py-4 px-8 text-lg',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
-  const disabledClass = disabled || loading ? 'opacity-50 cursor-not-allowed' : 'hover:-translate-y-1';
+  const disabledClass =
+    disabled || loading
+      ? 'opacity-50 cursor-not-allowed'
+      : 'hover:-translate-y-1';
 
   return (
     <button
@@ -71,7 +75,7 @@ export function RetroButton({
       `}
     >
       {loading ? (
-        <div className="loading-spinner" />
+        <div className='loading-spinner' />
       ) : (
         <>
           {leftIcon && <span>{leftIcon}</span>}

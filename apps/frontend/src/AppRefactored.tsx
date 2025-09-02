@@ -13,8 +13,8 @@ import { AutomationRefactored } from './pages/AutomationRefactored';
 import { useAuthStore } from './stores/auth';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  return isAuthenticated ? children : <Navigate to='/login' />;
 }
 
 export function AppRefactored() {
@@ -23,10 +23,10 @@ export function AppRefactored() {
       <Notifications />
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path='/login' element={<LoginPage />} />
+          <Route path='/register' element={<RegisterPage />} />
           <Route
-            path="/dashboard"
+            path='/dashboard'
             element={
               <ProtectedRoute>
                 <DashboardPage />
@@ -34,7 +34,7 @@ export function AppRefactored() {
             }
           />
           <Route
-            path="/trading"
+            path='/trading'
             element={
               <ProtectedRoute>
                 <TradingPage />
@@ -42,14 +42,14 @@ export function AppRefactored() {
             }
           />
           <Route
-            path="/automation"
+            path='/automation'
             element={
               <ProtectedRoute>
                 <AutomationRefactored />
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path='/' element={<Navigate to='/dashboard' replace />} />
         </Routes>
       </BrowserRouter>
     </MantineProvider>

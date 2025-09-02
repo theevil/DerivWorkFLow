@@ -3,9 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 from app.core.config import settings
-from app.core.database import connect_to_mongo, close_mongo_connection
-from app.routers import health, auth, deriv, trading, websocket, market, automation_simple as automation
+from app.core.database import close_mongo_connection, connect_to_mongo
+from app.routers import auth
+from app.routers import automation_simple as automation
+from app.routers import deriv, health, market
 from app.routers import settings as settings_router
+from app.routers import trading, websocket
+
 # from app.routers import ai  # Temporarily commented out due to pandas issue
 
 app = FastAPI(title=settings.app_name)

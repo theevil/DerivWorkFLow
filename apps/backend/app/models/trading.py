@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Optional, List, Any
-from pydantic import BaseModel, Field
+from typing import Any, Optional
+
 from bson import ObjectId
+from pydantic import BaseModel, Field
 
 
 class TradingParametersBase(BaseModel):
@@ -117,7 +118,7 @@ class MarketAnalysisInDB(MarketAnalysisBase):
     id: Any = Field(default_factory=lambda: ObjectId(), alias="_id")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     current_price: float
-    price_history: List[float] = Field(default_factory=list)
+    price_history: list[float] = Field(default_factory=list)
 
     model_config = {
         "json_encoders": {ObjectId: str},
@@ -130,7 +131,7 @@ class MarketAnalysis(MarketAnalysisBase):
     id: str
     timestamp: datetime
     current_price: float
-    price_history: List[float]
+    price_history: list[float]
 
     model_config = {
         "json_encoders": {ObjectId: str}

@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuthStore } from '../stores/auth';
-import { 
-  getWebSocketClient, 
-  disconnectWebSocket, 
-  WebSocketClient, 
+import {
+  getWebSocketClient,
+  disconnectWebSocket,
+  WebSocketClient,
   WebSocketMessage,
   TickData,
-  PortfolioData 
+  PortfolioData,
 } from '../lib/websocket';
 
 export interface UseWebSocketReturn {
@@ -65,18 +65,24 @@ export const useWebSocket = () => {
       const portfolioData = message.data as PortfolioData;
       console.log('Portfolio update:', portfolioData);
       // Emit to global state
-      window.dispatchEvent(new CustomEvent('portfolio-update', { detail: portfolioData }));
+      window.dispatchEvent(
+        new CustomEvent('portfolio-update', { detail: portfolioData })
+      );
     }
   }, []);
 
   const handleBuyResponse = useCallback((message: WebSocketMessage) => {
     console.log('Buy response:', message.data);
-    window.dispatchEvent(new CustomEvent('buy-response', { detail: message.data }));
+    window.dispatchEvent(
+      new CustomEvent('buy-response', { detail: message.data })
+    );
   }, []);
 
   const handleSellResponse = useCallback((message: WebSocketMessage) => {
     console.log('Sell response:', message.data);
-    window.dispatchEvent(new CustomEvent('sell-response', { detail: message.data }));
+    window.dispatchEvent(
+      new CustomEvent('sell-response', { detail: message.data })
+    );
   }, []);
 
   // Initialize WebSocket connection
@@ -84,7 +90,7 @@ export const useWebSocket = () => {
     if (isAuthenticated && token && !clientRef.current) {
       setIsConnecting(true);
       setConnectionStatus('connecting');
-      
+
       const client = getWebSocketClient(token);
       clientRef.current = client;
 
@@ -98,8 +104,9 @@ export const useWebSocket = () => {
       client.on('sell_response', handleSellResponse);
 
       // Connect
-      client.connect()
-        .then((success) => {
+      client
+        .connect()
+        .then(success => {
           if (success) {
             console.log('WebSocket connection established');
           } else {
@@ -107,7 +114,7 @@ export const useWebSocket = () => {
             setConnectionStatus('failed');
           }
         })
-        .catch((error) => {
+        .catch(error => {
           console.error('Failed to connect WebSocket:', error);
           setIsConnecting(false);
           setConnectionStatus('failed');
@@ -126,7 +133,17 @@ export const useWebSocket = () => {
         clientRef.current.off('sell_response', handleSellResponse);
       }
     };
-  }, [isAuthenticated, token, handleConnection, handleDisconnection, handleError, handleTick, handlePortfolio, handleBuyResponse, handleSellResponse]);
+  }, [
+    isAuthenticated,
+    token,
+    handleConnection,
+    handleDisconnection,
+    handleError,
+    handleTick,
+    handlePortfolio,
+    handleBuyResponse,
+    handleSellResponse,
+  ]);
 
   // Disconnect when user logs out
   useEffect(() => {
@@ -142,29 +159,41 @@ export const useWebSocket = () => {
   }, [isAuthenticated]);
 
   // Trading methods
-  const subscribeToTicks = useCallback((symbol: string) => {
-    if (clientRef.current && isConnected) {
-      clientRef.current.subscribeToTicks(symbol);
-    }
-  }, [isConnected]);
+  const subscribeToTicks = useCallback(
+    (symbol: string) => {
+      if (clientRef.current && isConnected) {
+        clientRef.current.subscribeToTicks(symbol);
+      }
+    },
+    [isConnected]
+  );
 
-  const unsubscribeFromTicks = useCallback((symbol: string) => {
-    if (clientRef.current && isConnected) {
-      clientRef.current.unsubscribeFromTicks(symbol);
-    }
-  }, [isConnected]);
+  const unsubscribeFromTicks = useCallback(
+    (symbol: string) => {
+      if (clientRef.current && isConnected) {
+        clientRef.current.unsubscribeFromTicks(symbol);
+      }
+    },
+    [isConnected]
+  );
 
-  const buyContract = useCallback((contractData: any) => {
-    if (clientRef.current && isConnected) {
-      clientRef.current.buyContract(contractData);
-    }
-  }, [isConnected]);
+  const buyContract = useCallback(
+    (contractData: any) => {
+      if (clientRef.current && isConnected) {
+        clientRef.current.buyContract(contractData);
+      }
+    },
+    [isConnected]
+  );
 
-  const sellContract = useCallback((contractId: string, price?: number) => {
-    if (clientRef.current && isConnected) {
-      clientRef.current.sellContract(contractId, price);
-    }
-  }, [isConnected]);
+  const sellContract = useCallback(
+    (contractId: string, price?: number) => {
+      if (clientRef.current && isConnected) {
+        clientRef.current.sellContract(contractId, price);
+      }
+    },
+    [isConnected]
+  );
 
   const getPortfolio = useCallback(() => {
     if (clientRef.current && isConnected) {
@@ -186,17 +215,19 @@ export const useWebSocket = () => {
 };
 
 // Custom hook for listening to specific WebSocket events
-export const useWebSocketEvent = (eventType: string, handler: (data: any) => void) => {
+export const useWebSocketEvent = (
+  eventType: string,
+  handler: (data: any) => void
+) => {
   useEffect(() => {
     const handleEvent = (event: CustomEvent) => {
       handler(event.detail);
     };
 
     window.addEventListener(eventType, handleEvent as EventListener);
-    
+
     return () => {
       window.removeEventListener(eventType, handleEvent as EventListener);
     };
   }, [eventType, handler]);
 };
-

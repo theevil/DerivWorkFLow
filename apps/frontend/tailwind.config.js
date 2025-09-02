@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -86,7 +83,7 @@ export default {
             700: '#854d0e',
             800: '#713f12',
             900: '#633a16',
-          }
+          },
         },
         // Colores primarios actualizados
         primary: {
@@ -101,7 +98,7 @@ export default {
           800: '#2d544e',
           900: '#1a2d29',
         },
-        
+
         // Fondo oscuro
         dark: {
           50: '#f7f3f0',
@@ -180,4 +177,4 @@ export default {
     },
   },
   plugins: [],
-}
+};

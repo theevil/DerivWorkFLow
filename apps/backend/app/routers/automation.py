@@ -2,57 +2,36 @@
 Automation Router for managing background workers and automated trading
 """
 
-from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
-from motor.motor_asyncio import AsyncIOMotorDatabase
-from pydantic import BaseModel, Field
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    pass
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
+
+from app.models import (
+    AutoTradingConfig,
+    EmergencyStopRequest,
+    TaskStatusResponse,
+    WorkerStatusResponse
+)
 from app.core.database import get_database
-from app.routers.auth import get_current_user
 from app.models.user import User
-# Commented out imports that might be causing issues
-# from app.workers.market_monitor import market_monitor
-# from app.workers.trading_executor import trading_executor  
-# from app.workers.celery_app import celery_app
-# from app.workers.tasks import (
-#     market_scan_scheduler,
-#     position_monitor_scheduler,
-#     process_signal,
-#     emergency_stop,
-#     retrain_user_models,
-#     health_check
-# )
+from app.routers.auth import get_current_user
+from app.workers.celery_app import celery_app
+
+# Worker imports
+from app.workers.market_monitor import market_monitor
+from app.workers.tasks import (
+    emergency_stop,
+    health_check,
+    market_scan_scheduler,
+    position_monitor_scheduler,
+    retrain_user_models,
+)
+from app.workers.trading_executor import trading_executor
 
 router = APIRouter()
-
-# Pydantic models for API requests/responses
-
-class AutoTradingConfig(BaseModel):
-    enabled: bool = Field(description="Enable/disable auto trading")
-    max_concurrent_positions: int = Field(default=5, ge=1, le=10, description="Maximum concurrent positions")
-    market_scan_interval: int = Field(default=30, ge=10, le=300, description="Market scan interval in seconds")
-    position_monitor_interval: int = Field(default=10, ge=5, le=60, description="Position monitoring interval in seconds")
-    auto_stop_loss: bool = Field(default=True, description="Enable automatic stop loss")
-    auto_take_profit: bool = Field(default=True, description="Enable automatic take profit")
-
-
-class EmergencyStopRequest(BaseModel):
-    reason: str = Field(description="Reason for emergency stop")
-    close_positions: bool = Field(default=True, description="Whether to close all open positions")
-
-
-class TaskStatusResponse(BaseModel):
-    task_id: str
-    status: str
-    result: Optional[Any] = None
-    timestamp: str
-
-
-class WorkerStatusResponse(BaseModel):
-    market_monitor: Dict[str, Any]
-    trading_executor: Dict[str, Any]
-    celery_active_tasks: int
-    redis_connected: bool
 
 
 @router.get("/status", response_model=WorkerStatusResponse)
@@ -64,24 +43,24 @@ async def get_automation_status(
         # Get status from workers
         market_status = market_monitor.get_market_status()
         executor_status = trading_executor.get_execution_status()
-        
+
         # Get Celery status
         celery_inspect = celery_app.control.inspect()
         active_tasks = celery_inspect.active()
-        
+
         # Count active tasks
         active_task_count = 0
         if active_tasks:
             for worker, tasks in active_tasks.items():
                 active_task_count += len(tasks)
-        
+
         return WorkerStatusResponse(
             market_monitor=market_status,
             trading_executor=executor_status,
             celery_active_tasks=active_task_count,
             redis_connected=market_status.get("redis_connected", False)
         )
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -103,18 +82,18 @@ async def configure_auto_trading(
             "auto_trading_config": config.dict(),
             "auto_trading_updated_at": datetime.utcnow()
         }
-        
+
         await db.users.update_one(
             {"_id": current_user.id},
             {"$set": user_config}
         )
-        
+
         return {
             "message": "Auto trading configuration updated",
             "config": config.dict(),
             "user_id": str(current_user.id)
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -130,21 +109,21 @@ async def get_auto_trading_config(
     """Get current auto trading configuration for the user"""
     try:
         user_doc = await db.users.find_one({"_id": current_user.id})
-        
+
         if not user_doc:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
-        
+
         auto_config = user_doc.get("auto_trading_config", {})
-        
+
         return {
             "enabled": user_doc.get("auto_trading_enabled", False),
             "config": auto_config,
             "last_updated": user_doc.get("auto_trading_updated_at")
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -163,7 +142,7 @@ async def trigger_emergency_stop(
     try:
         # Trigger emergency stop task
         task = emergency_stop.delay(str(current_user.id), request.reason)
-        
+
         return {
             "message": "Emergency stop triggered",
             "task_id": task.id,
@@ -171,7 +150,7 @@ async def trigger_emergency_stop(
             "reason": request.reason,
             "close_positions": request.close_positions
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -187,13 +166,13 @@ async def trigger_market_scan(
     try:
         # Trigger market scan task
         task = market_scan_scheduler.delay()
-        
+
         return {
             "message": "Market scan triggered",
             "task_id": task.id,
             "status": "scheduled"
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -209,13 +188,13 @@ async def trigger_position_monitor(
     try:
         # Trigger position monitoring task
         task = position_monitor_scheduler.delay()
-        
+
         return {
             "message": "Position monitoring triggered",
             "task_id": task.id,
             "status": "scheduled"
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -232,14 +211,14 @@ async def trigger_model_retrain(
     try:
         # Trigger model retraining task
         task = retrain_user_models.delay(str(current_user.id))
-        
+
         return {
             "message": "Model retraining started",
             "task_id": task.id,
             "user_id": str(current_user.id),
             "status": "scheduled"
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -256,14 +235,14 @@ async def get_task_status(
     try:
         # Get task result
         result = celery_app.AsyncResult(task_id)
-        
+
         return TaskStatusResponse(
             task_id=task_id,
             status=result.status,
             result=result.result,
             timestamp=datetime.utcnow().isoformat()
         )
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -281,7 +260,7 @@ async def get_active_tasks(
         celery_inspect = celery_app.control.inspect()
         active_tasks = celery_inspect.active()
         scheduled_tasks = celery_inspect.scheduled()
-        
+
         # Process active tasks
         processed_active = {}
         if active_tasks:
@@ -297,7 +276,7 @@ async def get_active_tasks(
                     }
                     for task in tasks
                 ]
-        
+
         # Process scheduled tasks
         processed_scheduled = {}
         if scheduled_tasks:
@@ -313,13 +292,13 @@ async def get_active_tasks(
                     }
                     for task in tasks
                 ]
-        
+
         return {
             "active_tasks": processed_active,
             "scheduled_tasks": processed_scheduled,
             "timestamp": datetime.utcnow().isoformat()
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -335,21 +314,22 @@ async def get_queue_stats(
     try:
         # Get queue statistics using Redis
         import redis
+
         from app.core.config import settings
-        
+
         redis_client = redis.from_url(settings.redis_url)
-        
+
         # Get queue lengths
         queues = [
             "market_scan",
-            "position_monitor", 
+            "position_monitor",
             "trading",
             "risk_monitor",
             "signals",
             "training",
             "analysis"
         ]
-        
+
         queue_stats = {}
         for queue in queues:
             queue_key = f"celery.{queue}"
@@ -358,17 +338,17 @@ async def get_queue_stats(
                 "length": length,
                 "queue_key": queue_key
             }
-        
+
         # Get worker statistics
         celery_inspect = celery_app.control.inspect()
         worker_stats = celery_inspect.stats()
-        
+
         return {
             "queue_lengths": queue_stats,
             "worker_stats": worker_stats,
             "timestamp": datetime.utcnow().isoformat()
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -384,16 +364,16 @@ async def run_health_check(
     try:
         # Trigger health check task
         task = health_check.delay()
-        
+
         # Wait for quick response
         result = task.get(timeout=10)
-        
+
         return {
             "health_check": result,
             "task_id": task.id,
             "system_status": "healthy" if result.get("status") == "healthy" else "unhealthy"
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -413,7 +393,7 @@ async def get_user_alerts(
             "user_id": str(current_user.id),
             "timestamp": {"$gte": datetime.utcnow() - timedelta(days=7)}
         }).sort("timestamp", -1).limit(50)
-        
+
         alerts = []
         async for alert in alerts_cursor:
             alerts.append({
@@ -424,13 +404,13 @@ async def get_user_alerts(
                 "acknowledged": alert.get("acknowledged", False),
                 "positions_closed": alert.get("positions_closed", [])
             })
-        
+
         return {
             "alerts": alerts,
             "total_count": len(alerts),
             "unacknowledged_count": len([a for a in alerts if not a["acknowledged"]])
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -447,7 +427,7 @@ async def acknowledge_alert(
     """Acknowledge an alert"""
     try:
         from bson import ObjectId
-        
+
         # Update alert as acknowledged
         result = await db.alerts.update_one(
             {
@@ -461,18 +441,18 @@ async def acknowledge_alert(
                 }
             }
         )
-        
+
         if result.matched_count == 0:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Alert not found"
             )
-        
+
         return {
             "message": "Alert acknowledged",
             "alert_id": alert_id
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -491,10 +471,10 @@ async def get_automation_performance(
     """Get automation performance summary"""
     try:
         from datetime import datetime, timedelta
-        
+
         # Get performance data for the specified period
         start_date = datetime.utcnow() - timedelta(days=days)
-        
+
         # Get trading statistics
         pipeline = [
             {
@@ -517,9 +497,9 @@ async def get_automation_performance(
                 }
             }
         ]
-        
+
         result = await db.trade_positions.aggregate(pipeline).to_list(1)
-        
+
         if result:
             stats = result[0]
             win_rate = stats["profitable_trades"] / stats["total_trades"] if stats["total_trades"] > 0 else 0
@@ -533,7 +513,7 @@ async def get_automation_performance(
                 "min_profit": 0
             }
             win_rate = 0
-        
+
         return {
             "period_days": days,
             "start_date": start_date.isoformat(),
@@ -544,7 +524,7 @@ async def get_automation_performance(
             },
             "user_id": str(current_user.id)
         }
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

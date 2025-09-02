@@ -7,7 +7,13 @@
     "dev": "npm -w apps/frontend run dev",
     "build": "npm -w apps/frontend run build",
     "install:shared": "npm -w packages/shared i -D typescript rimraf",
-    "install:frontend": "npm -w apps/frontend install"
+    "install:frontend": "npm -w apps/frontend install",
+    "pre-commit:install": "cd apps/backend && pipenv run pre-commit install",
+    "pre-commit:run": "cd apps/backend && pipenv run pre-commit run --all-files",
+    "pre-commit:run-changed": "cd apps/backend && pipenv run pre-commit run",
+    "format:all": "npm -w apps/frontend run format && cd apps/backend && pipenv run format",
+    "lint:all": "npm -w apps/frontend run lint && cd apps/backend && pipenv run lint",
+    "type-check:all": "npm -w apps/frontend run type-check && cd apps/backend && pipenv run type-check"
   },
   "keywords": [],
   "author": "",

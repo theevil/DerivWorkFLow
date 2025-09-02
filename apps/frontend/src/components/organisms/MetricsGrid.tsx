@@ -35,14 +35,14 @@ export function MetricsGrid({ metrics, className = '' }: MetricsGridProps) {
   return (
     <div className={`metrics-grid space-y-6 ${className}`}>
       {metricGroups.map((group, groupIndex) => (
-        <Grid key={groupIndex} gutter="lg">
-          {group.map((metric) => (
-            <Grid.Col 
-              key={metric.id} 
-              span={{ 
-                base: 12, 
-                sm: group.length >= 2 ? 6 : 12, 
-                md: group.length >= 3 ? 4 : group.length >= 2 ? 6 : 12 
+        <Grid key={groupIndex} gutter='lg'>
+          {group.map(metric => (
+            <Grid.Col
+              key={metric.id}
+              span={{
+                base: 12,
+                sm: group.length >= 2 ? 6 : 12,
+                md: group.length >= 3 ? 4 : group.length >= 2 ? 6 : 12,
               }}
             >
               <MetricCard

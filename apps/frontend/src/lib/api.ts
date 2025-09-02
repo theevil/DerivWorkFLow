@@ -26,24 +26,77 @@ const API_URL = config.apiUrl;
 
 class ApiClient {
   private token: string | null = null;
+  private refreshToken: string | null = null;
+  private tokenRefreshPromise: Promise<string> | null = null;
 
   setToken(token: string) {
     this.token = token;
   }
 
-  clearToken() {
-    this.token = null;
+  setRefreshToken(refreshToken: string) {
+    this.refreshToken = refreshToken;
   }
 
+  clearToken() {
+    console.log('Clearing API token');
+    this.token = null;
+    this.refreshToken = null;
+  }
+
+  getToken(): string | null {
+    return this.token;
+  }
+
+  isAuthenticated(): boolean {
+    return !!this.token;
+  }
+
+  // Debug method to check authentication status
+  debugAuth(): void {
+    console.log('API Client Auth Status:', {
+      hasToken: !!this.token,
+      hasRefreshToken: !!this.refreshToken,
+      tokenPreview: this.token ? `${this.token.substring(0, 20)}...` : 'null',
+      isAuthenticated: this.isAuthenticated()
+    });
+  }
+
+  // Refresh token method
+  async refreshAccessToken(): Promise<string> {
+    if (!this.refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    if (this.tokenRefreshPromise) {
+      return this.tokenRefreshPromise;
+    }
+
+    this.tokenRefreshPromise = this.fetch<{ access_token: string; refresh_token: string }>('/auth/refresh', {
+      method: 'POST',
+      body: JSON.stringify({ refresh_token: this.refreshToken }),
+    }, false).then(response => {
+      this.token = response.access_token;
+      this.refreshToken = response.refresh_token;
+      return response.access_token;
+    }).finally(() => {
+      this.tokenRefreshPromise = null;
+    });
+
+    return this.tokenRefreshPromise;
+  }
+
+  // Middleware to ensure token is available for authenticated requests
   private async fetch<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    requireAuth: boolean = true
   ): Promise<T> {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
     };
 
-    if (this.token) {
+    // Add Bearer token for authenticated requests
+    if (requireAuth && this.token) {
       headers.Authorization = `Bearer ${this.token}`;
     }
 
@@ -65,20 +118,63 @@ class ApiClient {
 
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
+
+        // Handle specific HTTP status codes
+        if (response.status === 401 && requireAuth && this.refreshToken) {
+          // Try to refresh the token
+          try {
+            console.log('Token expired, attempting refresh...');
+            const newToken = await this.refreshAccessToken();
+
+            // Retry the original request with the new token
+            const retryResponse = await fetch(`${API_URL}${endpoint}`, {
+              ...options,
+              headers: {
+                ...headers,
+                Authorization: `Bearer ${newToken}`,
+                ...options.headers,
+              },
+              signal: controller.signal,
+            });
+
+            if (!retryResponse.ok) {
+              const retryError = await retryResponse.json().catch(() => ({}));
+              throw new Error(retryError.detail || `HTTP ${retryResponse.status}: ${retryResponse.statusText}`);
+            }
+
+            return retryResponse.json();
+          } catch (refreshError) {
+            console.warn('Token refresh failed, clearing tokens');
+            this.clearToken();
+            throw new Error('Authentication failed');
+          }
+        } else if (response.status === 401) {
+          // Token might be expired or invalid
+          console.warn('Authentication failed (401), clearing token');
+          this.clearToken();
+          throw new Error('Not authenticated');
+        } else if (response.status === 403) {
+          throw new Error('Access forbidden');
+        } else if (response.status === 404) {
+          throw new Error('Resource not found');
+        } else if (response.status >= 500) {
+          throw new Error('Server error');
+        }
+
         throw new Error(error.detail || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       return response.json();
     } catch (error) {
       clearTimeout(timeoutId);
-      
+
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
           throw new Error('Request timeout');
         }
         throw error;
       }
-      
+
       throw new Error('An unexpected error occurred');
     }
   }
@@ -101,7 +197,17 @@ class ApiClient {
       throw new Error(error.detail || 'Login failed');
     }
 
-    return response.json();
+    const authResponse = await response.json();
+
+    // Set the tokens in the API client immediately after successful login
+    if (authResponse.access_token) {
+      this.setToken(authResponse.access_token);
+    }
+    if (authResponse.refresh_token) {
+      this.setRefreshToken(authResponse.refresh_token);
+    }
+
+    return authResponse;
   }
 
   async register(data: RegisterRequest): Promise<User> {
@@ -151,10 +257,35 @@ class ApiClient {
   }
 
   async updateSettings(settings: any): Promise<{ message: string }> {
-    return this.fetch<{ message: string }>('/settings/settings', {
+    return this.fetch<{ message: string }>('/settings/', {
       method: 'PUT',
       body: JSON.stringify(settings),
     });
+  }
+
+  async getSettings(): Promise<any> {
+    return this.fetch<any>('/settings/');
+  }
+
+  async testDerivConnection(token: string): Promise<{ status: string; message: string }> {
+    return this.fetch<{ status: string; message: string }>('/settings/test-deriv-connection', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  async getSystemStatus(): Promise<any> {
+    return this.fetch<any>('/settings/system-status');
+  }
+
+  async resetSettingsToDefaults(): Promise<{ message: string }> {
+    return this.fetch<{ message: string }>('/settings/reset-to-defaults', {
+      method: 'POST',
+    });
+  }
+
+  async exportSettings(): Promise<any> {
+    return this.fetch<any>('/settings/export');
   }
 
   async closePosition(positionId: string): Promise<{ message: string }> {

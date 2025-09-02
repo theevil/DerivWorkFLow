@@ -30,10 +30,10 @@ interface PerformanceSectionProps {
   className?: string;
 }
 
-export function PerformanceSection({ 
-  performance, 
+export function PerformanceSection({
+  performance,
   onViewReport,
-  className = '' 
+  className = '',
 }: PerformanceSectionProps) {
   // Preparar métricas para el grid
   const performanceMetrics: MetricData[] = [
@@ -49,16 +49,16 @@ export function PerformanceSection({
       id: 'win-rate',
       title: 'Win Rate',
       value: (
-        <Group gap="xs">
-          <Text size="2xl" fw={900} className="text-title">
+        <Group gap='xs'>
+          <Text size='2xl' fw={900} className='text-title'>
             <NumberFormatter
               value={performance.trading_stats.win_rate * 100}
               decimalScale={1}
-              suffix="%"
+              suffix='%'
             />
           </Text>
-          <div className="w-10 h-10 rounded-full border-4 border-retro-turquoise-400 flex items-center justify-center">
-            <Text fw={600} ta="center" size="xs" className="text-title">
+          <div className='w-10 h-10 rounded-full border-4 border-retro-turquoise-400 flex items-center justify-center'>
+            <Text fw={600} ta='center' size='xs' className='text-title'>
               ✓
             </Text>
           </div>
@@ -76,81 +76,87 @@ export function PerformanceSection({
           value={performance.trading_stats.avg_profit}
           thousandSeparator
           decimalScale={2}
-          prefix="$"
+          prefix='$'
         />
       ),
       subtitle: 'Per trade',
       icon: <IconChartLine size={20} />,
-      iconVariant: performance.trading_stats.avg_profit > 0 ? 'turquoise' : 'coral',
+      iconVariant:
+        performance.trading_stats.avg_profit > 0 ? 'turquoise' : 'coral',
     },
   ];
 
   return (
-    <RetroCard variant="elevated" padding="xl" className={className}>
-      <Group justify="space-between" mb="lg">
-        <Group gap="md">
-          <RetroIcon variant="turquoise" size="lg">
+    <RetroCard variant='elevated' padding='xl' className={className}>
+      <Group justify='space-between' mb='lg'>
+        <Group gap='md'>
+          <RetroIcon variant='turquoise' size='lg'>
             <IconChartLine size={28} />
           </RetroIcon>
           <Box>
-            <Text fw={700} size="xl" className="text-headline">
+            <Text fw={700} size='xl' className='text-headline'>
               Performance Analytics
             </Text>
-            <Text size="sm" className="text-caption">
+            <Text size='sm' className='text-caption'>
               7-day trading performance overview
             </Text>
           </Box>
         </Group>
-        <RetroBadge variant="info" size="md">
+        <RetroBadge variant='info' size='md'>
           Last 7 days
         </RetroBadge>
       </Group>
-      
+
       {/* Performance Metrics Grid */}
       <MetricsGrid metrics={performanceMetrics} />
 
       {/* Summary Stats */}
-      <div className="border-t-2 border-retro-brown mt-6 pt-6">
-        <Group justify="space-between">
-          <Group gap="lg">
-            <Box ta="center">
-              <Text size="sm" className="text-caption" mb="xs">
+      <div className='border-t-2 border-retro-brown mt-6 pt-6'>
+        <Group justify='space-between'>
+          <Group gap='lg'>
+            <Box ta='center'>
+              <Text size='sm' className='text-caption' mb='xs'>
                 Max Profit
               </Text>
-              <Text fw={700} className="text-profit">
+              <Text fw={700} className='text-profit'>
                 <NumberFormatter
                   value={performance.trading_stats.max_profit}
                   thousandSeparator
                   decimalScale={2}
-                  prefix="$"
-                />
-              </Text>
-            </Box>
-            
-            <Box ta="center">
-              <Text size="sm" className="text-caption" mb="xs">
-                Max Loss
-              </Text>
-              <Text fw={700} className="text-loss">
-                <NumberFormatter
-                  value={performance.trading_stats.min_profit}
-                  thousandSeparator
-                  decimalScale={2}
-                  prefix="$"
+                  prefix='$'
                 />
               </Text>
             </Box>
 
-            <Box ta="center">
-              <Text size="sm" className="text-caption" mb="xs">
+            <Box ta='center'>
+              <Text size='sm' className='text-caption' mb='xs'>
+                Max Loss
+              </Text>
+              <Text fw={700} className='text-loss'>
+                <NumberFormatter
+                  value={performance.trading_stats.min_profit}
+                  thousandSeparator
+                  decimalScale={2}
+                  prefix='$'
+                />
+              </Text>
+            </Box>
+
+            <Box ta='center'>
+              <Text size='sm' className='text-caption' mb='xs'>
                 Total P&L
               </Text>
-              <Text fw={700} className={`text-${performance.trading_stats.total_profit > 0 ? 'profit' : 'loss'}`}>
+              <Text
+                fw={700}
+                className={`text-${
+                  performance.trading_stats.total_profit > 0 ? 'profit' : 'loss'
+                }`}
+              >
                 <NumberFormatter
                   value={performance.trading_stats.total_profit}
                   thousandSeparator
                   decimalScale={2}
-                  prefix="$"
+                  prefix='$'
                 />
               </Text>
             </Box>
@@ -158,7 +164,7 @@ export function PerformanceSection({
 
           {onViewReport && (
             <RetroButton
-              variant="primary"
+              variant='primary'
               leftIcon={<IconChartLine size={16} />}
               onClick={onViewReport}
             >

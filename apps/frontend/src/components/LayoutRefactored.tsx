@@ -10,9 +10,5 @@ interface LayoutProps {
 }
 
 export function LayoutRefactored({ children }: LayoutProps) {
-  return (
-    <AppLayout>
-      {children}
-    </AppLayout>
-  );
+  return <AppLayout>{children}</AppLayout>;
 }

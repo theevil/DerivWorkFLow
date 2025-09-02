@@ -69,7 +69,7 @@ Run tests by category using markers:
 # Run only unit tests
 pipenv run pytest -m unit
 
-# Run only integration tests  
+# Run only integration tests
 pipenv run pytest -m integration
 
 # Run only authentication tests
@@ -245,10 +245,10 @@ Key fixtures available in `conftest.py`:
    def test_user_creation():
        # Arrange
        user_data = {"email": "test@example.com", "name": "Test"}
-       
+
        # Act
        result = create_user(user_data)
-       
+
        # Assert
        assert result.email == "test@example.com"
    ```

@@ -18,23 +18,45 @@ import {
   IconAlertTriangle,
   IconSettings,
   IconPlayerStop,
-  IconRefresh
+  IconRefresh,
 } from '@tabler/icons-react';
 
 // Atomic Design Components
 import { RetroButton, RetroCard, RetroIcon } from '../components/atoms';
-import { MetricsGrid, WorkersPanel, PerformanceSection } from '../components/organisms';
-import type { MetricData, WorkerData, ActionButton, PerformanceData } from '../components/organisms';
+import {
+  MetricsGrid,
+  WorkersPanel,
+  PerformanceSection,
+} from '../components/organisms';
+import type {
+  MetricData,
+  WorkerData,
+  ActionButton,
+  PerformanceData,
+} from '../components/organisms';
 import { AutoTradingConfigModal } from '../components/automation/AutoTradingConfigModal';
 import { AlertsList } from '../components/automation/AlertsList';
 
 // Hooks and Store
-import { useAutomationStore, automationActions, automationSelectors } from '../stores/automation';
-import type { AutoTradingConfig, EmergencyStopRequest } from '../types/automation';
+import {
+  useAutomationStore,
+  automationActions,
+  automationSelectors,
+} from '../stores/automation';
+import type {
+  AutoTradingConfig,
+  EmergencyStopRequest,
+} from '../types/automation';
 
 export function AutomationRefactored() {
-  const [configModalOpened, { open: openConfigModal, close: closeConfigModal }] = useDisclosure(false);
-  const [emergencyModalOpened, { open: openEmergencyModal, close: closeEmergencyModal }] = useDisclosure(false);
+  const [
+    configModalOpened,
+    { open: openConfigModal, close: closeConfigModal },
+  ] = useDisclosure(false);
+  const [
+    emergencyModalOpened,
+    { open: openEmergencyModal, close: closeEmergencyModal },
+  ] = useDisclosure(false);
   const [emergencyReason, setEmergencyReason] = useState('');
   const [lastStatusUpdate, setLastStatusUpdate] = useState<string | null>(null);
 
@@ -46,13 +68,19 @@ export function AutomationRefactored() {
     performance,
     isStatusLoading,
     isEmergencyLoading,
-    isConfigLoading
+    isConfigLoading,
   } = useAutomationStore();
 
   // Computed values
-  const isAutoTradingEnabled = automationSelectors.isAutoTradingEnabled(useAutomationStore.getState());
-  const isSystemHealthy = automationSelectors.isSystemHealthy(useAutomationStore.getState());
-  const unacknowledgedAlerts = automationSelectors.getUnacknowledgedAlerts(useAutomationStore.getState());
+  const isAutoTradingEnabled = automationSelectors.isAutoTradingEnabled(
+    useAutomationStore.getState()
+  );
+  const isSystemHealthy = automationSelectors.isSystemHealthy(
+    useAutomationStore.getState()
+  );
+  const unacknowledgedAlerts = automationSelectors.getUnacknowledgedAlerts(
+    useAutomationStore.getState()
+  );
 
   // Effects
   useEffect(() => {
@@ -78,7 +106,7 @@ export function AutomationRefactored() {
           notifications.show({
             title: 'Market Scan Triggered',
             message: 'Market scanning has been initiated',
-            color: 'green'
+            color: 'green',
           });
           break;
         case 'monitor':
@@ -86,7 +114,7 @@ export function AutomationRefactored() {
           notifications.show({
             title: 'Position Monitor Triggered',
             message: 'Position monitoring has been initiated',
-            color: 'blue'
+            color: 'blue',
           });
           break;
         case 'retrain':
@@ -94,7 +122,7 @@ export function AutomationRefactored() {
           notifications.show({
             title: 'Model Retraining Triggered',
             message: 'AI model retraining has been initiated',
-            color: 'violet'
+            color: 'violet',
           });
           break;
       }
@@ -103,7 +131,7 @@ export function AutomationRefactored() {
       notifications.show({
         title: 'Error',
         message: `Failed to trigger ${type}`,
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -114,14 +142,14 @@ export function AutomationRefactored() {
       notifications.show({
         title: 'Health Check Complete',
         message: 'System health check has been completed',
-        color: 'green'
+        color: 'green',
       });
       setTimeout(refreshSystemStatus, 1000);
     } catch (error) {
       notifications.show({
         title: 'Health Check Failed',
         message: 'Failed to complete health check',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -131,14 +159,14 @@ export function AutomationRefactored() {
       notifications.show({
         title: 'Reason Required',
         message: 'Please provide a reason for the emergency stop',
-        color: 'yellow'
+        color: 'yellow',
       });
       return;
     }
 
     const request: EmergencyStopRequest = {
       reason: emergencyReason,
-      force_close_positions: true
+      force_close_positions: true,
     };
 
     try {
@@ -146,7 +174,7 @@ export function AutomationRefactored() {
       notifications.show({
         title: 'Emergency Stop Activated',
         message: 'All automated trading has been stopped',
-        color: 'red'
+        color: 'red',
       });
       closeEmergencyModal();
       setEmergencyReason('');
@@ -155,7 +183,7 @@ export function AutomationRefactored() {
       notifications.show({
         title: 'Emergency Stop Failed',
         message: 'Failed to execute emergency stop',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -166,13 +194,13 @@ export function AutomationRefactored() {
       notifications.show({
         title: 'Alert Acknowledged',
         message: 'Alert has been acknowledged',
-        color: 'green'
+        color: 'green',
       });
     } catch (error) {
       notifications.show({
         title: 'Error',
         message: 'Failed to acknowledge alert',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -183,7 +211,7 @@ export function AutomationRefactored() {
       notifications.show({
         title: 'Configuration Saved',
         message: 'Auto trading configuration has been updated',
-        color: 'green'
+        color: 'green',
       });
       closeConfigModal();
       setTimeout(refreshSystemStatus, 1000);
@@ -191,7 +219,7 @@ export function AutomationRefactored() {
       notifications.show({
         title: 'Configuration Failed',
         message: 'Failed to save configuration',
-        color: 'red'
+        color: 'red',
       });
     }
   };
@@ -199,10 +227,10 @@ export function AutomationRefactored() {
   // Loading state
   if (!systemStatus) {
     return (
-      <Container size="xl" py="md">
-        <div className="flex items-center justify-center min-h-96">
-          <div className="loading-spinner" />
-          <Text ml="md">Loading automation dashboard...</Text>
+      <Container size='xl' py='md'>
+        <div className='flex items-center justify-center min-h-96'>
+          <div className='loading-spinner' />
+          <Text ml='md'>Loading automation dashboard...</Text>
         </div>
       </Container>
     );
@@ -214,20 +242,28 @@ export function AutomationRefactored() {
       id: 'auto-trading',
       title: 'AI Auto Trading',
       value: '',
-      subtitle: isAutoTradingEnabled ? 'System trading automatically' : 'Manual control only',
+      subtitle: isAutoTradingEnabled
+        ? 'System trading automatically'
+        : 'Manual control only',
       icon: <IconRobot size={18} />,
       iconVariant: isAutoTradingEnabled ? 'turquoise' : 'coral',
       badge: {
         text: isAutoTradingEnabled ? 'ACTIVE' : 'OFF',
-        variant: isAutoTradingEnabled ? 'success' : 'warning'
-      }
+        variant: isAutoTradingEnabled ? 'success' : 'warning',
+      },
     },
     {
       id: 'system-health',
       title: 'System Health',
       value: (
-        <div className={`w-8 h-8 rounded-full border-4 ${isSystemHealthy ? 'border-retro-turquoise-400' : 'border-retro-red-400'} flex items-center justify-center`}>
-          <Text fw={700} ta="center" size="xs" className="text-title">
+        <div
+          className={`w-8 h-8 rounded-full border-4 ${
+            isSystemHealthy
+              ? 'border-retro-turquoise-400'
+              : 'border-retro-red-400'
+          } flex items-center justify-center`}
+        >
+          <Text fw={700} ta='center' size='xs' className='text-title'>
             {isSystemHealthy ? '100' : '25'}
           </Text>
         </div>
@@ -252,13 +288,18 @@ export function AutomationRefactored() {
           value={performance?.trading_stats.total_profit ?? 0}
           thousandSeparator
           decimalScale={2}
-          prefix="$"
+          prefix='$'
         />
       ),
-      subtitle: performance ? `${performance.trading_stats.total_trades} trades` : 'No data',
+      subtitle: performance
+        ? `${performance.trading_stats.total_trades} trades`
+        : 'No data',
       icon: <IconTrendingUp size={18} />,
-      iconVariant: performance && performance.trading_stats.total_profit > 0 ? 'turquoise' : 'coral',
-    }
+      iconVariant:
+        performance && performance.trading_stats.total_profit > 0
+          ? 'turquoise'
+          : 'coral',
+    },
   ];
 
   // Preparar datos para los workers
@@ -271,21 +312,25 @@ export function AutomationRefactored() {
       iconVariant: 'turquoise',
       status: {
         text: systemStatus?.market_monitor?.active ? 'ON' : 'OFF',
-        variant: systemStatus?.market_monitor?.active ? 'success' : 'danger'
+        variant: systemStatus?.market_monitor?.active ? 'success' : 'danger',
       },
       statusItems: [
         {
           label: 'Redis',
           value: systemStatus?.market_monitor?.redis_connected ? 'OK' : 'NO',
-          variant: systemStatus?.market_monitor?.redis_connected ? 'success' : 'danger'
+          variant: systemStatus?.market_monitor?.redis_connected
+            ? 'success'
+            : 'danger',
         },
         {
           label: 'Last Scan',
-          value: systemStatus?.market_monitor?.last_scan 
-            ? new Date(systemStatus.market_monitor.last_scan).toLocaleTimeString()
-            : 'Never'
-        }
-      ]
+          value: systemStatus?.market_monitor?.last_scan
+            ? new Date(
+                systemStatus.market_monitor.last_scan
+              ).toLocaleTimeString()
+            : 'Never',
+        },
+      ],
     },
     {
       id: 'trading-executor',
@@ -295,19 +340,21 @@ export function AutomationRefactored() {
       iconVariant: 'coral',
       status: {
         text: systemStatus?.trading_executor?.redis_connected ? 'READY' : 'OFF',
-        variant: systemStatus?.trading_executor?.redis_connected ? 'info' : 'danger'
+        variant: systemStatus?.trading_executor?.redis_connected
+          ? 'info'
+          : 'danger',
       },
       statusItems: [
         {
           label: 'Active',
-          value: `${systemStatus?.trading_executor?.active_executions ?? 0}`
+          value: `${systemStatus?.trading_executor?.active_executions ?? 0}`,
         },
         {
           label: 'Total',
-          value: `${systemStatus?.trading_executor?.total_executions ?? 0}`
-        }
-      ]
-    }
+          value: `${systemStatus?.trading_executor?.total_executions ?? 0}`,
+        },
+      ],
+    },
   ];
 
   // Preparar acciones rápidas
@@ -316,71 +363,71 @@ export function AutomationRefactored() {
       label: 'Market Scan',
       icon: <IconEye size={14} />,
       variant: 'success',
-      onClick: () => handleManualTrigger('scan')
+      onClick: () => handleManualTrigger('scan'),
     },
     {
       label: 'Check Positions',
       icon: <IconActivity size={14} />,
       variant: 'primary',
-      onClick: () => handleManualTrigger('monitor')
+      onClick: () => handleManualTrigger('monitor'),
     },
     {
       label: 'Retrain AI',
       icon: <IconBrain size={14} />,
       variant: 'secondary',
-      onClick: () => handleManualTrigger('retrain')
+      onClick: () => handleManualTrigger('retrain'),
     },
     {
       label: 'Health Check',
       icon: <IconShield size={14} />,
       variant: 'warning',
-      onClick: handleHealthCheck
-    }
+      onClick: handleHealthCheck,
+    },
   ];
 
   return (
-    <Container size="xl" py="md">
-      <Stack gap="lg">
+    <Container size='xl' py='md'>
+      <Stack gap='lg'>
         {/* Header */}
-        <RetroCard variant="default" padding="lg" className="gradient-header">
-          <Group justify="space-between" align="center">
-            <Group gap="md">
-              <RetroIcon variant="turquoise" size="lg">
+        <RetroCard variant='default' padding='lg' className='gradient-header'>
+          <Group justify='space-between' align='center'>
+            <Group gap='md'>
+              <RetroIcon variant='turquoise' size='lg'>
                 <IconRobot size={24} />
               </RetroIcon>
               <div>
-                <Text fw={700} size="xl" className="text-headline">
+                <Text fw={700} size='xl' className='text-headline'>
                   AI Automation Dashboard
                 </Text>
-                <Text size="sm" className="text-caption">
+                <Text size='sm' className='text-caption'>
                   Intelligent trading automation control center
                 </Text>
               </div>
             </Group>
 
-            <Group gap="sm">
+            <Group gap='sm'>
               <button
-                className="retro-icon-coral rounded-xl p-2 transition-all hover:scale-110"
+                className='retro-icon-coral rounded-xl p-2 transition-all hover:scale-110'
                 onClick={refreshSystemStatus}
                 disabled={isStatusLoading}
-                aria-label="Refresh automation status"
-                title="Refresh automation status"
+                aria-label='Refresh automation status'
+                title='Refresh automation status'
               >
                 <IconRefresh size={16} />
               </button>
-              
+
               <RetroButton
-                variant="secondary"
-                size="sm"
+                variant='secondary'
+                size='sm'
                 leftIcon={<IconSettings size={14} />}
                 onClick={openConfigModal}
               >
                 Configure
               </RetroButton>
-              
+
               <RetroButton
-                variant="danger"
-                size="sm"
+                variant='danger'
+                size='sm'
                 leftIcon={<IconAlertTriangle size={14} />}
                 onClick={openEmergencyModal}
                 disabled={!isAutoTradingEnabled}
@@ -395,11 +442,12 @@ export function AutomationRefactored() {
         {systemStatus && !isSystemHealthy && (
           <Alert
             icon={<IconAlertTriangle size={16} />}
-            color="red"
-            title="System Health Alert"
-            className="alertPulse"
+            color='red'
+            title='System Health Alert'
+            className='alertPulse'
           >
-            You have new alerts that require attention. Please review them below.
+            You have new alerts that require attention. Please review them
+            below.
           </Alert>
         )}
 
@@ -416,17 +464,14 @@ export function AutomationRefactored() {
 
         {/* Performance Section */}
         {performance && (
-          <PerformanceSection 
+          <PerformanceSection
             performance={performance}
             onViewReport={() => console.log('View detailed report')}
           />
         )}
 
         {/* Alerts */}
-        <AlertsList
-          alerts={alerts}
-          onAcknowledge={acknowledgeAlert}
-        />
+        <AlertsList alerts={alerts} onAcknowledge={acknowledgeAlert} />
 
         {/* Modals */}
         <AutoTradingConfigModal
@@ -441,38 +486,40 @@ export function AutomationRefactored() {
         <Modal
           opened={emergencyModalOpened}
           onClose={closeEmergencyModal}
-          title="Emergency Stop"
+          title='Emergency Stop'
           centered
         >
-          <Stack gap="md">
+          <Stack gap='md'>
             <Alert
               icon={<IconAlertTriangle size={16} />}
-              color="red"
-              title="Emergency Stop Warning"
+              color='red'
+              title='Emergency Stop Warning'
             >
-              This will immediately disable auto trading and close all open positions. 
-              This action cannot be undone.
+              This will immediately disable auto trading and close all open
+              positions. This action cannot be undone.
             </Alert>
 
-            <Text size="sm" fw={500}>Reason for Emergency Stop:</Text>
+            <Text size='sm' fw={500}>
+              Reason for Emergency Stop:
+            </Text>
             <textarea
-              placeholder="Please provide a reason for the emergency stop..."
+              placeholder='Please provide a reason for the emergency stop...'
               value={emergencyReason}
-              onChange={(e) => setEmergencyReason(e.target.value)}
+              onChange={e => setEmergencyReason(e.target.value)}
               rows={3}
-              className="input-primary w-full min-h-20"
+              className='input-primary w-full min-h-20'
             />
 
-            <Group justify="flex-end" gap="sm">
-              <RetroButton 
-                variant="secondary" 
-                onClick={closeEmergencyModal} 
+            <Group justify='flex-end' gap='sm'>
+              <RetroButton
+                variant='secondary'
+                onClick={closeEmergencyModal}
                 disabled={isEmergencyLoading}
               >
                 Cancel
               </RetroButton>
               <RetroButton
-                variant="danger"
+                variant='danger'
                 loading={isEmergencyLoading}
                 onClick={handleEmergencyStop}
                 leftIcon={<IconPlayerStop size={16} />}

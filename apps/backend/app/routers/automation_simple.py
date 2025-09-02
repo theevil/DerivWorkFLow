@@ -130,3 +130,57 @@ async def run_health_check():
         },
         "timestamp": "2024-01-01T12:00:00Z"
     }
+
+# Additional endpoints that frontend expects
+@router.get("/tasks/{task_id}/status")
+async def get_task_status(task_id: str):
+    """Get task status by ID"""
+    return {
+        "task_id": task_id,
+        "status": "completed",
+        "progress": 100,
+        "result": "success",
+        "timestamp": "2024-01-01T12:00:00Z"
+    }
+
+@router.get("/tasks/active")
+async def get_active_tasks():
+    """Get active and scheduled tasks"""
+    return {
+        "active_tasks": {
+            "market_scan": [],
+            "position_monitor": [],
+            "model_retrain": []
+        },
+        "scheduled_tasks": {
+            "market_scan": [],
+            "position_monitor": [],
+            "model_retrain": []
+        },
+        "timestamp": "2024-01-01T12:00:00Z"
+    }
+
+@router.get("/queue-stats")
+async def get_queue_stats():
+    """Get queue statistics"""
+    return {
+        "queue_lengths": {
+            "market_scan": {"length": 0, "queue_key": "market_scan_queue"},
+            "position_monitor": {"length": 0, "queue_key": "position_monitor_queue"},
+            "model_retrain": {"length": 0, "queue_key": "model_retrain_queue"}
+        },
+        "worker_stats": {
+            "active_workers": 2,
+            "total_workers": 3,
+            "avg_load": 0.15
+        },
+        "timestamp": "2024-01-01T12:00:00Z"
+    }
+
+@router.post("/alerts/{alert_id}/acknowledge")
+async def acknowledge_alert(alert_id: str):
+    """Acknowledge an alert"""
+    return {
+        "message": "Alert acknowledged successfully",
+        "alert_id": alert_id
+    }

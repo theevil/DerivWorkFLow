@@ -1,6 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Button, Badge, Card, Group, Text, Alert, ActionIcon, Tooltip, Stack } from '@mantine/core';
-import { IconRefresh, IconPlus, IconTrendingUp, IconBell, IconMoon, IconUser, IconRobot, IconSettings, IconAlertTriangle } from '@tabler/icons-react';
+import {
+  Button,
+  Badge,
+  Card,
+  Group,
+  Text,
+  Alert,
+  ActionIcon,
+  Tooltip,
+  Stack,
+} from '@mantine/core';
+import {
+  IconRefresh,
+  IconPlus,
+  IconTrendingUp,
+  IconBell,
+  IconMoon,
+  IconUser,
+  IconRobot,
+  IconSettings,
+  IconAlertTriangle,
+} from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import type { TradePosition, TradingStats } from '../types/trading';
 import { useAuthStore } from '../stores/auth';
@@ -12,7 +32,7 @@ import { PerformanceChart } from '../components/PerformanceChart';
 import { useAutomationStore, automationSelectors } from '../stores/automation';
 
 export function DashboardPage() {
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore(state => state.user);
   const [positions, setPositions] = useState<TradePosition[]>([]);
   const [stats, setStats] = useState<TradingStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,8 +46,12 @@ export function DashboardPage() {
   } = useAutomationStore();
 
   // Computed automation values
-  const isAutoTradingEnabled = automationSelectors.isAutoTradingEnabled({ config: automationConfig } as any);
-  const isSystemHealthy = systemStatus ? automationSelectors.isSystemHealthy({ systemStatus } as any) : false;
+  const isAutoTradingEnabled = automationSelectors.isAutoTradingEnabled({
+    config: automationConfig,
+  } as any);
+  const isSystemHealthy = systemStatus
+    ? automationSelectors.isSystemHealthy({ systemStatus } as any)
+    : false;
   const hasUnacknowledgedAlerts = unacknowledgedCount > 0;
 
   const fetchData = async () => {
@@ -35,12 +59,12 @@ export function DashboardPage() {
       setLoading(true);
       // Mock data for now since we don't have real trading data yet
       const mockStats: TradingStats = {
-        total_profit: 1250.50,
+        total_profit: 1250.5,
         total_trades: 45,
         win_rate: 0.67,
         avg_profit: 27.79,
-        max_profit: 150.00,
-        max_loss: -75.00,
+        max_profit: 150.0,
+        max_loss: -75.0,
         active_positions: 3,
       };
 
@@ -53,7 +77,7 @@ export function DashboardPage() {
           amount: 50,
           entry_spot: 1.05423,
           current_spot: 1.05567,
-          profit_loss: 12.50,
+          profit_loss: 12.5,
           status: 'open',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -65,7 +89,7 @@ export function DashboardPage() {
           contract_type: 'PUT',
           amount: 25,
           entry_spot: 15847.23,
-          current_spot: 15832.10,
+          current_spot: 15832.1,
           profit_loss: 8.75,
           status: 'open',
           created_at: new Date().toISOString(),
@@ -108,34 +132,39 @@ export function DashboardPage() {
     { date: '2025-08-28', value: 1150 },
     { date: '2025-08-29', value: 1180 },
     { date: '2025-08-30', value: 1200 },
-    { date: '2025-09-01', value: 1250.50 },
+    { date: '2025-09-01', value: 1250.5 },
   ];
 
   return (
     <Layout>
-      <div className="flex flex-col gap-8">
+      <div className='flex flex-col gap-8'>
         {/* Header */}
-        <div className="card-glass m-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 p-6">
-            <div className="flex-1">
-              <h1 className="text-display mb-2">
+        <div className='card-glass m-6'>
+          <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 p-6'>
+            <div className='flex-1'>
+              <h1 className='text-display mb-2'>
                 Welcome back, {user?.name}! 👋
               </h1>
-              <p className="text-body">
+              <p className='text-body'>
                 Here's what's happening with your trading today.
               </p>
             </div>
-            <div className="flex gap-4 flex-shrink-0">
+            <div className='flex gap-4 flex-shrink-0'>
               <Button
                 onClick={fetchData}
-                className="btn-secondary"
+                className='btn-secondary'
                 disabled={loading}
-                leftSection={<IconRefresh size={18} className={loading ? 'animate-spin' : ''} />}
+                leftSection={
+                  <IconRefresh
+                    size={18}
+                    className={loading ? 'animate-spin' : ''}
+                  />
+                }
               >
                 Refresh
               </Button>
-              <Button 
-                className="btn-primary"
+              <Button
+                className='btn-primary'
                 leftSection={<IconPlus size={18} />}
               >
                 New Trade
@@ -146,32 +175,33 @@ export function DashboardPage() {
 
         {/* Automation Status Alert */}
         {(hasUnacknowledgedAlerts || !isSystemHealthy) && (
-          <div className="mx-6">
+          <div className='mx-6'>
             <Alert
               icon={<IconAlertTriangle size={16} />}
-              color="orange"
-              title="Automation System Alerts"
-              variant="light"
+              color='orange'
+              title='Automation System Alerts'
+              variant='light'
             >
-              <Group justify="space-between" align="center">
+              <Group justify='space-between' align='center'>
                 <Stack gap={4}>
                   {hasUnacknowledgedAlerts && (
-                    <Text size="sm">
-                      You have {unacknowledgedCount} unacknowledged alert{unacknowledgedCount === 1 ? '' : 's'}
+                    <Text size='sm'>
+                      You have {unacknowledgedCount} unacknowledged alert
+                      {unacknowledgedCount === 1 ? '' : 's'}
                     </Text>
                   )}
                   {!isSystemHealthy && (
-                    <Text size="sm">
+                    <Text size='sm'>
                       Automation system health issues detected
                     </Text>
                   )}
                 </Stack>
-                <Button 
-                  component={Link} 
-                  to="/automation" 
-                  variant="light" 
-                  color="orange"
-                  size="xs"
+                <Button
+                  component={Link}
+                  to='/automation'
+                  variant='light'
+                  color='orange'
+                  size='xs'
                 >
                   View Automation
                 </Button>
@@ -181,60 +211,73 @@ export function DashboardPage() {
         )}
 
         {/* Automation Quick Status */}
-        <div className="mx-6">
-          <Card shadow="sm" padding="lg" radius="md" withBorder>
-            <Group justify="space-between" mb="md">
-              <Group gap="sm">
-                <IconRobot size={24} color={isAutoTradingEnabled ? 'green' : 'gray'} />
-                <Text fw={600} size="lg">AI Automation Status</Text>
+        <div className='mx-6'>
+          <Card shadow='sm' padding='lg' radius='md' withBorder>
+            <Group justify='space-between' mb='md'>
+              <Group gap='sm'>
+                <IconRobot
+                  size={24}
+                  color={isAutoTradingEnabled ? 'green' : 'gray'}
+                />
+                <Text fw={600} size='lg'>
+                  AI Automation Status
+                </Text>
               </Group>
-              <Group gap="sm">
-                <Badge 
-                  color={isAutoTradingEnabled ? 'green' : 'gray'} 
-                  variant="filled"
+              <Group gap='sm'>
+                <Badge
+                  color={isAutoTradingEnabled ? 'green' : 'gray'}
+                  variant='filled'
                 >
                   {isAutoTradingEnabled ? 'ACTIVE' : 'INACTIVE'}
                 </Badge>
-                <ActionIcon 
-                  component={Link} 
-                  to="/automation" 
-                  variant="subtle"
-                  color="blue"
+                <ActionIcon
+                  component={Link}
+                  to='/automation'
+                  variant='subtle'
+                  color='blue'
                 >
                   <IconSettings size={16} />
                 </ActionIcon>
               </Group>
             </Group>
 
-            <Group justify="space-between">
-              <Group gap="lg">
+            <Group justify='space-between'>
+              <Group gap='lg'>
                 <div>
-                  <Text size="sm" c="dimmed">System Health</Text>
-                  <Badge 
-                    color={isSystemHealthy ? 'green' : 'red'} 
-                    variant="light"
+                  <Text size='sm' c='dimmed'>
+                    System Health
+                  </Text>
+                  <Badge
+                    color={isSystemHealthy ? 'green' : 'red'}
+                    variant='light'
                   >
                     {isSystemHealthy ? 'Healthy' : 'Issues'}
                   </Badge>
                 </div>
-                
+
                 <div>
-                  <Text size="sm" c="dimmed">Active Tasks</Text>
+                  <Text size='sm' c='dimmed'>
+                    Active Tasks
+                  </Text>
                   <Text fw={500}>{systemStatus?.celery_active_tasks ?? 0}</Text>
                 </div>
-                
+
                 {systemStatus?.trading_executor && (
                   <div>
-                    <Text size="sm" c="dimmed">Active Executions</Text>
-                    <Text fw={500}>{systemStatus.trading_executor.active_executions}</Text>
+                    <Text size='sm' c='dimmed'>
+                      Active Executions
+                    </Text>
+                    <Text fw={500}>
+                      {systemStatus.trading_executor.active_executions}
+                    </Text>
                   </div>
                 )}
               </Group>
 
-              <Button 
-                component={Link} 
-                to="/automation" 
-                variant="light"
+              <Button
+                component={Link}
+                to='/automation'
+                variant='light'
                 leftSection={<IconRobot size={16} />}
               >
                 Automation Dashboard
@@ -244,53 +287,55 @@ export function DashboardPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="px-4 lg:px-6">
+        <div className='px-4 lg:px-6'>
           <StatsGrid stats={stats} loading={loading} />
         </div>
 
         {/* Dashboard Flexbox Layout */}
-        <div className="flex flex-col xl:flex-row gap-8 px-4 lg:px-6 w-full">
+        <div className='flex flex-col xl:flex-row gap-8 px-4 lg:px-6 w-full'>
           {/* Columna Principal (Chart) */}
-          <div className="flex-1 xl:flex-[3]">
-            <PerformanceChart 
-              data={performanceData} 
-              title="Portfolio Performance"
-              color={stats?.total_profit && stats.total_profit >= 0 ? 'success' : 'danger'}
+          <div className='flex-1 xl:flex-[3]'>
+            <PerformanceChart
+              data={performanceData}
+              title='Portfolio Performance'
+              color={
+                stats?.total_profit && stats.total_profit >= 0
+                  ? 'success'
+                  : 'danger'
+              }
             />
           </div>
 
           {/* Sidebar Derecho (Quick Actions) */}
-          <div className="xl:flex-[1] xl:min-w-[320px] flex flex-col gap-6">
+          <div className='xl:flex-[1] xl:min-w-[320px] flex flex-col gap-6'>
             {/* Quick Actions */}
-            <div className="card-elevated flex-shrink-0">
-              <h3 className="text-headline mb-6">
-                Quick Actions
-              </h3>
-              <div className="flex flex-col gap-3">
-                <Button 
-                  fullWidth 
-                  className="btn-primary flex items-center justify-start gap-3"
+            <div className='card-elevated flex-shrink-0'>
+              <h3 className='text-headline mb-6'>Quick Actions</h3>
+              <div className='flex flex-col gap-3'>
+                <Button
+                  fullWidth
+                  className='btn-primary flex items-center justify-start gap-3'
                 >
                   <IconTrendingUp size={20} />
                   Start AI Trading
                 </Button>
-                <Button 
-                  fullWidth 
-                  className="btn-secondary flex items-center justify-start gap-3"
+                <Button
+                  fullWidth
+                  className='btn-secondary flex items-center justify-start gap-3'
                 >
                   <IconTrendingUp size={20} />
                   Market Analysis
                 </Button>
-                <Button 
-                  fullWidth 
-                  className="btn-secondary flex items-center justify-start gap-3"
+                <Button
+                  fullWidth
+                  className='btn-secondary flex items-center justify-start gap-3'
                 >
                   <IconTrendingUp size={20} />
                   Parameters
                 </Button>
-                <Button 
-                  fullWidth 
-                  className="btn-secondary flex items-center justify-start gap-3"
+                <Button
+                  fullWidth
+                  className='btn-secondary flex items-center justify-start gap-3'
                 >
                   <IconTrendingUp size={20} />
                   Risk Management
@@ -299,59 +344,58 @@ export function DashboardPage() {
             </div>
 
             {/* AI Recommendation */}
-            <div className="card flex-shrink-0">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="text-2xl">🤖</span>
-                <h4 className="text-title">AI Recommendation</h4>
+            <div className='card flex-shrink-0'>
+              <div className='flex items-center gap-2 mb-4'>
+                <span className='text-2xl'>🤖</span>
+                <h4 className='text-title'>AI Recommendation</h4>
               </div>
-              <p className="text-body text-sm leading-relaxed mb-4">
+              <p className='text-body text-sm leading-relaxed mb-4'>
                 Market conditions are favorable for CALL positions on R_10.
               </p>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-caption">Confidence:</span>
-                <span className="retro-text-accent font-bold text-lg">78%</span>
+              <div className='flex items-center justify-between mb-3'>
+                <span className='text-caption'>Confidence:</span>
+                <span className='retro-text-accent font-bold text-lg'>78%</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full animate-pulse retro-indicator-turquoise"></div>
-                <span className="text-caption">Live Analysis</span>
+              <div className='flex items-center gap-2'>
+                <div className='w-2 h-2 rounded-full animate-pulse retro-indicator-turquoise'></div>
+                <span className='text-caption'>Live Analysis</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Active Positions */}
-        <div className="mt-12 w-full px-6">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-            <h2 className="text-headline">
+        <div className='mt-12 w-full px-6'>
+          <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8'>
+            <h2 className='text-headline'>
               Active Positions ({positions.length})
             </h2>
-            <Button className="btn-secondary w-full sm:w-auto flex-shrink-0">
+            <Button className='btn-secondary w-full sm:w-auto flex-shrink-0'>
               View All Positions
             </Button>
           </div>
 
           {positions.length === 0 ? (
-            <div className="card-elevated text-center py-16 w-full">
-              <div className="w-16 h-16 mx-auto mb-6 rounded-lg flex items-center justify-center retro-icon-turquoise">
+            <div className='card-elevated text-center py-16 w-full'>
+              <div className='w-16 h-16 mx-auto mb-6 rounded-lg flex items-center justify-center retro-icon-turquoise'>
                 <IconTrendingUp size={32} />
               </div>
-              <h3 className="text-title mb-3">
-                No active positions
-              </h3>
-              <p className="text-body mb-8 max-w-md mx-auto">
-                Start your first trade to see your positions here. Our AI will help you make informed decisions.
+              <h3 className='text-title mb-3'>No active positions</h3>
+              <p className='text-body mb-8 max-w-md mx-auto'>
+                Start your first trade to see your positions here. Our AI will
+                help you make informed decisions.
               </p>
-              <Button 
-                className="btn-primary"
+              <Button
+                className='btn-primary'
                 leftSection={<IconPlus size={20} />}
               >
                 Create New Trade
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
-              {positions.map((position) => (
-                <div key={position.id} className="w-full">
+            <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 w-full'>
+              {positions.map(position => (
+                <div key={position.id} className='w-full'>
                   <TradingCard
                     position={position}
                     onClose={handleClosePosition}
@@ -363,62 +407,54 @@ export function DashboardPage() {
         </div>
 
         {/* Recent Activity */}
-        <div className="card mt-12 mx-6 mb-6">
-          <h3 className="text-headline mb-6">
-            Recent Activity
-          </h3>
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between p-4 border border-retro-brown rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full animate-pulse retro-indicator-turquoise"></div>
-                <div className="flex flex-col">
-                  <span className="text-body font-medium">
-                    Position R_10 CALL closed with 
-                    <span className="text-profit ml-1">+$12.50 profit</span>
+        <div className='card mt-12 mx-6 mb-6'>
+          <h3 className='text-headline mb-6'>Recent Activity</h3>
+          <div className='flex flex-col gap-4'>
+            <div className='flex items-center justify-between p-4 border border-retro-brown rounded-lg'>
+              <div className='flex items-center gap-4'>
+                <div className='w-3 h-3 rounded-full animate-pulse retro-indicator-turquoise'></div>
+                <div className='flex flex-col'>
+                  <span className='text-body font-medium'>
+                    Position R_10 CALL closed with
+                    <span className='text-profit ml-1'>+$12.50 profit</span>
                   </span>
                 </div>
               </div>
-              <span className="text-caption">
-                2 minutes ago
-              </span>
+              <span className='text-caption'>2 minutes ago</span>
             </div>
-            
-            <div className="flex items-center justify-between p-4 border border-retro-brown rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full animate-pulse retro-indicator-coral"></div>
-                <div className="flex flex-col">
-                  <span className="text-body font-medium">
+
+            <div className='flex items-center justify-between p-4 border border-retro-brown rounded-lg'>
+              <div className='flex items-center gap-4'>
+                <div className='w-3 h-3 rounded-full animate-pulse retro-indicator-coral'></div>
+                <div className='flex flex-col'>
+                  <span className='text-body font-medium'>
                     New BOOM_1000 PUT position opened
                   </span>
                 </div>
               </div>
-              <span className="text-caption">
-                5 minutes ago
-              </span>
+              <span className='text-caption'>5 minutes ago</span>
             </div>
-            
-            <div className="flex items-center justify-between p-4 border border-retro-brown rounded-lg">
-              <div className="flex items-center gap-4">
-                <div className="w-3 h-3 rounded-full animate-pulse retro-indicator-gold"></div>
-                <div className="flex flex-col">
-                  <span className="text-body font-medium">
+
+            <div className='flex items-center justify-between p-4 border border-retro-brown rounded-lg'>
+              <div className='flex items-center gap-4'>
+                <div className='w-3 h-3 rounded-full animate-pulse retro-indicator-gold'></div>
+                <div className='flex flex-col'>
+                  <span className='text-body font-medium'>
                     AI analysis updated market recommendations
                   </span>
                 </div>
               </div>
-              <span className="text-caption">
-                10 minutes ago
-              </span>
+              <span className='text-caption'>10 minutes ago</span>
             </div>
           </div>
         </div>
 
         {/* Floating Action Button */}
-        <div className="fixed bottom-8 right-8 z-50">
-          <button 
-            className="fab"
-            title="Create New Trade"
-            aria-label="Create New Trade"
+        <div className='fixed bottom-8 right-8 z-50'>
+          <button
+            className='fab'
+            title='Create New Trade'
+            aria-label='Create New Trade'
           >
             <IconPlus size={24} />
           </button>

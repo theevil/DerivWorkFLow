@@ -4,8 +4,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useAutomationStore } from '../stores/automation';
+import { useAuthStore } from '../stores/auth';
 import { config } from '../config/env';
-import type { AutomationWebSocketMessage, AutomationUpdate } from '../types/automation';
+import type {
+  AutomationWebSocketMessage,
+  AutomationUpdate,
+} from '../types/automation';
 
 interface UseAutomationWebSocketOptions {
   enabled?: boolean;
@@ -13,11 +17,13 @@ interface UseAutomationWebSocketOptions {
   maxReconnectAttempts?: number;
 }
 
-export function useAutomationWebSocket(options: UseAutomationWebSocketOptions = {}) {
+export function useAutomationWebSocket(
+  options: UseAutomationWebSocketOptions = {}
+) {
   const {
     enabled = true,
     reconnectInterval = 5000,
-    maxReconnectAttempts = 10
+    maxReconnectAttempts = 10,
   } = options;
 
   const [isConnected, setIsConnected] = useState(false);
@@ -25,16 +31,27 @@ export function useAutomationWebSocket(options: UseAutomationWebSocketOptions = 
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const { setConnected, updateLastUpdate, loadAlerts, refreshSystemStatus } = useAutomationStore();
+  const reconnectTimeoutRef = useRef<number | null>(null);
+  const { setConnected, updateLastUpdate, loadAlerts, refreshSystemStatus } =
+    useAutomationStore();
+  const { token } = useAuthStore();
 
   const connect = () => {
     if (!enabled || wsRef.current?.readyState === WebSocket.OPEN) return;
 
+    // Check if we have a token for authentication
+    if (!token) {
+      console.warn(
+        'No authentication token available for WebSocket connection'
+      );
+      setError('Authentication required');
+      return;
+    }
+
     try {
-      // Construct WebSocket URL (assuming same host as API)
-      const wsUrl = config.apiUrl.replace('http', 'ws') + '/automation';
-      
+      // Construct WebSocket URL with token as path parameter
+      const wsUrl = `${config.apiUrl.replace('http', 'ws')}/ws/${token}`;
+
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
@@ -46,7 +63,7 @@ export function useAutomationWebSocket(options: UseAutomationWebSocketOptions = 
         updateLastUpdate();
       };
 
-      wsRef.current.onmessage = (event) => {
+      wsRef.current.onmessage = event => {
         try {
           const message: AutomationWebSocketMessage = JSON.parse(event.data);
           handleMessage(message);
@@ -56,8 +73,12 @@ export function useAutomationWebSocket(options: UseAutomationWebSocketOptions = 
         }
       };
 
-      wsRef.current.onclose = (event) => {
-        console.log('Automation WebSocket disconnected:', event.code, event.reason);
+      wsRef.current.onclose = event => {
+        console.log(
+          'Automation WebSocket disconnected:',
+          event.code,
+          event.reason
+        );
         setIsConnected(false);
         setConnected(false);
 
@@ -72,11 +93,10 @@ export function useAutomationWebSocket(options: UseAutomationWebSocketOptions = 
         }
       };
 
-      wsRef.current.onerror = (error) => {
+      wsRef.current.onerror = error => {
         console.error('Automation WebSocket error:', error);
         setError('WebSocket connection error');
       };
-
     } catch (error) {
       console.error('Failed to create WebSocket connection:', error);
       setError('Failed to create WebSocket connection');
@@ -155,7 +175,7 @@ export function useAutomationWebSocket(options: UseAutomationWebSocketOptions = 
   const subscribe = (eventTypes: string[]) => {
     sendMessage({
       type: 'subscribe',
-      events: eventTypes
+      events: eventTypes,
     });
   };
 
@@ -163,20 +183,20 @@ export function useAutomationWebSocket(options: UseAutomationWebSocketOptions = 
   const unsubscribe = (eventTypes: string[]) => {
     sendMessage({
       type: 'unsubscribe',
-      events: eventTypes
+      events: eventTypes,
     });
   };
 
   // Connect on mount if enabled
   useEffect(() => {
-    if (enabled) {
+    if (enabled && token) {
       connect();
     }
 
     return () => {
       disconnect();
     };
-  }, [enabled]);
+  }, [enabled, token]); // Add token as dependency
 
   // Cleanup on unmount
   useEffect(() => {

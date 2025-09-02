@@ -27,7 +27,7 @@ export function ActionButtonGroup({
   buttons,
   direction = 'vertical',
   spacing = 'sm',
-  className = ''
+  className = '',
 }: ActionButtonGroupProps) {
   if (direction === 'horizontal') {
     return (
@@ -41,7 +41,7 @@ export function ActionButtonGroup({
             disabled={button.disabled}
             loading={button.loading}
             fullWidth
-            size="sm"
+            size='sm'
           >
             {button.label}
           </RetroButton>
@@ -61,7 +61,7 @@ export function ActionButtonGroup({
           disabled={button.disabled}
           loading={button.loading}
           fullWidth
-          size="sm"
+          size='sm'
         >
           {button.label}
         </RetroButton>

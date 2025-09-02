@@ -34,49 +34,49 @@ export function WorkerStatusCard({
   iconVariant = 'turquoise',
   status,
   statusItems = [],
-  className = ''
+  className = '',
 }: WorkerStatusCardProps) {
   return (
-    <RetroCard 
-      variant="default" 
-      padding="md" 
+    <RetroCard
+      variant='default'
+      padding='md'
       className={`worker-card ${className}`}
     >
-      <Group justify="space-between" mb="sm">
-        <Group gap="xs">
-          <RetroIcon variant={iconVariant} size="sm">
+      <Group justify='space-between' mb='sm'>
+        <Group gap='xs'>
+          <RetroIcon variant={iconVariant} size='sm'>
             {icon}
           </RetroIcon>
           <div>
-            <Text fw={700} size="sm" className="text-title">
+            <Text fw={700} size='sm' className='text-title'>
               {title}
             </Text>
             {subtitle && (
-              <Text size="xs" className="text-caption">
+              <Text size='xs' className='text-caption'>
                 {subtitle}
               </Text>
             )}
           </div>
         </Group>
-        <RetroBadge variant={status.variant} size="xs">
+        <RetroBadge variant={status.variant} size='xs'>
           {status.text}
         </RetroBadge>
       </Group>
 
       {statusItems.length > 0 && (
-        <Stack gap="xs">
+        <Stack gap='xs'>
           {statusItems.map((item, index) => (
-            <Group justify="space-between" key={index}>
-              <Text size="xs" className="text-caption">
+            <Group justify='space-between' key={index}>
+              <Text size='xs' className='text-caption'>
                 {item.label}
               </Text>
               {typeof item.value === 'string' ? (
                 item.variant ? (
-                  <RetroBadge variant={item.variant} size="xs">
+                  <RetroBadge variant={item.variant} size='xs'>
                     {item.value}
                   </RetroBadge>
                 ) : (
-                  <Text size="xs" fw={700} className="text-title">
+                  <Text size='xs' fw={700} className='text-title'>
                     {item.value}
                   </Text>
                 )

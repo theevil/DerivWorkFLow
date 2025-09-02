@@ -1,15 +1,17 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
+
 from bson import ObjectId
+from loguru import logger
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from app.models.trading import (
+    MarketAnalysisInDB,
+    TradePositionCreate,
+    TradePositionInDB,
     TradingParametersCreate,
     TradingParametersInDB,
     TradingParametersUpdate,
-    TradePositionCreate,
-    TradePositionInDB,
-    MarketAnalysisInDB,
     TradingSignalInDB,
 )
 
@@ -22,7 +24,7 @@ async def create_trading_parameters(
         user_id=ObjectId(user_id),
         **params.model_dump()
     )
-    
+
     result = await db.trading_parameters.insert_one(
         db_params.model_dump(by_alias=True, exclude=["id"])
     )
@@ -43,7 +45,7 @@ async def update_trading_parameters(
 ) -> Optional[TradingParametersInDB]:
     update_data = params_update.model_dump(exclude_unset=True)
     update_data["updated_at"] = datetime.utcnow()
-    
+
     if result := await db.trading_parameters.find_one_and_update(
         {"user_id": ObjectId(user_id)},
         {"$set": update_data},
@@ -61,7 +63,7 @@ async def create_trade_position(
         user_id=ObjectId(user_id),
         **trade.model_dump()
     )
-    
+
     result = await db.trade_positions.insert_one(
         db_trade.model_dump(by_alias=True, exclude=["id"])
     )
@@ -71,11 +73,11 @@ async def create_trade_position(
 
 async def get_user_positions(
     db: AsyncIOMotorDatabase, user_id: str, status: Optional[str] = None
-) -> List[TradePositionInDB]:
+) -> list[TradePositionInDB]:
     query = {"user_id": ObjectId(user_id)}
     if status:
         query["status"] = status
-        
+
     cursor = db.trade_positions.find(query).sort("created_at", -1)
     positions = []
     async for position in cursor:
@@ -98,7 +100,7 @@ async def update_position(
     db: AsyncIOMotorDatabase, position_id: str, user_id: str, update_data: dict
 ) -> Optional[TradePositionInDB]:
     update_data["updated_at"] = datetime.utcnow()
-    
+
     if result := await db.trade_positions.find_one_and_update(
         {"_id": ObjectId(position_id), "user_id": ObjectId(user_id)},
         {"$set": update_data},
@@ -131,7 +133,7 @@ async def get_latest_market_analysis(
 
 async def get_market_analysis_history(
     db: AsyncIOMotorDatabase, symbol: str, limit: int = 100
-) -> List[MarketAnalysisInDB]:
+) -> list[MarketAnalysisInDB]:
     cursor = db.market_analysis.find({"symbol": symbol}).sort("timestamp", -1).limit(limit)
     analyses = []
     async for analysis in cursor:
@@ -153,11 +155,11 @@ async def create_trading_signal(
 
 async def get_user_signals(
     db: AsyncIOMotorDatabase, user_id: str, executed: Optional[bool] = None
-) -> List[TradingSignalInDB]:
+) -> list[TradingSignalInDB]:
     query = {"user_id": ObjectId(user_id)}
     if executed is not None:
         query["executed"] = executed
-        
+
     cursor = db.trading_signals.find(query).sort("created_at", -1)
     signals = []
     async for signal in cursor:
@@ -178,7 +180,7 @@ async def update_signal_executed(
 
 
 # Analytics and reporting
-async def get_all_open_positions(db: AsyncIOMotorDatabase) -> List[TradePositionInDB]:
+async def get_all_open_positions(db: AsyncIOMotorDatabase) -> list[TradePositionInDB]:
     """Get all open positions across all users"""
     try:
         cursor = db.trade_positions.find({"status": "open"})
@@ -191,7 +193,7 @@ async def get_all_open_positions(db: AsyncIOMotorDatabase) -> List[TradePosition
         return []
 
 
-async def get_all_active_users(db: AsyncIOMotorDatabase) -> List[str]:
+async def get_all_active_users(db: AsyncIOMotorDatabase) -> list[str]:
     """Get all active user IDs"""
     try:
         cursor = db.users.find({"active": {"$ne": False}}, {"_id": 1})
@@ -225,16 +227,16 @@ async def get_user_trading_stats(db: AsyncIOMotorDatabase, user_id: str) -> dict
             }
         }
     ]
-    
+
     result = await db.trade_positions.aggregate(pipeline).to_list(1)
     if result:
         stats = result[0]
         stats["win_rate"] = (
-            stats["winning_trades"] / stats["total_trades"] 
+            stats["winning_trades"] / stats["total_trades"]
             if stats["total_trades"] > 0 else 0
         )
         return stats
-    
+
     return {
         "total_trades": 0,
         "winning_trades": 0,

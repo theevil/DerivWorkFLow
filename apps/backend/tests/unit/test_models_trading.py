@@ -2,34 +2,30 @@
 Unit tests for app.models.trading module.
 """
 
-import pytest
 from datetime import datetime
-from typing import List
-from pydantic import ValidationError
+
+import pytest
 from bson import ObjectId
+from pydantic import ValidationError
 
 from app.models.trading import (
-    TradingParametersBase,
-    TradingParametersCreate,
-    TradingParametersUpdate,
-    TradingParametersInDB,
-    TradingParameters,
-    TradePositionBase,
-    TradePositionCreate,
-    TradePositionInDB,
-    TradePosition,
     MarketAnalysisBase,
     MarketAnalysisInDB,
-    MarketAnalysis,
+    TradePosition,
+    TradePositionBase,
+    TradePositionInDB,
+    TradingParametersBase,
+    TradingParametersCreate,
+    TradingParametersInDB,
+    TradingParametersUpdate,
     TradingSignalBase,
     TradingSignalInDB,
-    TradingSignal
 )
 
 
 class TestTradingParametersBase:
     """Test the TradingParametersBase model."""
-    
+
     def test_valid_trading_parameters(self):
         """Test creating valid trading parameters."""
         params_data = {
@@ -40,16 +36,16 @@ class TestTradingParametersBase:
             "max_daily_loss": 100.0,
             "position_size": 10.0
         }
-        
+
         params = TradingParametersBase(**params_data)
-        
+
         assert params.profit_top == 10.0
         assert params.profit_loss == 5.0
         assert params.stop_loss == 15.0
         assert params.take_profit == 8.0
         assert params.max_daily_loss == 100.0
         assert params.position_size == 10.0
-    
+
     def test_field_validation_ranges(self):
         """Test field validation for acceptable ranges."""
         # Test minimum values
@@ -61,10 +57,10 @@ class TestTradingParametersBase:
             "max_daily_loss": 1.0,
             "position_size": 1.0
         }
-        
+
         params = TradingParametersBase(**params_data)
         assert params.profit_top == 0.1
-        
+
         # Test maximum values
         params_data = {
             "profit_top": 100.0,
@@ -74,10 +70,10 @@ class TestTradingParametersBase:
             "max_daily_loss": 10000.0,
             "position_size": 10000.0
         }
-        
+
         params = TradingParametersBase(**params_data)
         assert params.profit_top == 100.0
-    
+
     def test_profit_top_validation_errors(self):
         """Test profit_top field validation errors."""
         # Below minimum
@@ -91,7 +87,7 @@ class TestTradingParametersBase:
                 position_size=10.0
             )
         assert "Input should be greater than or equal to 0.1" in str(exc_info.value)
-        
+
         # Above maximum
         with pytest.raises(ValidationError) as exc_info:
             TradingParametersBase(
@@ -103,7 +99,7 @@ class TestTradingParametersBase:
                 position_size=10.0
             )
         assert "Input should be less than or equal to 100" in str(exc_info.value)
-    
+
     def test_position_size_validation_errors(self):
         """Test position_size field validation errors."""
         # Below minimum
@@ -117,7 +113,7 @@ class TestTradingParametersBase:
                 position_size=0.5  # Below 1.0
             )
         assert "Input should be greater than or equal to 1" in str(exc_info.value)
-        
+
         # Above maximum
         with pytest.raises(ValidationError) as exc_info:
             TradingParametersBase(
@@ -129,7 +125,7 @@ class TestTradingParametersBase:
                 position_size=15000.0  # Above 10000.0
             )
         assert "Input should be less than or equal to 10000" in str(exc_info.value)
-    
+
     def test_missing_required_fields(self):
         """Test that all fields are required."""
         with pytest.raises(ValidationError) as exc_info:
@@ -138,7 +134,7 @@ class TestTradingParametersBase:
                 profit_loss=5.0
                 # Missing other fields
             )
-        
+
         error_msg = str(exc_info.value)
         assert "stop_loss" in error_msg
         assert "Field required" in error_msg
@@ -146,7 +142,7 @@ class TestTradingParametersBase:
 
 class TestTradingParametersCreate:
     """Test the TradingParametersCreate model."""
-    
+
     def test_inherits_from_base(self):
         """Test that TradingParametersCreate inherits from base."""
         params_data = {
@@ -157,9 +153,9 @@ class TestTradingParametersCreate:
             "max_daily_loss": 100.0,
             "position_size": 10.0
         }
-        
+
         params = TradingParametersCreate(**params_data)
-        
+
         # Should have all base fields
         assert hasattr(params, 'profit_top')
         assert hasattr(params, 'profit_loss')
@@ -171,48 +167,48 @@ class TestTradingParametersCreate:
 
 class TestTradingParametersUpdate:
     """Test the TradingParametersUpdate model."""
-    
+
     def test_all_fields_optional(self):
         """Test that all fields are optional in update model."""
         params = TradingParametersUpdate()
-        
+
         assert params.profit_top is None
         assert params.profit_loss is None
         assert params.stop_loss is None
         assert params.take_profit is None
         assert params.max_daily_loss is None
         assert params.position_size is None
-    
+
     def test_partial_update(self):
         """Test partial update with some fields."""
         params_data = {
             "profit_top": 15.0,
             "position_size": 20.0
         }
-        
+
         params = TradingParametersUpdate(**params_data)
-        
+
         assert params.profit_top == 15.0
         assert params.position_size == 20.0
         assert params.profit_loss is None
         assert params.stop_loss is None
-    
+
     def test_validation_on_provided_fields(self):
         """Test that validation still applies to provided fields."""
         with pytest.raises(ValidationError) as exc_info:
             TradingParametersUpdate(profit_top=150.0)  # Above maximum
-        
+
         assert "Input should be less than or equal to 100" in str(exc_info.value)
 
 
 class TestTradingParametersInDB:
     """Test the TradingParametersInDB model."""
-    
+
     def test_valid_in_db_model(self):
         """Test creating valid TradingParametersInDB."""
         object_id = ObjectId()
         user_id = ObjectId()
-        
+
         params_data = {
             "_id": object_id,
             "user_id": user_id,
@@ -223,14 +219,14 @@ class TestTradingParametersInDB:
             "max_daily_loss": 100.0,
             "position_size": 10.0
         }
-        
+
         params = TradingParametersInDB(**params_data)
-        
+
         assert params.id == object_id
         assert params.user_id == user_id
         assert isinstance(params.created_at, datetime)
         assert isinstance(params.updated_at, datetime)
-    
+
     def test_default_timestamps(self):
         """Test that timestamps are set by default."""
         params_data = {
@@ -243,16 +239,16 @@ class TestTradingParametersInDB:
             "max_daily_loss": 100.0,
             "position_size": 10.0
         }
-        
+
         params = TradingParametersInDB(**params_data)
-        
+
         assert params.created_at is not None
         assert params.updated_at is not None
 
 
 class TestTradePositionBase:
     """Test the TradePositionBase model."""
-    
+
     def test_valid_trade_position(self):
         """Test creating valid trade position."""
         position_data = {
@@ -262,15 +258,15 @@ class TestTradePositionBase:
             "duration": 5,
             "duration_unit": "m"
         }
-        
+
         position = TradePositionBase(**position_data)
-        
+
         assert position.symbol == "R_10"
         assert position.contract_type == "CALL"
         assert position.amount == 10.0
         assert position.duration == 5
         assert position.duration_unit == "m"
-    
+
     def test_default_duration_unit(self):
         """Test default duration unit."""
         position_data = {
@@ -279,10 +275,10 @@ class TestTradePositionBase:
             "amount": 10.0,
             "duration": 5
         }
-        
+
         position = TradePositionBase(**position_data)
         assert position.duration_unit == "m"  # Default value
-    
+
     def test_amount_validation(self):
         """Test amount field validation."""
         # Below minimum
@@ -294,7 +290,7 @@ class TestTradePositionBase:
                 duration=5
             )
         assert "Input should be greater than or equal to 1" in str(exc_info.value)
-    
+
     def test_duration_validation(self):
         """Test duration field validation."""
         # Below minimum
@@ -310,12 +306,12 @@ class TestTradePositionBase:
 
 class TestTradePositionInDB:
     """Test the TradePositionInDB model."""
-    
+
     def test_valid_position_in_db(self):
         """Test creating valid TradePositionInDB."""
         object_id = ObjectId()
         user_id = ObjectId()
-        
+
         position_data = {
             "_id": object_id,
             "user_id": user_id,
@@ -329,9 +325,9 @@ class TestTradePositionInDB:
             "profit_loss": 0.5,
             "status": "open"
         }
-        
+
         position = TradePositionInDB(**position_data)
-        
+
         assert position.id == object_id
         assert position.user_id == user_id
         assert position.contract_id == "12345"
@@ -339,7 +335,7 @@ class TestTradePositionInDB:
         assert position.current_spot == 101.0
         assert position.profit_loss == 0.5
         assert position.status == "open"
-    
+
     def test_default_status(self):
         """Test default status value."""
         position_data = {
@@ -350,10 +346,10 @@ class TestTradePositionInDB:
             "amount": 10.0,
             "duration": 5
         }
-        
+
         position = TradePositionInDB(**position_data)
         assert position.status == "pending"  # Default value
-    
+
     def test_optional_fields(self):
         """Test that optional fields can be None."""
         position_data = {
@@ -364,9 +360,9 @@ class TestTradePositionInDB:
             "amount": 10.0,
             "duration": 5
         }
-        
+
         position = TradePositionInDB(**position_data)
-        
+
         assert position.contract_id is None
         assert position.entry_spot is None
         assert position.exit_spot is None
@@ -378,7 +374,7 @@ class TestTradePositionInDB:
 
 class TestMarketAnalysisBase:
     """Test the MarketAnalysisBase model."""
-    
+
     def test_valid_market_analysis(self):
         """Test creating valid market analysis."""
         analysis_data = {
@@ -391,9 +387,9 @@ class TestMarketAnalysisBase:
             "volatility": 0.15,
             "confidence": 0.8
         }
-        
+
         analysis = MarketAnalysisBase(**analysis_data)
-        
+
         assert analysis.symbol == "R_10"
         assert analysis.rsi == 65.5
         assert analysis.macd == 0.25
@@ -402,15 +398,15 @@ class TestMarketAnalysisBase:
         assert analysis.trend == "up"
         assert analysis.volatility == 0.15
         assert analysis.confidence == 0.8
-    
+
     def test_optional_fields(self):
         """Test that most fields are optional."""
         analysis_data = {
             "symbol": "R_10"
         }
-        
+
         analysis = MarketAnalysisBase(**analysis_data)
-        
+
         assert analysis.symbol == "R_10"
         assert analysis.rsi is None
         assert analysis.macd is None
@@ -419,7 +415,7 @@ class TestMarketAnalysisBase:
         assert analysis.trend is None
         assert analysis.volatility is None
         assert analysis.confidence is None
-    
+
     def test_confidence_validation(self):
         """Test confidence field validation."""
         # Below minimum
@@ -429,7 +425,7 @@ class TestMarketAnalysisBase:
                 confidence=-0.1  # Below 0.0
             )
         assert "Input should be greater than or equal to 0" in str(exc_info.value)
-        
+
         # Above maximum
         with pytest.raises(ValidationError) as exc_info:
             MarketAnalysisBase(
@@ -441,11 +437,11 @@ class TestMarketAnalysisBase:
 
 class TestMarketAnalysisInDB:
     """Test the MarketAnalysisInDB model."""
-    
+
     def test_valid_analysis_in_db(self):
         """Test creating valid MarketAnalysisInDB."""
         object_id = ObjectId()
-        
+
         analysis_data = {
             "_id": object_id,
             "symbol": "R_10",
@@ -453,14 +449,14 @@ class TestMarketAnalysisInDB:
             "price_history": [98.0, 99.0, 100.0, 101.0],
             "rsi": 65.5
         }
-        
+
         analysis = MarketAnalysisInDB(**analysis_data)
-        
+
         assert analysis.id == object_id
         assert analysis.current_price == 100.0
         assert analysis.price_history == [98.0, 99.0, 100.0, 101.0]
         assert isinstance(analysis.timestamp, datetime)
-    
+
     def test_default_timestamp(self):
         """Test that timestamp is set by default."""
         analysis_data = {
@@ -468,11 +464,11 @@ class TestMarketAnalysisInDB:
             "symbol": "R_10",
             "current_price": 100.0
         }
-        
+
         analysis = MarketAnalysisInDB(**analysis_data)
         assert analysis.timestamp is not None
         assert isinstance(analysis.timestamp, datetime)
-    
+
     def test_default_price_history(self):
         """Test that price_history defaults to empty list."""
         analysis_data = {
@@ -480,14 +476,14 @@ class TestMarketAnalysisInDB:
             "symbol": "R_10",
             "current_price": 100.0
         }
-        
+
         analysis = MarketAnalysisInDB(**analysis_data)
         assert analysis.price_history == []
 
 
 class TestTradingSignalBase:
     """Test the TradingSignalBase model."""
-    
+
     def test_valid_trading_signal(self):
         """Test creating valid trading signal."""
         signal_data = {
@@ -498,16 +494,16 @@ class TestTradingSignalBase:
             "recommended_duration": 5,
             "reasoning": "RSI indicates oversold conditions"
         }
-        
+
         signal = TradingSignalBase(**signal_data)
-        
+
         assert signal.symbol == "R_10"
         assert signal.signal_type == "BUY_CALL"
         assert signal.confidence == 0.8
         assert signal.recommended_amount == 10.0
         assert signal.recommended_duration == 5
         assert signal.reasoning == "RSI indicates oversold conditions"
-    
+
     def test_confidence_validation(self):
         """Test confidence field validation."""
         # Valid range
@@ -519,10 +515,10 @@ class TestTradingSignalBase:
             "recommended_duration": 5,
             "reasoning": "Test"
         }
-        
+
         signal = TradingSignalBase(**signal_data)
         assert signal.confidence == 0.5
-        
+
         # Invalid range
         with pytest.raises(ValidationError):
             TradingSignalBase(
@@ -533,7 +529,7 @@ class TestTradingSignalBase:
                 recommended_duration=5,
                 reasoning="Test"
             )
-    
+
     def test_recommended_amount_validation(self):
         """Test recommended_amount field validation."""
         with pytest.raises(ValidationError) as exc_info:
@@ -546,7 +542,7 @@ class TestTradingSignalBase:
                 reasoning="Test"
             )
         assert "Input should be greater than or equal to 1" in str(exc_info.value)
-    
+
     def test_recommended_duration_validation(self):
         """Test recommended_duration field validation."""
         with pytest.raises(ValidationError) as exc_info:
@@ -563,13 +559,13 @@ class TestTradingSignalBase:
 
 class TestTradingSignalInDB:
     """Test the TradingSignalInDB model."""
-    
+
     def test_valid_signal_in_db(self):
         """Test creating valid TradingSignalInDB."""
         object_id = ObjectId()
         user_id = ObjectId()
         trade_id = ObjectId()
-        
+
         signal_data = {
             "_id": object_id,
             "user_id": user_id,
@@ -582,15 +578,15 @@ class TestTradingSignalInDB:
             "executed": True,
             "trade_id": trade_id
         }
-        
+
         signal = TradingSignalInDB(**signal_data)
-        
+
         assert signal.id == object_id
         assert signal.user_id == user_id
         assert signal.executed is True
         assert signal.trade_id == trade_id
         assert isinstance(signal.created_at, datetime)
-    
+
     def test_default_values(self):
         """Test default values for optional fields."""
         signal_data = {
@@ -603,9 +599,9 @@ class TestTradingSignalInDB:
             "recommended_duration": 5,
             "reasoning": "Test reasoning"
         }
-        
+
         signal = TradingSignalInDB(**signal_data)
-        
+
         assert signal.executed is False  # Default value
         assert signal.trade_id is None  # Default value
         assert isinstance(signal.created_at, datetime)
@@ -613,7 +609,7 @@ class TestTradingSignalInDB:
 
 class TestTradingModelInteroperability:
     """Test interoperability between trading models."""
-    
+
     def test_parameters_create_to_in_db(self):
         """Test converting TradingParametersCreate to InDB."""
         create_data = {
@@ -624,27 +620,27 @@ class TestTradingModelInteroperability:
             "max_daily_loss": 100.0,
             "position_size": 10.0
         }
-        
+
         params_create = TradingParametersCreate(**create_data)
-        
+
         # Convert to InDB model
         in_db_data = {
             "_id": ObjectId(),
             "user_id": ObjectId(),
             **params_create.model_dump()
         }
-        
+
         params_in_db = TradingParametersInDB(**in_db_data)
-        
+
         assert params_in_db.profit_top == params_create.profit_top
         assert params_in_db.profit_loss == params_create.profit_loss
         assert params_in_db.stop_loss == params_create.stop_loss
-    
+
     def test_position_in_db_to_public(self):
         """Test converting TradePositionInDB to public model."""
         object_id = ObjectId()
         user_id = ObjectId()
-        
+
         in_db_data = {
             "_id": object_id,
             "user_id": user_id,
@@ -656,9 +652,9 @@ class TestTradingModelInteroperability:
             "created_at": datetime(2023, 1, 1, 12, 0, 0),
             "updated_at": datetime(2023, 1, 1, 12, 0, 0)
         }
-        
+
         position_in_db = TradePositionInDB(**in_db_data)
-        
+
         # Convert to public model
         public_data = {
             "id": str(position_in_db.id),
@@ -679,9 +675,9 @@ class TestTradingModelInteroperability:
             "created_at": position_in_db.created_at,
             "updated_at": position_in_db.updated_at
         }
-        
+
         position = TradePosition(**public_data)
-        
+
         assert position.id == str(object_id)
         assert position.user_id == str(user_id)
         assert position.symbol == "R_10"

@@ -112,7 +112,11 @@ export interface TaskQueueData {
 
 // Real-time updates
 export interface AutomationUpdate {
-  type: 'signal_generated' | 'trade_executed' | 'position_closed' | 'alert_created';
+  type:
+    | 'signal_generated'
+    | 'trade_executed'
+    | 'position_closed'
+    | 'alert_created';
   data: any;
   timestamp: string;
 }
@@ -153,31 +157,31 @@ export interface AutomationState {
   // Configuration
   config: AutomationSettings | null;
   isConfigLoading: boolean;
-  
+
   // System status
   systemStatus: SystemStatus | null;
   isStatusLoading: boolean;
   lastStatusUpdate: string | null;
-  
+
   // Tasks
   activeTasks: Record<string, ActiveTask[]>;
   taskHistory: TaskStatus[];
   isTasksLoading: boolean;
-  
+
   // Alerts
   alerts: Alert[];
   unacknowledgedCount: number;
   isAlertsLoading: boolean;
-  
+
   // Performance
   performance: AutomationPerformance | null;
   performanceHistory: PerformanceChartData[];
   isPerformanceLoading: boolean;
-  
+
   // Queue stats
   queueStats: Record<string, QueueStats>;
   isQueueStatsLoading: boolean;
-  
+
   // Real-time updates
   isConnected: boolean;
   lastUpdate: string | null;

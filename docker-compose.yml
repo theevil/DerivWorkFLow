@@ -6,7 +6,7 @@ services:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
-  
+
   redis:
     image: redis:7-alpine
     restart: unless-stopped
@@ -33,7 +33,7 @@ services:
       - redis
     ports:
       - '8000:8000'
-  
+
   celery-worker:
     build:
       context: ./apps/backend
@@ -51,7 +51,7 @@ services:
       - mongodb
       - redis
     command: celery -A app.workers.celery_app worker --loglevel=info --queues=market_scan,position_monitor,trading,risk_monitor,signals,training,analysis
-  
+
   celery-beat:
     build:
       context: ./apps/backend
@@ -82,5 +82,3 @@ services:
 volumes:
   mongo_data:
   redis_data:
-
-

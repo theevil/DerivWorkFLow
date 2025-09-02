@@ -49,35 +49,35 @@ export function WorkersPanel({
   quickActions,
   onRefresh,
   isRefreshing = false,
-  className = ''
+  className = '',
 }: WorkersPanelProps) {
   return (
     <Grid className={className}>
       {/* Workers Section - 8 columns */}
       <Grid.Col span={{ base: 12, lg: 8 }}>
-        <RetroCard variant="default" padding="lg">
-          <Group justify="space-between" mb="md">
-            <Group gap="sm">
-              <RetroIcon variant="turquoise" size="md">
+        <RetroCard variant='default' padding='lg'>
+          <Group justify='space-between' mb='md'>
+            <Group gap='sm'>
+              <RetroIcon variant='turquoise' size='md'>
                 <IconServer size={18} />
               </RetroIcon>
-              <Text fw={700} size="lg" className="text-headline">
+              <Text fw={700} size='lg' className='text-headline'>
                 System Workers
               </Text>
             </Group>
-            <button 
-              className="retro-icon-coral rounded-xl p-2 transition-all hover:scale-110"
+            <button
+              className='retro-icon-coral rounded-xl p-2 transition-all hover:scale-110'
               onClick={onRefresh}
               disabled={isRefreshing}
-              aria-label="Refresh worker status"
-              title="Refresh worker status"
+              aria-label='Refresh worker status'
+              title='Refresh worker status'
             >
               <IconRefresh size={14} />
             </button>
           </Group>
 
           <Grid>
-            {workers.map((worker) => (
+            {workers.map(worker => (
               <Grid.Col key={worker.id} span={{ base: 12, md: 6 }}>
                 <WorkerStatusCard
                   title={worker.title}
@@ -95,22 +95,22 @@ export function WorkersPanel({
 
       {/* Quick Actions Section - 4 columns */}
       <Grid.Col span={{ base: 12, lg: 4 }}>
-        <RetroCard variant="default" padding="lg">
-          <Group justify="space-between" mb="md">
-            <Group gap="sm">
-              <RetroIcon variant="coral" size="md">
+        <RetroCard variant='default' padding='lg'>
+          <Group justify='space-between' mb='md'>
+            <Group gap='sm'>
+              <RetroIcon variant='coral' size='md'>
                 <IconServer size={18} />
               </RetroIcon>
-              <Text fw={700} size="lg" className="text-headline">
+              <Text fw={700} size='lg' className='text-headline'>
                 Quick Actions
               </Text>
             </Group>
           </Group>
 
-          <ActionButtonGroup 
+          <ActionButtonGroup
             buttons={quickActions}
-            direction="vertical"
-            spacing="sm"
+            direction='vertical'
+            spacing='sm'
           />
         </RetroCard>
       </Grid.Col>

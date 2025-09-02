@@ -1,32 +1,31 @@
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from motor.motor_asyncio import AsyncIOMotorDatabase
+from typing import Optional
 
+from fastapi import APIRouter, Depends, HTTPException, status
 from app.core.database import get_database
-from app.routers.auth import get_current_user
-from app.models.user import User
+from app.crud.trading import (
+    create_trade_position,
+    create_trading_parameters,
+    get_latest_market_analysis,
+    get_market_analysis_history,
+    get_position_by_id,
+    get_user_positions,
+    get_user_signals,
+    get_user_trading_parameters,
+    get_user_trading_stats,
+    update_position,
+    update_trading_parameters,
+)
 from app.models.trading import (
+    MarketAnalysis,
+    TradePosition,
+    TradePositionCreate,
     TradingParameters,
     TradingParametersCreate,
     TradingParametersUpdate,
-    TradePosition,
-    TradePositionCreate,
-    MarketAnalysis,
     TradingSignal,
 )
-from app.crud.trading import (
-    create_trading_parameters,
-    get_user_trading_parameters,
-    update_trading_parameters,
-    create_trade_position,
-    get_user_positions,
-    get_position_by_id,
-    update_position,
-    get_latest_market_analysis,
-    get_market_analysis_history,
-    get_user_signals,
-    get_user_trading_stats,
-)
+from app.models.user import User
+from app.routers.auth import get_current_user
 
 router = APIRouter()
 
@@ -46,7 +45,7 @@ async def create_user_trading_parameters(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Trading parameters already exist. Use PUT to update."
         )
-    
+
     db_params = await create_trading_parameters(db, str(current_user.id), params)
     return TradingParameters(
         id=str(db_params.id),
@@ -64,7 +63,7 @@ async def get_trading_parameters(
     params = await get_user_trading_parameters(db, str(current_user.id))
     if not params:
         return None
-    
+
     return TradingParameters(
         id=str(params.id),
         user_id=str(params.user_id),
@@ -85,7 +84,7 @@ async def update_user_trading_parameters(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Trading parameters not found"
         )
-    
+
     return TradingParameters(
         id=str(updated_params.id),
         user_id=str(updated_params.user_id),
@@ -109,7 +108,7 @@ async def create_position(
     )
 
 
-@router.get("/positions", response_model=List[TradePosition])
+@router.get("/positions", response_model=list[TradePosition])
 async def get_positions(
     status: Optional[str] = None,
     current_user: User = Depends(get_current_user),
@@ -140,7 +139,7 @@ async def get_position(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Position not found"
         )
-    
+
     return TradePosition(
         id=str(position.id),
         user_id=str(position.user_id),
@@ -161,17 +160,17 @@ async def close_position(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Position not found"
         )
-    
+
     if position.status != "open":
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Position is not open"
         )
-    
+
     updated_position = await update_position(
         db, position_id, str(current_user.id), {"status": "closed"}
     )
-    
+
     return {"message": "Position closed successfully"}
 
 
@@ -185,14 +184,14 @@ async def get_market_analysis(
     analysis = await get_latest_market_analysis(db, symbol)
     if not analysis:
         return None
-    
+
     return MarketAnalysis(
         id=str(analysis.id),
         **analysis.model_dump(exclude=["id"])
     )
 
 
-@router.get("/analysis/{symbol}/history", response_model=List[MarketAnalysis])
+@router.get("/analysis/{symbol}/history", response_model=list[MarketAnalysis])
 async def get_analysis_history(
     symbol: str,
     limit: int = 100,
@@ -210,7 +209,7 @@ async def get_analysis_history(
 
 
 # Trading Signals endpoints
-@router.get("/signals", response_model=List[TradingSignal])
+@router.get("/signals", response_model=list[TradingSignal])
 async def get_trading_signals(
     executed: Optional[bool] = None,
     current_user: User = Depends(get_current_user),
