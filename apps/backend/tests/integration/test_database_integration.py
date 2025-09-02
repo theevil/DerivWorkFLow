@@ -105,7 +105,7 @@ class TestUserCRUDIntegration:
         user_create = UserCreate(
             email="test@example.com",
             name="Test User",
-            password="testpassword123"
+            password="testpassword123"  # pragma: allowlist secret
         )
 
         # Create user
@@ -114,7 +114,7 @@ class TestUserCRUDIntegration:
         assert created_user is not None
         assert created_user.email == "test@example.com"
         assert created_user.name == "Test User"
-        assert created_user.hashed_password != "testpassword123"  # Should be hashed
+        assert created_user.hashed_password != "testpassword123"  # Should be hashed  # pragma: allowlist secret
         assert created_user.id is not None
         assert isinstance(created_user.created_at, datetime)
 
@@ -138,7 +138,7 @@ class TestUserCRUDIntegration:
         user_create = UserCreate(
             email="update@example.com",
             name="Original Name",
-            password="password123"
+            password="password123"  # pragma: allowlist secret
         )
 
         # Create user
@@ -167,7 +167,7 @@ class TestUserCRUDIntegration:
         user_create = UserCreate(
             email="auth@example.com",
             name="Auth User",
-            password="correctpassword"
+            password="correctpassword"  # pragma: allowlist secret
         )
 
         # Create user
@@ -201,13 +201,13 @@ class TestUserCRUDIntegration:
         user_create1 = UserCreate(
             email="duplicate@example.com",
             name="User One",
-            password="password123"
+            password="password123"  # pragma: allowlist secret
         )
 
         user_create2 = UserCreate(
             email="duplicate@example.com",
             name="User Two",
-            password="password456"
+            password="password456"  # pragma: allowlist secret
         )
 
         # Create first user
@@ -243,7 +243,7 @@ class TestTradingCRUDIntegration:
         user_create = UserCreate(
             email="trader@example.com",
             name="Trader User",
-            password="password123"
+            password="password123"  # pragma: allowlist secret
         )
         user = await create_user(self.db, user_create)
 
@@ -296,7 +296,7 @@ class TestTradingCRUDIntegration:
         user_create = UserCreate(
             email="trader2@example.com",
             name="Trader User 2",
-            password="password123"
+            password="password123"  # pragma: allowlist secret
         )
         user = await create_user(self.db, user_create)
 
@@ -354,7 +354,7 @@ class TestTradingCRUDIntegration:
         user1_create = UserCreate(
             email="trader1@example.com",
             name="Trader One",
-            password="password123"
+            password="password123"  # pragma: allowlist secret
         )
         user1 = await create_user(self.db, user1_create)
 
@@ -362,7 +362,7 @@ class TestTradingCRUDIntegration:
         user2_create = UserCreate(
             email="trader2@example.com",
             name="Trader Two",
-            password="password456"
+            password="password456"  # pragma: allowlist secret
         )
         user2 = await create_user(self.db, user2_create)
 
@@ -439,7 +439,7 @@ class TestDatabasePerformance:
             user_create = UserCreate(
                 email=f"user{i}@example.com",
                 name=f"User {i}",
-                password="password123"
+                password="password123"  # pragma: allowlist secret
             )
             user = await create_user(self.db, user_create)
             users.append(user)

@@ -336,11 +336,11 @@ class HistoricalLearningSystem:
             self.model_performance["trend_classifier"] = performance
 
             logger.info(f"Trend classifier trained. Accuracy: {performance['accuracy']:.3f}")
-            return performance
+            return ModelPerformance(performance)
 
         except Exception as e:
             logger.error(f"Error training trend classifier: {e}")
-            return {}
+            return ModelPerformance()
 
     async def _train_signal_classifier(self, features_df: pd.DataFrame) -> ModelPerformance:
         """Train signal classification model"""
@@ -373,11 +373,11 @@ class HistoricalLearningSystem:
             self.model_performance["signal_classifier"] = performance
 
             logger.info(f"Signal classifier trained. Accuracy: {performance['accuracy']:.3f}")
-            return performance
+            return ModelPerformance(performance)
 
         except Exception as e:
             logger.error(f"Error training signal classifier: {e}")
-            return {}
+            return ModelPerformance()
 
     async def _train_risk_classifier(self, features_df: pd.DataFrame) -> ModelPerformance:
         """Train risk classification model"""
@@ -409,11 +409,11 @@ class HistoricalLearningSystem:
             self.model_performance["risk_classifier"] = performance
 
             logger.info(f"Risk classifier trained. Accuracy: {performance['accuracy']:.3f}")
-            return performance
+            return ModelPerformance(performance)
 
         except Exception as e:
             logger.error(f"Error training risk classifier: {e}")
-            return {}
+            return ModelPerformance()
 
     async def predict_trend(self, features: dict[str, Any]) -> tuple[str, float]:
         """Predict market trend using trained model"""
@@ -594,7 +594,7 @@ class HistoricalLearningSystem:
                 "profitable_trades": len([p for p in positions if p.profit_loss and p.profit_loss > 0]),
                 "losing_trades": len([p for p in positions if p.profit_loss and p.profit_loss < 0]),
                 "total_profit": sum(p.profit_loss for p in positions if p.profit_loss),
-                "avg_profit_per_trade": np.mean([p.profit_loss for p in positions if p.profit_loss]) if positions else 0,
+                "avg_profit_per_trade": float(np.mean([p.profit_loss for p in positions if p.profit_loss])) if positions else 0.0,
                 "best_trade": max([p.profit_loss for p in positions if p.profit_loss], default=0),
                 "worst_trade": min([p.profit_loss for p in positions if p.profit_loss], default=0),
             }

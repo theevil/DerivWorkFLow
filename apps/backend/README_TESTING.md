@@ -281,7 +281,7 @@ Key fixtures available in `conftest.py`:
        defaults = {
            "email": "test@example.com",
            "name": "Test User",
-           "password": "password123"
+           "password": "password123"  # pragma: allowlist secret
        }
        defaults.update(kwargs)
        return UserCreate(**defaults)

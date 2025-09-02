@@ -45,7 +45,7 @@ class TestSettings:
     @patch.dict(os.environ, {
         "ENVIRONMENT": "production",
         "DEBUG": "true",
-        "SECRET_KEY": "prod-secret-key",
+        "SECRET_KEY": "prod-secret-key",  # pragma: allowlist secret
         "MONGODB_URI": "mongodb://prod-db:27017",
         "MONGODB_DB": "deriv_prod",
         "ACCESS_TOKEN_EXPIRE_MINUTES": "120",

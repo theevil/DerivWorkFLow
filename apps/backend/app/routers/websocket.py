@@ -126,11 +126,20 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
     deriv_ws = None
 
     try:
-        # Validate user first
-        user = await get_current_user_from_token(token)
-
-        # Accept the WebSocket connection
+        # Accept the WebSocket connection first
         await websocket.accept()
+
+        # Validate user after accepting the connection
+        try:
+            user = await get_current_user_from_token(token)
+        except HTTPException as e:
+            logger.error(f"Authentication failed for WebSocket: {e}")
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+        except Exception as e:
+            logger.error(f"Unexpected error during authentication: {e}")
+            await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
+            return
 
         # Connect to our connection manager
         await connection_manager.connect(websocket, user.id)
@@ -185,12 +194,6 @@ async def websocket_endpoint(websocket: WebSocket, token: str):
                     # If we can't send error message, connection is likely broken
                     break
 
-    except HTTPException as e:
-        logger.error(f"HTTP error in WebSocket: {e}")
-        try:
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
-        except:
-            pass
     except Exception as e:
         logger.error(f"WebSocket connection error: {e}")
         try:

@@ -35,7 +35,7 @@ class TestUserWorkflow:
             user_data = {
                 "email": "integration@example.com",
                 "name": "Integration User",
-                "password": "password123"
+                "password": "password123"  # pragma: allowlist secret
             }
 
             created_user = UserInDB(

@@ -92,14 +92,14 @@ class TestUserCreate:
         user_data = {
             "email": "test@example.com",
             "name": "Test User",
-            "password": "securepassword123"
+            "password": "securepassword123"  # pragma: allowlist secret
         }
 
         user = UserCreate(**user_data)
 
         assert user.email == "test@example.com"
         assert user.name == "Test User"
-        assert user.password == "securepassword123"
+        assert user.password == "securepassword123"  # pragma: allowlist secret
 
     def test_missing_password(self):
         """Test UserCreate with missing password."""
@@ -132,7 +132,7 @@ class TestUserCreate:
         user_data = {
             "email": "test@example.com",
             "name": "Test User",
-            "password": "password123"
+            "password": "password123"  # pragma: allowlist secret
         }
 
         user = UserCreate(**user_data)
@@ -152,7 +152,7 @@ class TestUserUpdate:
         user_data = {
             "email": "updated@example.com",
             "name": "Updated User",
-            "password": "newpassword123",
+            "password": "newpassword123",  # pragma: allowlist secret
             "deriv_token": "new_token_123"
         }
 
@@ -160,7 +160,7 @@ class TestUserUpdate:
 
         assert user.email == "updated@example.com"
         assert user.name == "Updated User"
-        assert user.password == "newpassword123"
+        assert user.password == "newpassword123"  # pragma: allowlist secret
         assert user.deriv_token == "new_token_123"
 
     def test_partial_update(self):
@@ -431,7 +431,7 @@ class TestUserModelInteroperability:
 
         assert user_in_db.email == user_create.email
         assert user_in_db.name == user_create.name
-        assert user_in_db.hashed_password != create_data["password"]  # Should be hashed
+        assert user_in_db.hashed_password != create_data["password"]  # Should be hashed  # pragma: allowlist secret
 
     def test_user_in_db_to_user(self):
         """Test converting UserInDB to User."""

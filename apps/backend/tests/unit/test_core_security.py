@@ -21,7 +21,7 @@ class TestPasswordHashing:
 
     def test_get_password_hash(self):
         """Test password hashing function."""
-        password = "testpassword123"
+        password = "testpassword123"  # pragma: allowlist secret
         hashed = get_password_hash(password)
 
         assert hashed != password
@@ -30,15 +30,15 @@ class TestPasswordHashing:
 
     def test_verify_password_correct(self):
         """Test password verification with correct password."""
-        password = "testpassword123"
+        password = "testpassword123"  # pragma: allowlist secret
         hashed = get_password_hash(password)
 
         assert verify_password(password, hashed) is True
 
     def test_verify_password_incorrect(self):
         """Test password verification with incorrect password."""
-        password = "testpassword123"
-        wrong_password = "wrongpassword"
+        password = "testpassword123"  # pragma: allowlist secret
+        wrong_password = "wrongpassword"  # pragma: allowlist secret
         hashed = get_password_hash(password)
 
         assert verify_password(wrong_password, hashed) is False
@@ -62,8 +62,8 @@ class TestPasswordHashing:
 
     def test_different_passwords_different_hashes(self):
         """Test that different passwords produce different hashes."""
-        password1 = "password1"
-        password2 = "password2"
+        password1 = "password1"  # pragma: allowlist secret
+        password2 = "password2"  # pragma: allowlist secret
 
         hash1 = get_password_hash(password1)
         hash2 = get_password_hash(password2)
@@ -72,7 +72,7 @@ class TestPasswordHashing:
 
     def test_same_password_different_hashes(self):
         """Test that the same password produces different hashes (salt)."""
-        password = "testpassword123"
+        password = "testpassword123"  # pragma: allowlist secret
 
         hash1 = get_password_hash(password)
         hash2 = get_password_hash(password)

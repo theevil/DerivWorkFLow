@@ -165,7 +165,7 @@ class TestAuthRoutes:
 
                     response = self.client.post(
                         "/token",
-                        data={"username": "test@example.com", "password": "password123"}
+                        data={"username": "test@example.com", "password": "password123"}  # pragma: allowlist secret
                     )
 
                     assert response.status_code == 200
@@ -188,7 +188,7 @@ class TestAuthRoutes:
 
                 response = self.client.post(
                     "/token",
-                    data={"username": "test@example.com", "password": "wrongpassword"}
+                    data={"username": "test@example.com", "password": "wrongpassword"}  # pragma: allowlist secret
                 )
 
                 assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -207,7 +207,7 @@ class TestAuthRoutes:
         # Missing username
         response = self.client.post(
             "/token",
-            data={"password": "password123"}
+            data={"password": "password123"}  # pragma: allowlist secret
         )
         assert response.status_code == 422  # Validation error
 
@@ -240,7 +240,7 @@ class TestAuthRoutes:
         user_create_data = {
             "email": "newuser@example.com",
             "name": "New User",
-            "password": "password123"
+            "password": "password123"  # pragma: allowlist secret
         }
 
         created_user = UserInDB(

@@ -131,7 +131,7 @@ class TestCreateUser:
         user_create = UserCreate(
             email="test@example.com",
             name="Test User",
-            password="plainpassword"
+            password="plainpassword"  # pragma: allowlist secret
         )
 
         inserted_id = ObjectId()
@@ -170,7 +170,7 @@ class TestCreateUser:
         user_create = UserCreate(
             email="test@example.com",
             name="Test User",
-            password="plainpassword"
+            password="plainpassword"  # pragma: allowlist secret
         )
 
         mock_db.users.insert_one.return_value.inserted_id = ObjectId()
@@ -192,7 +192,7 @@ class TestCreateUser:
         user_create = UserCreate(
             email="test@example.com",
             name="Test User",
-            password="plainpassword"
+            password="plainpassword"  # pragma: allowlist secret
         )
 
         mock_db.users.insert_one.side_effect = Exception("Database error")
@@ -250,7 +250,7 @@ class TestUpdateUser:
         """Test updating user password."""
         mock_db = AsyncMock()
         user_id = "507f1f77bcf86cd799439011"
-        user_update = UserUpdate(password="newpassword")
+        user_update = UserUpdate(password="newpassword")  # pragma: allowlist secret
 
         updated_user_data = {
             "_id": ObjectId(user_id),
@@ -359,7 +359,7 @@ class TestAuthenticateUser:
         """Test successful user authentication."""
         mock_db = AsyncMock()
         email = "test@example.com"
-        password = "correctpassword"
+        password = "correctpassword"  # pragma: allowlist secret
 
         user_data = {
             "_id": ObjectId(),
@@ -389,7 +389,7 @@ class TestAuthenticateUser:
         """Test authentication with non-existent user."""
         mock_db = AsyncMock()
         email = "nonexistent@example.com"
-        password = "password"
+        password = "password"  # pragma: allowlist secret
 
         with patch('app.crud.users.get_user_by_email') as mock_get_user:
             mock_get_user.return_value = None
@@ -404,7 +404,7 @@ class TestAuthenticateUser:
         """Test authentication with wrong password."""
         mock_db = AsyncMock()
         email = "test@example.com"
-        password = "wrongpassword"
+        password = "wrongpassword"  # pragma: allowlist secret
 
         user_data = {
             "_id": ObjectId(),
@@ -463,7 +463,7 @@ class TestUserCRUDIntegration:
         user_create = UserCreate(
             email="test@example.com",
             name="Test User",
-            password="testpassword"
+            password="testpassword"  # pragma: allowlist secret
         )
 
         # Mock creation
@@ -497,7 +497,7 @@ class TestUserCRUDIntegration:
         """Test creating a user and then authenticating."""
         mock_db = AsyncMock()
         email = "test@example.com"
-        password = "testpassword"
+        password = "testpassword"  # pragma: allowlist secret
         hashed_password = "$2b$12$hashed_password"
 
         user_create = UserCreate(
