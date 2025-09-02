@@ -336,11 +336,11 @@ class HistoricalLearningSystem:
             self.model_performance["trend_classifier"] = performance
 
             logger.info(f"Trend classifier trained. Accuracy: {performance['accuracy']:.3f}")
-            return ModelPerformance(performance)
+            return performance
 
         except Exception as e:
             logger.error(f"Error training trend classifier: {e}")
-            return ModelPerformance()
+            return {}
 
     async def _train_signal_classifier(self, features_df: pd.DataFrame) -> ModelPerformance:
         """Train signal classification model"""
@@ -373,11 +373,11 @@ class HistoricalLearningSystem:
             self.model_performance["signal_classifier"] = performance
 
             logger.info(f"Signal classifier trained. Accuracy: {performance['accuracy']:.3f}")
-            return ModelPerformance(performance)
+            return performance
 
         except Exception as e:
             logger.error(f"Error training signal classifier: {e}")
-            return ModelPerformance()
+            return {}
 
     async def _train_risk_classifier(self, features_df: pd.DataFrame) -> ModelPerformance:
         """Train risk classification model"""
@@ -409,11 +409,11 @@ class HistoricalLearningSystem:
             self.model_performance["risk_classifier"] = performance
 
             logger.info(f"Risk classifier trained. Accuracy: {performance['accuracy']:.3f}")
-            return ModelPerformance(performance)
+            return performance
 
         except Exception as e:
             logger.error(f"Error training risk classifier: {e}")
-            return ModelPerformance()
+            return {}
 
     async def predict_trend(self, features: dict[str, Any]) -> tuple[str, float]:
         """Predict market trend using trained model"""
@@ -589,7 +589,7 @@ class HistoricalLearningSystem:
                 return {"message": "No trading history available"}
 
             # Analyze patterns
-            patterns: dict[str, Any] = {
+            patterns = {
                 "total_trades": len(positions),
                 "profitable_trades": len([p for p in positions if p.profit_loss and p.profit_loss > 0]),
                 "losing_trades": len([p for p in positions if p.profit_loss and p.profit_loss < 0]),
@@ -620,8 +620,8 @@ class HistoricalLearningSystem:
             # Time analysis
             trade_hours = [p.created_at.hour for p in positions]
             if trade_hours:
-                patterns["most_active_hour"] = float(max(set(trade_hours), key=trade_hours.count))
-                patterns["hourly_distribution"] = {h: int(trade_hours.count(h)) for h in range(24)}
+                patterns["most_active_hour"] = max(set(trade_hours), key=trade_hours.count)
+                patterns["hourly_distribution"] = {h: trade_hours.count(h) for h in range(24)}
 
             logger.info(f"Trading patterns analyzed for user {user_id}")
             return patterns

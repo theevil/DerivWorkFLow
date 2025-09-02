@@ -4,14 +4,14 @@ from pydantic import BaseModel, Field
 
 class MarketAnalysisRequest(BaseModel):
     symbol: str = Field(description="Trading symbol")
-    price_history: List[float] = Field(description="Historical price data", min_items=10, max_items=1000)
+    price_history: list[float] = Field(description="Historical price data", min_items=10, max_items=1000)
     current_price: float = Field(description="Current market price", gt=0)
-    market_context: Optional[Dict[str, Any]] = Field(default={}, description="Additional market context")
+    market_context: Optional[dict[str, Any]] = Field(default={}, description="Additional market context")
 
 
 class TradingDecisionRequest(BaseModel):
     symbol: str = Field(description="Trading symbol")
-    price_history: List[float] = Field(description="Historical price data", min_items=10, max_items=1000)
+    price_history: list[float] = Field(description="Historical price data", min_items=10, max_items=1000)
     current_price: float = Field(description="Current market price", gt=0)
     account_balance: float = Field(description="Account balance", gt=0)
     risk_tolerance: str = Field(default="medium", description="Risk tolerance: low, medium, high")
@@ -32,12 +32,12 @@ class RiskAssessmentRequest(BaseModel):
 
 class TrainingRequest(BaseModel):
     user_specific: bool = Field(default=True, description="Train user-specific models")
-    symbols: Optional[List[str]] = Field(default=None, description="Specific symbols to train on")
+    symbols: Optional[list[str]] = Field(default=None, description="Specific symbols to train on")
     lookback_days: Optional[int] = Field(default=30, description="Days of historical data to use")
 
 
 class SignalGenerationRequest(BaseModel):
     symbol: str = Field(description="Trading symbol")
-    price_history: List[float] = Field(description="Historical price data")
+    price_history: list[float] = Field(description="Historical price data")
     current_price: float = Field(description="Current market price", gt=0)
     use_ai: bool = Field(default=True, description="Use AI analysis")

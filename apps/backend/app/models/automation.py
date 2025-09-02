@@ -24,7 +24,7 @@ class TaskStatusResponse(BaseModel):
 
 
 class WorkerStatusResponse(BaseModel):
-    market_monitor: Dict[str, Any]
-    trading_executor: Dict[str, Any]
+    market_monitor: dict[str, Any]
+    trading_executor: dict[str, Any]
     celery_active_tasks: int
     redis_connected: bool

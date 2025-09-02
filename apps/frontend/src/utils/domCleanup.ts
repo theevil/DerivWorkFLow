@@ -4,20 +4,24 @@
 
 export function cleanupProblematicElements() {
   // Remove ProtonPass extension elements
-  const protonPassElements = document.querySelectorAll('protonpass-root, [data-protonpass-role="root"]');
+  const protonPassElements = document.querySelectorAll(
+    'protonpass-root, [data-protonpass-role="root"]'
+  );
   protonPassElements.forEach(element => {
     element.remove();
   });
 
   // Fix Mantine notification containers
-  const notificationContainers = document.querySelectorAll('.mantine-Notifications-root');
+  const notificationContainers = document.querySelectorAll(
+    '.mantine-Notifications-root'
+  );
   notificationContainers.forEach(container => {
     const element = container as HTMLElement;
     element.style.position = 'fixed';
     element.style.zIndex = '1000';
     element.style.maxWidth = '400px';
     element.style.overflow = 'visible';
-    
+
     // Ensure proper positioning
     const position = element.getAttribute('data-position');
     if (position === 'bottom-left' || position === 'bottom-center') {
@@ -40,7 +44,7 @@ export function cleanupProblematicElements() {
     el.style.position = 'fixed';
     el.style.zIndex = '999';
     el.style.pointerEvents = 'none';
-    
+
     // Hide empty portal elements
     if (!el.children.length) {
       el.style.display = 'none';

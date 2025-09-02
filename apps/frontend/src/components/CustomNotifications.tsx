@@ -4,8 +4,8 @@ import { Notifications } from '@mantine/notifications';
 export function CustomNotifications() {
   return (
     <div style={{ position: 'relative', zIndex: 1000 }}>
-      <Notifications 
-        position="top-right"
+      <Notifications
+        position='top-right'
         zIndex={1000}
         containerWidth={400}
         autoClose={5000}

@@ -13,6 +13,7 @@ Se detectaron elementos en el DOM que estaban causando errores visuales al rende
 ### 1. Configuración Personalizada de Mantine
 
 Se creó una configuración personalizada en `src/config/mantineConfig.ts` que:
+
 - Define posiciones fijas para las notificaciones
 - Establece z-index apropiados para evitar conflictos
 - Configura estilos globales para controlar elementos problemáticos
@@ -20,6 +21,7 @@ Se creó una configuración personalizada en `src/config/mantineConfig.ts` que:
 ### 2. Componente de Notificaciones Personalizado
 
 Se creó `src/components/CustomNotifications.tsx` que:
+
 - Controla mejor el posicionamiento de las notificaciones
 - Aplica estilos específicos para evitar desbordamientos
 - Limita el número de notificaciones mostradas
@@ -27,6 +29,7 @@ Se creó `src/components/CustomNotifications.tsx` que:
 ### 3. Utilidad de Limpieza del DOM
 
 Se implementó `src/utils/domCleanup.ts` que:
+
 - Elimina elementos de extensiones del navegador problemáticas
 - Corrige el posicionamiento de contenedores de notificaciones
 - Controla elementos portal vacíos
@@ -35,6 +38,7 @@ Se implementó `src/utils/domCleanup.ts` que:
 ### 4. Script de Limpieza del Navegador
 
 Se agregó `public/cleanup.js` que:
+
 - Se ejecuta automáticamente en el navegador
 - Limpia elementos problemáticos de manera periódica
 - Se activa en eventos como resize y visibility change
@@ -42,6 +46,7 @@ Se agregó `public/cleanup.js` que:
 ### 5. Estilos CSS Específicos
 
 Se agregaron estilos en `src/index.css` que:
+
 - Fuerzan el posicionamiento correcto de elementos problemáticos
 - Ocultan elementos de extensiones del navegador
 - Previenen desbordamientos horizontales

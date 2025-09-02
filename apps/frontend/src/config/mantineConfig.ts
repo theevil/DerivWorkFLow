@@ -62,8 +62,8 @@ export const mantineConfig: MantineThemeOverride = {
       },
     },
   },
-  globalStyles: (theme) => ({
-    'body': {
+  globalStyles: theme => ({
+    body: {
       overflowX: 'hidden',
     },
     '#root': {
@@ -76,12 +76,13 @@ export const mantineConfig: MantineThemeOverride = {
       maxWidth: '400px !important',
       overflow: 'visible !important',
     },
-    '.mantine-Notifications-root[data-position="bottom-left"], .mantine-Notifications-root[data-position="bottom-center"]': {
-      bottom: '20px !important',
-      left: '20px !important',
-      right: 'auto !important',
-      top: 'auto !important',
-    },
+    '.mantine-Notifications-root[data-position="bottom-left"], .mantine-Notifications-root[data-position="bottom-center"]':
+      {
+        bottom: '20px !important',
+        left: '20px !important',
+        right: 'auto !important',
+        top: 'auto !important',
+      },
     '.mantine-Notifications-root[data-position="top-right"]': {
       top: '20px !important',
       right: '20px !important',

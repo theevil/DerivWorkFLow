@@ -34,7 +34,7 @@ __all__ = [
     "TradePosition", "TradePositionCreate",
     "TradingParameters", "TradingParametersCreate", "TradingParametersUpdate",
     "TradingSignal", "MarketAnalysis",
-    
+
     # API models
     "DerivTokenRequest",
     "UserSettings", "SettingsUpdate",

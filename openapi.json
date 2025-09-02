@@ -1,1 +1,1653 @@
-{"openapi":"3.1.0","info":{"title":"Deriv Workflow API","version":"0.1.0"},"paths":{"/health":{"get":{"tags":["health"],"summary":"Health","operationId":"health_health_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"additionalProperties":true,"type":"object","title":"Response Health Health Get"}}}}}}},"/api/v1/auth/token":{"post":{"tags":["auth"],"summary":"Login","operationId":"login_api_v1_auth_token_post","requestBody":{"content":{"application/x-www-form-urlencoded":{"schema":{"$ref":"#/components/schemas/Body_login_api_v1_auth_token_post"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/auth/register":{"post":{"tags":["auth"],"summary":"Register","operationId":"register_api_v1_auth_register_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserCreate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/User"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/auth/me":{"get":{"tags":["auth"],"summary":"Get Current User Info","description":"Get current user information","operationId":"get_current_user_info_api_v1_auth_me_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/User"}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/deriv/token":{"post":{"tags":["deriv"],"summary":"Set Deriv Token","description":"Set or update a user's Deriv API token","operationId":"set_deriv_token_api_v1_deriv_token_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DerivTokenRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/trading/parameters":{"get":{"tags":["trading"],"summary":"Get Trading Parameters","description":"Get trading parameters for the current user","operationId":"get_trading_parameters_api_v1_trading_parameters_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"anyOf":[{"$ref":"#/components/schemas/TradingParameters"},{"type":"null"}],"title":"Response Get Trading Parameters Api V1 Trading Parameters Get"}}}}},"security":[{"OAuth2PasswordBearer":[]}]},"put":{"tags":["trading"],"summary":"Update User Trading Parameters","description":"Update trading parameters for the current user","operationId":"update_user_trading_parameters_api_v1_trading_parameters_put","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TradingParametersUpdate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TradingParameters"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}},"security":[{"OAuth2PasswordBearer":[]}]},"post":{"tags":["trading"],"summary":"Create User Trading Parameters","description":"Create trading parameters for the current user","operationId":"create_user_trading_parameters_api_v1_trading_parameters_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TradingParametersCreate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TradingParameters"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/trading/positions":{"post":{"tags":["trading"],"summary":"Create Position","description":"Create a new trade position","operationId":"create_position_api_v1_trading_positions_post","security":[{"OAuth2PasswordBearer":[]}],"requestBody":{"required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/TradePositionCreate"}}}},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TradePosition"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}},"get":{"tags":["trading"],"summary":"Get Positions","description":"Get trade positions for the current user","operationId":"get_positions_api_v1_trading_positions_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"status","in":"query","required":false,"schema":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Status"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/TradePosition"},"title":"Response Get Positions Api V1 Trading Positions Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/trading/positions/{position_id}":{"get":{"tags":["trading"],"summary":"Get Position","description":"Get a specific trade position","operationId":"get_position_api_v1_trading_positions__position_id__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"position_id","in":"path","required":true,"schema":{"type":"string","title":"Position Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TradePosition"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/trading/positions/{position_id}/close":{"put":{"tags":["trading"],"summary":"Close Position","description":"Close a trade position","operationId":"close_position_api_v1_trading_positions__position_id__close_put","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"position_id","in":"path","required":true,"schema":{"type":"string","title":"Position Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/trading/analysis/{symbol}":{"get":{"tags":["trading"],"summary":"Get Market Analysis","description":"Get latest market analysis for a symbol","operationId":"get_market_analysis_api_v1_trading_analysis__symbol__get","parameters":[{"name":"symbol","in":"path","required":true,"schema":{"type":"string","title":"Symbol"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"anyOf":[{"$ref":"#/components/schemas/MarketAnalysis"},{"type":"null"}],"title":"Response Get Market Analysis Api V1 Trading Analysis  Symbol  Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/trading/analysis/{symbol}/history":{"get":{"tags":["trading"],"summary":"Get Analysis History","description":"Get historical market analysis for a symbol","operationId":"get_analysis_history_api_v1_trading_analysis__symbol__history_get","parameters":[{"name":"symbol","in":"path","required":true,"schema":{"type":"string","title":"Symbol"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/MarketAnalysis"},"title":"Response Get Analysis History Api V1 Trading Analysis  Symbol  History Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/trading/signals":{"get":{"tags":["trading"],"summary":"Get Trading Signals","description":"Get trading signals for the current user","operationId":"get_trading_signals_api_v1_trading_signals_get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"executed","in":"query","required":false,"schema":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Executed"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/TradingSignal"},"title":"Response Get Trading Signals Api V1 Trading Signals Get"}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/trading/stats":{"get":{"tags":["trading"],"summary":"Get Trading Statistics","description":"Get comprehensive trading statistics for the current user","operationId":"get_trading_statistics_api_v1_trading_stats_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/market/symbols":{"get":{"tags":["market"],"summary":"Get Available Symbols","description":"Get list of available trading symbols","operationId":"get_available_symbols_api_v1_market_symbols_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/market/tick/{symbol}":{"get":{"tags":["market"],"summary":"Get Current Tick","description":"Get current tick data for a symbol","operationId":"get_current_tick_api_v1_market_tick__symbol__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"symbol","in":"path","required":true,"schema":{"type":"string","title":"Symbol"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/market/ticks":{"get":{"tags":["market"],"summary":"Get All Ticks","description":"Get current tick data for all symbols","operationId":"get_all_ticks_api_v1_market_ticks_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/market/history/{symbol}":{"get":{"tags":["market"],"summary":"Get Price History","description":"Get historical price data for a symbol (simulated)","operationId":"get_price_history_api_v1_market_history__symbol__get","security":[{"OAuth2PasswordBearer":[]}],"parameters":[{"name":"symbol","in":"path","required":true,"schema":{"type":"string","title":"Symbol"}},{"name":"limit","in":"query","required":false,"schema":{"type":"integer","default":100,"title":"Limit"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/market/market-status":{"get":{"tags":["market"],"summary":"Get Market Status","description":"Get overall market status","operationId":"get_market_status_api_v1_market_market_status_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/automation/status":{"get":{"tags":["automation"],"summary":"Get Automation Status","description":"Get current status of all automation workers","operationId":"get_automation_status_api_v1_automation_status_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/auto-trading/config":{"get":{"tags":["automation"],"summary":"Get Auto Trading Config","description":"Get auto trading configuration","operationId":"get_auto_trading_config_api_v1_automation_auto_trading_config_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/performance/summary":{"get":{"tags":["automation"],"summary":"Get Automation Performance","description":"Get automation performance metrics","operationId":"get_automation_performance_api_v1_automation_performance_summary_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/alerts":{"get":{"tags":["automation"],"summary":"Get Automation Alerts","description":"Get automation alerts","operationId":"get_automation_alerts_api_v1_automation_alerts_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/auto-trading/configure":{"post":{"tags":["automation"],"summary":"Configure Auto Trading","description":"Configure auto trading settings","operationId":"configure_auto_trading_api_v1_automation_auto_trading_configure_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/emergency-stop":{"post":{"tags":["automation"],"summary":"Trigger Emergency Stop","description":"Trigger emergency stop","operationId":"trigger_emergency_stop_api_v1_automation_emergency_stop_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/market-scan/trigger":{"post":{"tags":["automation"],"summary":"Trigger Market Scan","description":"Trigger market scan","operationId":"trigger_market_scan_api_v1_automation_market_scan_trigger_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/position-monitor/trigger":{"post":{"tags":["automation"],"summary":"Trigger Position Monitor","description":"Trigger position monitor","operationId":"trigger_position_monitor_api_v1_automation_position_monitor_trigger_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/models/retrain":{"post":{"tags":["automation"],"summary":"Trigger Model Retrain","description":"Trigger model retraining","operationId":"trigger_model_retrain_api_v1_automation_models_retrain_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/health-check":{"post":{"tags":["automation"],"summary":"Run Health Check","description":"Run system health check","operationId":"run_health_check_api_v1_automation_health_check_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/tasks/{task_id}/status":{"get":{"tags":["automation"],"summary":"Get Task Status","description":"Get task status by ID","operationId":"get_task_status_api_v1_automation_tasks__task_id__status_get","parameters":[{"name":"task_id","in":"path","required":true,"schema":{"type":"string","title":"Task Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/automation/tasks/active":{"get":{"tags":["automation"],"summary":"Get Active Tasks","description":"Get active and scheduled tasks","operationId":"get_active_tasks_api_v1_automation_tasks_active_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/queue-stats":{"get":{"tags":["automation"],"summary":"Get Queue Stats","description":"Get queue statistics","operationId":"get_queue_stats_api_v1_automation_queue_stats_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/automation/alerts/{alert_id}/acknowledge":{"post":{"tags":["automation"],"summary":"Acknowledge Alert","description":"Acknowledge an alert","operationId":"acknowledge_alert_api_v1_automation_alerts__alert_id__acknowledge_post","parameters":[{"name":"alert_id","in":"path","required":true,"schema":{"type":"string","title":"Alert Id"}}],"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}}}},"/api/v1/settings/test":{"get":{"tags":["settings"],"summary":"Test Settings Endpoint","description":"Test endpoint to verify settings router is working","operationId":"test_settings_endpoint_api_v1_settings_test_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/api/v1/settings/":{"get":{"tags":["settings"],"summary":"Get User Settings","description":"Get current user settings","operationId":"get_user_settings_api_v1_settings__get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/UserSettings"}}}}},"security":[{"OAuth2PasswordBearer":[]}]},"put":{"tags":["settings"],"summary":"Update User Settings","description":"Update user settings","operationId":"update_user_settings_api_v1_settings__put","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/SettingsUpdate"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/settings/test-deriv-connection":{"post":{"tags":["settings"],"summary":"Test Deriv Connection","description":"Test Deriv API connection with provided token","operationId":"test_deriv_connection_api_v1_settings_test_deriv_connection_post","requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DerivTokenRequest"}}},"required":true},"responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}},"422":{"description":"Validation Error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HTTPValidationError"}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/settings/system-status":{"get":{"tags":["settings"],"summary":"Get System Status","description":"Get system configuration status","operationId":"get_system_status_api_v1_settings_system_status_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/settings/reset-to-defaults":{"post":{"tags":["settings"],"summary":"Reset Settings To Defaults","description":"Reset user settings to default values","operationId":"reset_settings_to_defaults_api_v1_settings_reset_to_defaults_post","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/settings/export":{"get":{"tags":["settings"],"summary":"Export User Settings","description":"Export user settings for backup","operationId":"export_user_settings_api_v1_settings_export_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}},"security":[{"OAuth2PasswordBearer":[]}]}},"/api/v1/ws/stats":{"get":{"tags":["websocket"],"summary":"Get Websocket Stats","description":"Get WebSocket connection statistics","operationId":"get_websocket_stats_api_v1_ws_stats_get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{}}}}}}},"/":{"get":{"summary":"Root","operationId":"root__get","responses":{"200":{"description":"Successful Response","content":{"application/json":{"schema":{"additionalProperties":true,"type":"object","title":"Response Root  Get"}}}}}}}},"components":{"schemas":{"Body_login_api_v1_auth_token_post":{"properties":{"grant_type":{"anyOf":[{"type":"string","pattern":"password"},{"type":"null"}],"title":"Grant Type"},"username":{"type":"string","title":"Username"},"password":{"type":"string","title":"Password"},"scope":{"type":"string","title":"Scope","default":""},"client_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Client Id"},"client_secret":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Client Secret"}},"type":"object","required":["username","password"],"title":"Body_login_api_v1_auth_token_post"},"DerivTokenRequest":{"properties":{"token":{"type":"string","title":"Token"}},"type":"object","required":["token"],"title":"DerivTokenRequest"},"HTTPValidationError":{"properties":{"detail":{"items":{"$ref":"#/components/schemas/ValidationError"},"type":"array","title":"Detail"}},"type":"object","title":"HTTPValidationError"},"MarketAnalysis":{"properties":{"symbol":{"type":"string","title":"Symbol"},"rsi":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Rsi"},"macd":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Macd"},"bollinger_upper":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Bollinger Upper"},"bollinger_lower":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Bollinger Lower"},"trend":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Trend"},"volatility":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Volatility"},"confidence":{"anyOf":[{"type":"number","maximum":1.0,"minimum":0.0},{"type":"null"}],"title":"Confidence"},"id":{"type":"string","title":"Id"},"timestamp":{"type":"string","format":"date-time","title":"Timestamp"},"current_price":{"type":"number","title":"Current Price"},"price_history":{"items":{"type":"number"},"type":"array","title":"Price History"}},"type":"object","required":["symbol","id","timestamp","current_price","price_history"],"title":"MarketAnalysis"},"SettingsUpdate":{"properties":{"deriv_token":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Deriv Token"},"deriv_app_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Deriv App Id"},"ai_confidence_threshold":{"anyOf":[{"type":"number","maximum":1.0,"minimum":0.0},{"type":"null"}],"title":"Ai Confidence Threshold"},"ai_analysis_interval":{"anyOf":[{"type":"integer","maximum":300.0,"minimum":10.0},{"type":"null"}],"title":"Ai Analysis Interval"},"max_positions_per_user":{"anyOf":[{"type":"integer","maximum":50.0,"minimum":1.0},{"type":"null"}],"title":"Max Positions Per User"},"ai_model":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Ai Model"},"ai_temperature":{"anyOf":[{"type":"number","maximum":1.0,"minimum":0.0},{"type":"null"}],"title":"Ai Temperature"},"ai_max_tokens":{"anyOf":[{"type":"integer","maximum":4000.0,"minimum":100.0},{"type":"null"}],"title":"Ai Max Tokens"},"openai_api_key":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Openai Api Key"},"langchain_api_key":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Langchain Api Key"},"langsmith_project":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Langsmith Project"},"auto_stop_loss_enabled":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Auto Stop Loss Enabled"},"auto_take_profit_enabled":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Auto Take Profit Enabled"},"emergency_stop_enabled":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Emergency Stop Enabled"},"circuit_breaker_enabled":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Circuit Breaker Enabled"},"auto_trading_enabled":{"anyOf":[{"type":"boolean"},{"type":"null"}],"title":"Auto Trading Enabled"},"market_scan_interval":{"anyOf":[{"type":"integer","maximum":300.0,"minimum":5.0},{"type":"null"}],"title":"Market Scan Interval"},"position_monitor_interval":{"anyOf":[{"type":"integer","maximum":60.0,"minimum":1.0},{"type":"null"}],"title":"Position Monitor Interval"},"signal_execution_delay":{"anyOf":[{"type":"integer","maximum":30.0,"minimum":0.0},{"type":"null"}],"title":"Signal Execution Delay"},"max_concurrent_positions":{"anyOf":[{"type":"integer","maximum":20.0,"minimum":1.0},{"type":"null"}],"title":"Max Concurrent Positions"},"learning_data_lookback_days":{"anyOf":[{"type":"integer","maximum":365.0,"minimum":1.0},{"type":"null"}],"title":"Learning Data Lookback Days"},"min_training_samples":{"anyOf":[{"type":"integer","maximum":1000.0,"minimum":10.0},{"type":"null"}],"title":"Min Training Samples"},"retrain_interval_hours":{"anyOf":[{"type":"integer","maximum":168.0,"minimum":1.0},{"type":"null"}],"title":"Retrain Interval Hours"}},"type":"object","title":"SettingsUpdate","description":"Settings update model with optional fields"},"TradePosition":{"properties":{"symbol":{"type":"string","title":"Symbol","description":"Trading symbol (e.g., R_10, R_25)"},"contract_type":{"type":"string","title":"Contract Type","description":"Contract type (CALL, PUT)"},"amount":{"type":"number","minimum":1.0,"title":"Amount","description":"Trade amount in USD"},"duration":{"type":"integer","minimum":1.0,"title":"Duration","description":"Trade duration"},"duration_unit":{"type":"string","title":"Duration Unit","description":"Duration unit (m, h, d)","default":"m"},"id":{"type":"string","title":"Id"},"user_id":{"type":"string","title":"User Id"},"contract_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Contract Id"},"entry_spot":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Entry Spot"},"exit_spot":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Exit Spot"},"current_spot":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Current Spot"},"profit_loss":{"anyOf":[{"type":"number"},{"type":"null"}],"title":"Profit Loss"},"status":{"type":"string","title":"Status"},"entry_time":{"anyOf":[{"type":"string","format":"date-time"},{"type":"null"}],"title":"Entry Time"},"exit_time":{"anyOf":[{"type":"string","format":"date-time"},{"type":"null"}],"title":"Exit Time"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"updated_at":{"type":"string","format":"date-time","title":"Updated At"}},"type":"object","required":["symbol","contract_type","amount","duration","id","user_id","status","created_at","updated_at"],"title":"TradePosition"},"TradePositionCreate":{"properties":{"symbol":{"type":"string","title":"Symbol","description":"Trading symbol (e.g., R_10, R_25)"},"contract_type":{"type":"string","title":"Contract Type","description":"Contract type (CALL, PUT)"},"amount":{"type":"number","minimum":1.0,"title":"Amount","description":"Trade amount in USD"},"duration":{"type":"integer","minimum":1.0,"title":"Duration","description":"Trade duration"},"duration_unit":{"type":"string","title":"Duration Unit","description":"Duration unit (m, h, d)","default":"m"}},"type":"object","required":["symbol","contract_type","amount","duration"],"title":"TradePositionCreate"},"TradingParameters":{"properties":{"profit_top":{"type":"number","maximum":100.0,"minimum":0.1,"title":"Profit Top","description":"Profit target percentage"},"profit_loss":{"type":"number","maximum":100.0,"minimum":0.1,"title":"Profit Loss","description":"Stop loss percentage"},"stop_loss":{"type":"number","maximum":100.0,"minimum":0.1,"title":"Stop Loss","description":"Maximum stop loss"},"take_profit":{"type":"number","maximum":100.0,"minimum":0.1,"title":"Take Profit","description":"Take profit percentage"},"max_daily_loss":{"type":"number","maximum":10000.0,"minimum":1.0,"title":"Max Daily Loss","description":"Maximum daily loss amount"},"position_size":{"type":"number","maximum":10000.0,"minimum":1.0,"title":"Position Size","description":"Position size in USD"},"id":{"type":"string","title":"Id"},"user_id":{"type":"string","title":"User Id"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"updated_at":{"type":"string","format":"date-time","title":"Updated At"}},"type":"object","required":["profit_top","profit_loss","stop_loss","take_profit","max_daily_loss","position_size","id","user_id","created_at","updated_at"],"title":"TradingParameters"},"TradingParametersCreate":{"properties":{"profit_top":{"type":"number","maximum":100.0,"minimum":0.1,"title":"Profit Top","description":"Profit target percentage"},"profit_loss":{"type":"number","maximum":100.0,"minimum":0.1,"title":"Profit Loss","description":"Stop loss percentage"},"stop_loss":{"type":"number","maximum":100.0,"minimum":0.1,"title":"Stop Loss","description":"Maximum stop loss"},"take_profit":{"type":"number","maximum":100.0,"minimum":0.1,"title":"Take Profit","description":"Take profit percentage"},"max_daily_loss":{"type":"number","maximum":10000.0,"minimum":1.0,"title":"Max Daily Loss","description":"Maximum daily loss amount"},"position_size":{"type":"number","maximum":10000.0,"minimum":1.0,"title":"Position Size","description":"Position size in USD"}},"type":"object","required":["profit_top","profit_loss","stop_loss","take_profit","max_daily_loss","position_size"],"title":"TradingParametersCreate"},"TradingParametersUpdate":{"properties":{"profit_top":{"anyOf":[{"type":"number","maximum":100.0,"minimum":0.1},{"type":"null"}],"title":"Profit Top"},"profit_loss":{"anyOf":[{"type":"number","maximum":100.0,"minimum":0.1},{"type":"null"}],"title":"Profit Loss"},"stop_loss":{"anyOf":[{"type":"number","maximum":100.0,"minimum":0.1},{"type":"null"}],"title":"Stop Loss"},"take_profit":{"anyOf":[{"type":"number","maximum":100.0,"minimum":0.1},{"type":"null"}],"title":"Take Profit"},"max_daily_loss":{"anyOf":[{"type":"number","maximum":10000.0,"minimum":1.0},{"type":"null"}],"title":"Max Daily Loss"},"position_size":{"anyOf":[{"type":"number","maximum":10000.0,"minimum":1.0},{"type":"null"}],"title":"Position Size"}},"type":"object","title":"TradingParametersUpdate"},"TradingSignal":{"properties":{"symbol":{"type":"string","title":"Symbol"},"signal_type":{"type":"string","title":"Signal Type","description":"BUY_CALL, BUY_PUT, HOLD"},"confidence":{"type":"number","maximum":1.0,"minimum":0.0,"title":"Confidence"},"recommended_amount":{"type":"number","minimum":1.0,"title":"Recommended Amount"},"recommended_duration":{"type":"integer","minimum":1.0,"title":"Recommended Duration"},"reasoning":{"type":"string","title":"Reasoning","description":"AI reasoning for the signal"},"id":{"type":"string","title":"Id"},"user_id":{"type":"string","title":"User Id"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"executed":{"type":"boolean","title":"Executed"},"trade_id":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Trade Id"}},"type":"object","required":["symbol","signal_type","confidence","recommended_amount","recommended_duration","reasoning","id","user_id","created_at","executed"],"title":"TradingSignal"},"User":{"properties":{"email":{"type":"string","format":"email","title":"Email"},"name":{"type":"string","title":"Name"},"id":{"type":"string","title":"Id"},"deriv_token":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Deriv Token"},"created_at":{"type":"string","format":"date-time","title":"Created At"},"updated_at":{"type":"string","format":"date-time","title":"Updated At"}},"type":"object","required":["email","name","id","created_at","updated_at"],"title":"User"},"UserCreate":{"properties":{"email":{"type":"string","format":"email","title":"Email"},"name":{"type":"string","title":"Name"},"password":{"type":"string","title":"Password"}},"type":"object","required":["email","name","password"],"title":"UserCreate"},"UserSettings":{"properties":{"deriv_token":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Deriv Token"},"deriv_app_id":{"type":"string","title":"Deriv App Id","default":"1089"},"ai_confidence_threshold":{"type":"number","maximum":1.0,"minimum":0.0,"title":"Ai Confidence Threshold","default":0.6},"ai_analysis_interval":{"type":"integer","maximum":300.0,"minimum":10.0,"title":"Ai Analysis Interval","default":30},"max_positions_per_user":{"type":"integer","maximum":50.0,"minimum":1.0,"title":"Max Positions Per User","default":10},"ai_model":{"type":"string","title":"Ai Model","default":"gpt-4o-mini"},"ai_temperature":{"type":"number","maximum":1.0,"minimum":0.0,"title":"Ai Temperature","default":0.1},"ai_max_tokens":{"type":"integer","maximum":4000.0,"minimum":100.0,"title":"Ai Max Tokens","default":1000},"openai_api_key":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Openai Api Key"},"langchain_api_key":{"anyOf":[{"type":"string"},{"type":"null"}],"title":"Langchain Api Key"},"langsmith_project":{"type":"string","title":"Langsmith Project","default":"deriv-trading"},"auto_stop_loss_enabled":{"type":"boolean","title":"Auto Stop Loss Enabled","default":true},"auto_take_profit_enabled":{"type":"boolean","title":"Auto Take Profit Enabled","default":true},"emergency_stop_enabled":{"type":"boolean","title":"Emergency Stop Enabled","default":true},"circuit_breaker_enabled":{"type":"boolean","title":"Circuit Breaker Enabled","default":true},"auto_trading_enabled":{"type":"boolean","title":"Auto Trading Enabled","default":false},"market_scan_interval":{"type":"integer","maximum":300.0,"minimum":5.0,"title":"Market Scan Interval","default":30},"position_monitor_interval":{"type":"integer","maximum":60.0,"minimum":1.0,"title":"Position Monitor Interval","default":10},"signal_execution_delay":{"type":"integer","maximum":30.0,"minimum":0.0,"title":"Signal Execution Delay","default":5},"max_concurrent_positions":{"type":"integer","maximum":20.0,"minimum":1.0,"title":"Max Concurrent Positions","default":5},"learning_data_lookback_days":{"type":"integer","maximum":365.0,"minimum":1.0,"title":"Learning Data Lookback Days","default":30},"min_training_samples":{"type":"integer","maximum":1000.0,"minimum":10.0,"title":"Min Training Samples","default":100},"retrain_interval_hours":{"type":"integer","maximum":168.0,"minimum":1.0,"title":"Retrain Interval Hours","default":24}},"type":"object","title":"UserSettings","description":"User settings model"},"ValidationError":{"properties":{"loc":{"items":{"anyOf":[{"type":"string"},{"type":"integer"}]},"type":"array","title":"Location"},"msg":{"type":"string","title":"Message"},"type":{"type":"string","title":"Error Type"}},"type":"object","required":["loc","msg","type"],"title":"ValidationError"}},"securitySchemes":{"OAuth2PasswordBearer":{"type":"oauth2","flows":{"password":{"scopes":{},"tokenUrl":"/api/v1/auth/token"}}}}}}
+{
+  "openapi": "3.1.0",
+  "info": { "title": "Deriv Workflow API", "version": "0.1.0" },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": ["health"],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/token": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Login",
+        "operationId": "login_api_v1_auth_token_post",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": { "$ref": "#/components/schemas/Body_login_api_v1_auth_token_post" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": ["auth"],
+        "summary": "Register",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UserCreate" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": ["auth"],
+        "summary": "Get Current User Info",
+        "description": "Get current user information",
+        "operationId": "get_current_user_info_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/deriv/token": {
+      "post": {
+        "tags": ["deriv"],
+        "summary": "Set Deriv Token",
+        "description": "Set or update a user's Deriv API token",
+        "operationId": "set_deriv_token_api_v1_deriv_token_post",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/DerivTokenRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/trading/parameters": {
+      "get": {
+        "tags": ["trading"],
+        "summary": "Get Trading Parameters",
+        "description": "Get trading parameters for the current user",
+        "operationId": "get_trading_parameters_api_v1_trading_parameters_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    { "$ref": "#/components/schemas/TradingParameters" },
+                    { "type": "null" }
+                  ],
+                  "title": "Response Get Trading Parameters Api V1 Trading Parameters Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      },
+      "put": {
+        "tags": ["trading"],
+        "summary": "Update User Trading Parameters",
+        "description": "Update trading parameters for the current user",
+        "operationId": "update_user_trading_parameters_api_v1_trading_parameters_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TradingParametersUpdate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/TradingParameters" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      },
+      "post": {
+        "tags": ["trading"],
+        "summary": "Create User Trading Parameters",
+        "description": "Create trading parameters for the current user",
+        "operationId": "create_user_trading_parameters_api_v1_trading_parameters_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TradingParametersCreate" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/TradingParameters" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/trading/positions": {
+      "post": {
+        "tags": ["trading"],
+        "summary": "Create Position",
+        "description": "Create a new trade position",
+        "operationId": "create_position_api_v1_trading_positions_post",
+        "security": [{ "OAuth2PasswordBearer": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/TradePositionCreate" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/TradePosition" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["trading"],
+        "summary": "Get Positions",
+        "description": "Get trade positions for the current user",
+        "operationId": "get_positions_api_v1_trading_positions_get",
+        "security": [{ "OAuth2PasswordBearer": [] }],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Status" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/TradePosition" },
+                  "title": "Response Get Positions Api V1 Trading Positions Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/positions/{position_id}": {
+      "get": {
+        "tags": ["trading"],
+        "summary": "Get Position",
+        "description": "Get a specific trade position",
+        "operationId": "get_position_api_v1_trading_positions__position_id__get",
+        "security": [{ "OAuth2PasswordBearer": [] }],
+        "parameters": [
+          {
+            "name": "position_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Position Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/TradePosition" } }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/positions/{position_id}/close": {
+      "put": {
+        "tags": ["trading"],
+        "summary": "Close Position",
+        "description": "Close a trade position",
+        "operationId": "close_position_api_v1_trading_positions__position_id__close_put",
+        "security": [{ "OAuth2PasswordBearer": [] }],
+        "parameters": [
+          {
+            "name": "position_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Position Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/analysis/{symbol}": {
+      "get": {
+        "tags": ["trading"],
+        "summary": "Get Market Analysis",
+        "description": "Get latest market analysis for a symbol",
+        "operationId": "get_market_analysis_api_v1_trading_analysis__symbol__get",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Symbol" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [{ "$ref": "#/components/schemas/MarketAnalysis" }, { "type": "null" }],
+                  "title": "Response Get Market Analysis Api V1 Trading Analysis  Symbol  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/analysis/{symbol}/history": {
+      "get": {
+        "tags": ["trading"],
+        "summary": "Get Analysis History",
+        "description": "Get historical market analysis for a symbol",
+        "operationId": "get_analysis_history_api_v1_trading_analysis__symbol__history_get",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Symbol" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 100, "title": "Limit" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/MarketAnalysis" },
+                  "title": "Response Get Analysis History Api V1 Trading Analysis  Symbol  History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/signals": {
+      "get": {
+        "tags": ["trading"],
+        "summary": "Get Trading Signals",
+        "description": "Get trading signals for the current user",
+        "operationId": "get_trading_signals_api_v1_trading_signals_get",
+        "security": [{ "OAuth2PasswordBearer": [] }],
+        "parameters": [
+          {
+            "name": "executed",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "type": "boolean" }, { "type": "null" }], "title": "Executed" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/TradingSignal" },
+                  "title": "Response Get Trading Signals Api V1 Trading Signals Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/trading/stats": {
+      "get": {
+        "tags": ["trading"],
+        "summary": "Get Trading Statistics",
+        "description": "Get comprehensive trading statistics for the current user",
+        "operationId": "get_trading_statistics_api_v1_trading_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/market/symbols": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get Available Symbols",
+        "description": "Get list of available trading symbols",
+        "operationId": "get_available_symbols_api_v1_market_symbols_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/market/tick/{symbol}": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get Current Tick",
+        "description": "Get current tick data for a symbol",
+        "operationId": "get_current_tick_api_v1_market_tick__symbol__get",
+        "security": [{ "OAuth2PasswordBearer": [] }],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Symbol" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/market/ticks": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get All Ticks",
+        "description": "Get current tick data for all symbols",
+        "operationId": "get_all_ticks_api_v1_market_ticks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/market/history/{symbol}": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get Price History",
+        "description": "Get historical price data for a symbol (simulated)",
+        "operationId": "get_price_history_api_v1_market_history__symbol__get",
+        "security": [{ "OAuth2PasswordBearer": [] }],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Symbol" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 100, "title": "Limit" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/market/market-status": {
+      "get": {
+        "tags": ["market"],
+        "summary": "Get Market Status",
+        "description": "Get overall market status",
+        "operationId": "get_market_status_api_v1_market_market_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/automation/status": {
+      "get": {
+        "tags": ["automation"],
+        "summary": "Get Automation Status",
+        "description": "Get current status of all automation workers",
+        "operationId": "get_automation_status_api_v1_automation_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/auto-trading/config": {
+      "get": {
+        "tags": ["automation"],
+        "summary": "Get Auto Trading Config",
+        "description": "Get auto trading configuration",
+        "operationId": "get_auto_trading_config_api_v1_automation_auto_trading_config_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/performance/summary": {
+      "get": {
+        "tags": ["automation"],
+        "summary": "Get Automation Performance",
+        "description": "Get automation performance metrics",
+        "operationId": "get_automation_performance_api_v1_automation_performance_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/alerts": {
+      "get": {
+        "tags": ["automation"],
+        "summary": "Get Automation Alerts",
+        "description": "Get automation alerts",
+        "operationId": "get_automation_alerts_api_v1_automation_alerts_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/auto-trading/configure": {
+      "post": {
+        "tags": ["automation"],
+        "summary": "Configure Auto Trading",
+        "description": "Configure auto trading settings",
+        "operationId": "configure_auto_trading_api_v1_automation_auto_trading_configure_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/emergency-stop": {
+      "post": {
+        "tags": ["automation"],
+        "summary": "Trigger Emergency Stop",
+        "description": "Trigger emergency stop",
+        "operationId": "trigger_emergency_stop_api_v1_automation_emergency_stop_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/market-scan/trigger": {
+      "post": {
+        "tags": ["automation"],
+        "summary": "Trigger Market Scan",
+        "description": "Trigger market scan",
+        "operationId": "trigger_market_scan_api_v1_automation_market_scan_trigger_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/position-monitor/trigger": {
+      "post": {
+        "tags": ["automation"],
+        "summary": "Trigger Position Monitor",
+        "description": "Trigger position monitor",
+        "operationId": "trigger_position_monitor_api_v1_automation_position_monitor_trigger_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/models/retrain": {
+      "post": {
+        "tags": ["automation"],
+        "summary": "Trigger Model Retrain",
+        "description": "Trigger model retraining",
+        "operationId": "trigger_model_retrain_api_v1_automation_models_retrain_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/health-check": {
+      "post": {
+        "tags": ["automation"],
+        "summary": "Run Health Check",
+        "description": "Run system health check",
+        "operationId": "run_health_check_api_v1_automation_health_check_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/tasks/{task_id}/status": {
+      "get": {
+        "tags": ["automation"],
+        "summary": "Get Task Status",
+        "description": "Get task status by ID",
+        "operationId": "get_task_status_api_v1_automation_tasks__task_id__status_get",
+        "parameters": [
+          {
+            "name": "task_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Task Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/tasks/active": {
+      "get": {
+        "tags": ["automation"],
+        "summary": "Get Active Tasks",
+        "description": "Get active and scheduled tasks",
+        "operationId": "get_active_tasks_api_v1_automation_tasks_active_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/queue-stats": {
+      "get": {
+        "tags": ["automation"],
+        "summary": "Get Queue Stats",
+        "description": "Get queue statistics",
+        "operationId": "get_queue_stats_api_v1_automation_queue_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/automation/alerts/{alert_id}/acknowledge": {
+      "post": {
+        "tags": ["automation"],
+        "summary": "Acknowledge Alert",
+        "description": "Acknowledge an alert",
+        "operationId": "acknowledge_alert_api_v1_automation_alerts__alert_id__acknowledge_post",
+        "parameters": [
+          {
+            "name": "alert_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "title": "Alert Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/test": {
+      "get": {
+        "tags": ["settings"],
+        "summary": "Test Settings Endpoint",
+        "description": "Test endpoint to verify settings router is working",
+        "operationId": "test_settings_endpoint_api_v1_settings_test_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/api/v1/settings/": {
+      "get": {
+        "tags": ["settings"],
+        "summary": "Get User Settings",
+        "description": "Get current user settings",
+        "operationId": "get_user_settings_api_v1_settings__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/UserSettings" } }
+            }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      },
+      "put": {
+        "tags": ["settings"],
+        "summary": "Update User Settings",
+        "description": "Update user settings",
+        "operationId": "update_user_settings_api_v1_settings__put",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/SettingsUpdate" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/settings/test-deriv-connection": {
+      "post": {
+        "tags": ["settings"],
+        "summary": "Test Deriv Connection",
+        "description": "Test Deriv API connection with provided token",
+        "operationId": "test_deriv_connection_api_v1_settings_test_deriv_connection_post",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/DerivTokenRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+              }
+            }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/settings/system-status": {
+      "get": {
+        "tags": ["settings"],
+        "summary": "Get System Status",
+        "description": "Get system configuration status",
+        "operationId": "get_system_status_api_v1_settings_system_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/settings/reset-to-defaults": {
+      "post": {
+        "tags": ["settings"],
+        "summary": "Reset Settings To Defaults",
+        "description": "Reset user settings to default values",
+        "operationId": "reset_settings_to_defaults_api_v1_settings_reset_to_defaults_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/settings/export": {
+      "get": {
+        "tags": ["settings"],
+        "summary": "Export User Settings",
+        "description": "Export user settings for backup",
+        "operationId": "export_user_settings_api_v1_settings_export_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        },
+        "security": [{ "OAuth2PasswordBearer": [] }]
+      }
+    },
+    "/api/v1/ws/stats": {
+      "get": {
+        "tags": ["websocket"],
+        "summary": "Get Websocket Stats",
+        "description": "Get WebSocket connection statistics",
+        "operationId": "get_websocket_stats_api_v1_ws_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": {} } }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Root  Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Body_login_api_v1_auth_token_post": {
+        "properties": {
+          "grant_type": {
+            "anyOf": [{ "type": "string", "pattern": "password" }, { "type": "null" }],
+            "title": "Grant Type"
+          },
+          "username": { "type": "string", "title": "Username" },
+          "password": { "type": "string", "title": "Password" },
+          "scope": { "type": "string", "title": "Scope", "default": "" },
+          "client_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Client Secret"
+          }
+        },
+        "type": "object",
+        "required": ["username", "password"],
+        "title": "Body_login_api_v1_auth_token_post"
+      },
+      "DerivTokenRequest": {
+        "properties": { "token": { "type": "string", "title": "Token" } },
+        "type": "object",
+        "required": ["token"],
+        "title": "DerivTokenRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": { "$ref": "#/components/schemas/ValidationError" },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "MarketAnalysis": {
+        "properties": {
+          "symbol": { "type": "string", "title": "Symbol" },
+          "rsi": { "anyOf": [{ "type": "number" }, { "type": "null" }], "title": "Rsi" },
+          "macd": { "anyOf": [{ "type": "number" }, { "type": "null" }], "title": "Macd" },
+          "bollinger_upper": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Bollinger Upper"
+          },
+          "bollinger_lower": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Bollinger Lower"
+          },
+          "trend": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Trend" },
+          "volatility": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Volatility"
+          },
+          "confidence": {
+            "anyOf": [{ "type": "number", "maximum": 1.0, "minimum": 0.0 }, { "type": "null" }],
+            "title": "Confidence"
+          },
+          "id": { "type": "string", "title": "Id" },
+          "timestamp": { "type": "string", "format": "date-time", "title": "Timestamp" },
+          "current_price": { "type": "number", "title": "Current Price" },
+          "price_history": {
+            "items": { "type": "number" },
+            "type": "array",
+            "title": "Price History"
+          }
+        },
+        "type": "object",
+        "required": ["symbol", "id", "timestamp", "current_price", "price_history"],
+        "title": "MarketAnalysis"
+      },
+      "SettingsUpdate": {
+        "properties": {
+          "deriv_token": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Deriv Token"
+          },
+          "deriv_app_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Deriv App Id"
+          },
+          "ai_confidence_threshold": {
+            "anyOf": [{ "type": "number", "maximum": 1.0, "minimum": 0.0 }, { "type": "null" }],
+            "title": "Ai Confidence Threshold"
+          },
+          "ai_analysis_interval": {
+            "anyOf": [{ "type": "integer", "maximum": 300.0, "minimum": 10.0 }, { "type": "null" }],
+            "title": "Ai Analysis Interval"
+          },
+          "max_positions_per_user": {
+            "anyOf": [{ "type": "integer", "maximum": 50.0, "minimum": 1.0 }, { "type": "null" }],
+            "title": "Max Positions Per User"
+          },
+          "ai_model": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Ai Model" },
+          "ai_temperature": {
+            "anyOf": [{ "type": "number", "maximum": 1.0, "minimum": 0.0 }, { "type": "null" }],
+            "title": "Ai Temperature"
+          },
+          "ai_max_tokens": {
+            "anyOf": [
+              { "type": "integer", "maximum": 4000.0, "minimum": 100.0 },
+              { "type": "null" }
+            ],
+            "title": "Ai Max Tokens"
+          },
+          "openai_api_key": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Openai Api Key"
+          },
+          "langchain_api_key": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Langchain Api Key"
+          },
+          "langsmith_project": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Langsmith Project"
+          },
+          "auto_stop_loss_enabled": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Auto Stop Loss Enabled"
+          },
+          "auto_take_profit_enabled": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Auto Take Profit Enabled"
+          },
+          "emergency_stop_enabled": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Emergency Stop Enabled"
+          },
+          "circuit_breaker_enabled": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Circuit Breaker Enabled"
+          },
+          "auto_trading_enabled": {
+            "anyOf": [{ "type": "boolean" }, { "type": "null" }],
+            "title": "Auto Trading Enabled"
+          },
+          "market_scan_interval": {
+            "anyOf": [{ "type": "integer", "maximum": 300.0, "minimum": 5.0 }, { "type": "null" }],
+            "title": "Market Scan Interval"
+          },
+          "position_monitor_interval": {
+            "anyOf": [{ "type": "integer", "maximum": 60.0, "minimum": 1.0 }, { "type": "null" }],
+            "title": "Position Monitor Interval"
+          },
+          "signal_execution_delay": {
+            "anyOf": [{ "type": "integer", "maximum": 30.0, "minimum": 0.0 }, { "type": "null" }],
+            "title": "Signal Execution Delay"
+          },
+          "max_concurrent_positions": {
+            "anyOf": [{ "type": "integer", "maximum": 20.0, "minimum": 1.0 }, { "type": "null" }],
+            "title": "Max Concurrent Positions"
+          },
+          "learning_data_lookback_days": {
+            "anyOf": [{ "type": "integer", "maximum": 365.0, "minimum": 1.0 }, { "type": "null" }],
+            "title": "Learning Data Lookback Days"
+          },
+          "min_training_samples": {
+            "anyOf": [
+              { "type": "integer", "maximum": 1000.0, "minimum": 10.0 },
+              { "type": "null" }
+            ],
+            "title": "Min Training Samples"
+          },
+          "retrain_interval_hours": {
+            "anyOf": [{ "type": "integer", "maximum": 168.0, "minimum": 1.0 }, { "type": "null" }],
+            "title": "Retrain Interval Hours"
+          }
+        },
+        "type": "object",
+        "title": "SettingsUpdate",
+        "description": "Settings update model with optional fields"
+      },
+      "TradePosition": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol",
+            "description": "Trading symbol (e.g., R_10, R_25)"
+          },
+          "contract_type": {
+            "type": "string",
+            "title": "Contract Type",
+            "description": "Contract type (CALL, PUT)"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 1.0,
+            "title": "Amount",
+            "description": "Trade amount in USD"
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Duration",
+            "description": "Trade duration"
+          },
+          "duration_unit": {
+            "type": "string",
+            "title": "Duration Unit",
+            "description": "Duration unit (m, h, d)",
+            "default": "m"
+          },
+          "id": { "type": "string", "title": "Id" },
+          "user_id": { "type": "string", "title": "User Id" },
+          "contract_id": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Contract Id"
+          },
+          "entry_spot": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Entry Spot"
+          },
+          "exit_spot": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Exit Spot"
+          },
+          "current_spot": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Current Spot"
+          },
+          "profit_loss": {
+            "anyOf": [{ "type": "number" }, { "type": "null" }],
+            "title": "Profit Loss"
+          },
+          "status": { "type": "string", "title": "Status" },
+          "entry_time": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Entry Time"
+          },
+          "exit_time": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Exit Time"
+          },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": { "type": "string", "format": "date-time", "title": "Updated At" }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "contract_type",
+          "amount",
+          "duration",
+          "id",
+          "user_id",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TradePosition"
+      },
+      "TradePositionCreate": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol",
+            "description": "Trading symbol (e.g., R_10, R_25)"
+          },
+          "contract_type": {
+            "type": "string",
+            "title": "Contract Type",
+            "description": "Contract type (CALL, PUT)"
+          },
+          "amount": {
+            "type": "number",
+            "minimum": 1.0,
+            "title": "Amount",
+            "description": "Trade amount in USD"
+          },
+          "duration": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Duration",
+            "description": "Trade duration"
+          },
+          "duration_unit": {
+            "type": "string",
+            "title": "Duration Unit",
+            "description": "Duration unit (m, h, d)",
+            "default": "m"
+          }
+        },
+        "type": "object",
+        "required": ["symbol", "contract_type", "amount", "duration"],
+        "title": "TradePositionCreate"
+      },
+      "TradingParameters": {
+        "properties": {
+          "profit_top": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Profit Top",
+            "description": "Profit target percentage"
+          },
+          "profit_loss": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Profit Loss",
+            "description": "Stop loss percentage"
+          },
+          "stop_loss": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Stop Loss",
+            "description": "Maximum stop loss"
+          },
+          "take_profit": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Take Profit",
+            "description": "Take profit percentage"
+          },
+          "max_daily_loss": {
+            "type": "number",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Max Daily Loss",
+            "description": "Maximum daily loss amount"
+          },
+          "position_size": {
+            "type": "number",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Position Size",
+            "description": "Position size in USD"
+          },
+          "id": { "type": "string", "title": "Id" },
+          "user_id": { "type": "string", "title": "User Id" },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": { "type": "string", "format": "date-time", "title": "Updated At" }
+        },
+        "type": "object",
+        "required": [
+          "profit_top",
+          "profit_loss",
+          "stop_loss",
+          "take_profit",
+          "max_daily_loss",
+          "position_size",
+          "id",
+          "user_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "TradingParameters"
+      },
+      "TradingParametersCreate": {
+        "properties": {
+          "profit_top": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Profit Top",
+            "description": "Profit target percentage"
+          },
+          "profit_loss": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Profit Loss",
+            "description": "Stop loss percentage"
+          },
+          "stop_loss": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Stop Loss",
+            "description": "Maximum stop loss"
+          },
+          "take_profit": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.1,
+            "title": "Take Profit",
+            "description": "Take profit percentage"
+          },
+          "max_daily_loss": {
+            "type": "number",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Max Daily Loss",
+            "description": "Maximum daily loss amount"
+          },
+          "position_size": {
+            "type": "number",
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Position Size",
+            "description": "Position size in USD"
+          }
+        },
+        "type": "object",
+        "required": [
+          "profit_top",
+          "profit_loss",
+          "stop_loss",
+          "take_profit",
+          "max_daily_loss",
+          "position_size"
+        ],
+        "title": "TradingParametersCreate"
+      },
+      "TradingParametersUpdate": {
+        "properties": {
+          "profit_top": {
+            "anyOf": [{ "type": "number", "maximum": 100.0, "minimum": 0.1 }, { "type": "null" }],
+            "title": "Profit Top"
+          },
+          "profit_loss": {
+            "anyOf": [{ "type": "number", "maximum": 100.0, "minimum": 0.1 }, { "type": "null" }],
+            "title": "Profit Loss"
+          },
+          "stop_loss": {
+            "anyOf": [{ "type": "number", "maximum": 100.0, "minimum": 0.1 }, { "type": "null" }],
+            "title": "Stop Loss"
+          },
+          "take_profit": {
+            "anyOf": [{ "type": "number", "maximum": 100.0, "minimum": 0.1 }, { "type": "null" }],
+            "title": "Take Profit"
+          },
+          "max_daily_loss": {
+            "anyOf": [{ "type": "number", "maximum": 10000.0, "minimum": 1.0 }, { "type": "null" }],
+            "title": "Max Daily Loss"
+          },
+          "position_size": {
+            "anyOf": [{ "type": "number", "maximum": 10000.0, "minimum": 1.0 }, { "type": "null" }],
+            "title": "Position Size"
+          }
+        },
+        "type": "object",
+        "title": "TradingParametersUpdate"
+      },
+      "TradingSignal": {
+        "properties": {
+          "symbol": { "type": "string", "title": "Symbol" },
+          "signal_type": {
+            "type": "string",
+            "title": "Signal Type",
+            "description": "BUY_CALL, BUY_PUT, HOLD"
+          },
+          "confidence": { "type": "number", "maximum": 1.0, "minimum": 0.0, "title": "Confidence" },
+          "recommended_amount": { "type": "number", "minimum": 1.0, "title": "Recommended Amount" },
+          "recommended_duration": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Recommended Duration"
+          },
+          "reasoning": {
+            "type": "string",
+            "title": "Reasoning",
+            "description": "AI reasoning for the signal"
+          },
+          "id": { "type": "string", "title": "Id" },
+          "user_id": { "type": "string", "title": "User Id" },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "executed": { "type": "boolean", "title": "Executed" },
+          "trade_id": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Trade Id" }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "signal_type",
+          "confidence",
+          "recommended_amount",
+          "recommended_duration",
+          "reasoning",
+          "id",
+          "user_id",
+          "created_at",
+          "executed"
+        ],
+        "title": "TradingSignal"
+      },
+      "User": {
+        "properties": {
+          "email": { "type": "string", "format": "email", "title": "Email" },
+          "name": { "type": "string", "title": "Name" },
+          "id": { "type": "string", "title": "Id" },
+          "deriv_token": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Deriv Token"
+          },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "updated_at": { "type": "string", "format": "date-time", "title": "Updated At" }
+        },
+        "type": "object",
+        "required": ["email", "name", "id", "created_at", "updated_at"],
+        "title": "User"
+      },
+      "UserCreate": {
+        "properties": {
+          "email": { "type": "string", "format": "email", "title": "Email" },
+          "name": { "type": "string", "title": "Name" },
+          "password": { "type": "string", "title": "Password" }
+        },
+        "type": "object",
+        "required": ["email", "name", "password"],
+        "title": "UserCreate"
+      },
+      "UserSettings": {
+        "properties": {
+          "deriv_token": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Deriv Token"
+          },
+          "deriv_app_id": { "type": "string", "title": "Deriv App Id", "default": "1089" },
+          "ai_confidence_threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Ai Confidence Threshold",
+            "default": 0.6
+          },
+          "ai_analysis_interval": {
+            "type": "integer",
+            "maximum": 300.0,
+            "minimum": 10.0,
+            "title": "Ai Analysis Interval",
+            "default": 30
+          },
+          "max_positions_per_user": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Max Positions Per User",
+            "default": 10
+          },
+          "ai_model": { "type": "string", "title": "Ai Model", "default": "gpt-4o-mini" },
+          "ai_temperature": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Ai Temperature",
+            "default": 0.1
+          },
+          "ai_max_tokens": {
+            "type": "integer",
+            "maximum": 4000.0,
+            "minimum": 100.0,
+            "title": "Ai Max Tokens",
+            "default": 1000
+          },
+          "openai_api_key": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Openai Api Key"
+          },
+          "langchain_api_key": {
+            "anyOf": [{ "type": "string" }, { "type": "null" }],
+            "title": "Langchain Api Key"
+          },
+          "langsmith_project": {
+            "type": "string",
+            "title": "Langsmith Project",
+            "default": "deriv-trading"
+          },
+          "auto_stop_loss_enabled": {
+            "type": "boolean",
+            "title": "Auto Stop Loss Enabled",
+            "default": true
+          },
+          "auto_take_profit_enabled": {
+            "type": "boolean",
+            "title": "Auto Take Profit Enabled",
+            "default": true
+          },
+          "emergency_stop_enabled": {
+            "type": "boolean",
+            "title": "Emergency Stop Enabled",
+            "default": true
+          },
+          "circuit_breaker_enabled": {
+            "type": "boolean",
+            "title": "Circuit Breaker Enabled",
+            "default": true
+          },
+          "auto_trading_enabled": {
+            "type": "boolean",
+            "title": "Auto Trading Enabled",
+            "default": false
+          },
+          "market_scan_interval": {
+            "type": "integer",
+            "maximum": 300.0,
+            "minimum": 5.0,
+            "title": "Market Scan Interval",
+            "default": 30
+          },
+          "position_monitor_interval": {
+            "type": "integer",
+            "maximum": 60.0,
+            "minimum": 1.0,
+            "title": "Position Monitor Interval",
+            "default": 10
+          },
+          "signal_execution_delay": {
+            "type": "integer",
+            "maximum": 30.0,
+            "minimum": 0.0,
+            "title": "Signal Execution Delay",
+            "default": 5
+          },
+          "max_concurrent_positions": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Concurrent Positions",
+            "default": 5
+          },
+          "learning_data_lookback_days": {
+            "type": "integer",
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Learning Data Lookback Days",
+            "default": 30
+          },
+          "min_training_samples": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 10.0,
+            "title": "Min Training Samples",
+            "default": 100
+          },
+          "retrain_interval_hours": {
+            "type": "integer",
+            "maximum": 168.0,
+            "minimum": 1.0,
+            "title": "Retrain Interval Hours",
+            "default": 24
+          }
+        },
+        "type": "object",
+        "title": "UserSettings",
+        "description": "User settings model"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": { "password": { "scopes": {}, "tokenUrl": "/api/v1/auth/token" } }
+      }
+    }
+  }
+}
