@@ -6,7 +6,10 @@ export interface WebSocketMessage {
   message?: string;
   status?: string;
   timestamp?: number;
+  code?: number;
 }
+
+type TimeoutType = ReturnType<typeof setTimeout>;
 
 export interface TickData {
   symbol: string;
@@ -41,91 +44,133 @@ export class WebSocketClient {
   private reconnectInterval = 3000;
   private eventHandlers: Map<string, WebSocketEventHandler[]> = new Map();
   private isConnecting = false;
+  private messageBuffer: any[] = [];
+  private worker: Worker | null = null;
+  private readonly BUFFER_FLUSH_INTERVAL = 100; // ms
+  private readonly MESSAGE_BATCH_SIZE = 10;
+  private flushTimeout: TimeoutType | null = null;
+  private lastHeartbeat: number = Date.now();
+  private heartbeatInterval: TimeoutType | null = null;
+
+  private readonly WS_CONFIG = {
+    RECONNECT_MAX_ATTEMPTS: 5,
+    RECONNECT_BASE_DELAY: 1000,
+    MESSAGE_BATCH_SIZE: 10,
+    MESSAGE_BATCH_INTERVAL: 100,
+    HEARTBEAT_INTERVAL: 15000,
+    CONNECTION_TIMEOUT: 30000
+  };
 
   constructor(token?: string) {
-    this.token = token;
+    this.token = token || null;
+    this.initializeWorker();
   }
 
   setToken(token: string) {
     this.token = token;
   }
 
-  connect(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      if (!this.token) {
-        reject(new Error('No authentication token provided'));
-        return;
+  private initializeWorker() {
+    if (typeof Worker !== 'undefined') {
+      this.worker = new Worker(new URL('./websocket.worker.ts', import.meta.url));
+      this.worker.onmessage = this.handleWorkerMessage.bind(this);
+    }
+  }
+
+  private handleWorkerMessage(event: MessageEvent) {
+    const { type, data } = event.data;
+    this.notifyHandlers(type, data);
+  }
+
+  private startHeartbeat() {
+    this.heartbeatInterval = setInterval(() => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({ type: 'heartbeat' }));
+        this.lastHeartbeat = Date.now();
+      }
+    }, this.WS_CONFIG.HEARTBEAT_INTERVAL);
+  }
+
+  private stopHeartbeat() {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval);
+      this.heartbeatInterval = null;
+    }
+  }
+
+  private bufferMessage(message: any) {
+    this.messageBuffer.push(message);
+
+    if (this.messageBuffer.length >= this.MESSAGE_BATCH_SIZE) {
+      this.flushMessageBuffer();
+    } else if (!this.flushTimeout) {
+      this.flushTimeout = setTimeout(() => this.flushMessageBuffer(), this.BUFFER_FLUSH_INTERVAL);
+    }
+  }
+
+  private flushMessageBuffer() {
+    if (this.messageBuffer.length === 0) return;
+
+    if (this.worker) {
+      this.worker.postMessage({
+        type: 'PROCESS_BATCH',
+        data: this.messageBuffer
+      });
+    } else {
+      // Fallback if worker is not available
+      this.messageBuffer.forEach(msg => this.notifyHandlers(msg.type, msg));
+    }
+
+    this.messageBuffer = [];
+    if (this.flushTimeout) {
+      clearTimeout(this.flushTimeout);
+      this.flushTimeout = null;
+    }
+  }
+
+  async connect() {
+    if (this.ws?.readyState === WebSocket.OPEN || this.isConnecting) {
+      return;
+    }
+
+    this.isConnecting = true;
+
+    try {
+      // Reset any existing connection
+      if (this.ws) {
+        this.ws.close();
+        this.ws = null;
       }
 
-      if (this.isConnecting || (this.ws && this.ws.readyState === WebSocket.CONNECTING)) {
-        resolve(false);
-        return;
-      }
+      const wsUrl = `${config.wsUrl}?token=${this.token}`;
+      this.ws = new WebSocket(wsUrl);
 
-      this.isConnecting = true;
+      // Set up connection timeout
+      const connectionTimeout = setTimeout(() => {
+        if (this.ws?.readyState !== WebSocket.OPEN) {
+          console.error('WebSocket connection timeout');
+          this.ws?.close();
+          this.handleError(new Error('Connection timeout'));
+        }
+      }, this.WS_CONFIG.CONNECTION_TIMEOUT);
 
-      const wsUrl = `${config.wsUrl}/ws/${this.token}`.replace('http', 'ws');
+      // Set up event handlers
+      this.ws.onopen = () => {
+        clearTimeout(connectionTimeout);
+        this.handleOpen();
+      };
+      this.ws.onclose = this.handleClose.bind(this);
+      this.ws.onerror = this.handleError.bind(this);
+      this.ws.onmessage = this.handleMessage.bind(this);
 
-      try {
-        this.ws = new WebSocket(wsUrl);
+      this.startHeartbeat();
 
-        this.ws.onopen = () => {
-          this.isConnecting = false;
-          this.reconnectAttempts = 0;
-          console.log('WebSocket connected');
-          this.emit('connection', { type: 'connection', status: 'connected' });
-          resolve(true);
-        };
-
-        this.ws.onmessage = (event) => {
-          try {
-            const message: WebSocketMessage = JSON.parse(event.data);
-            this.handleMessage(message);
-          } catch (error) {
-            console.error('Failed to parse WebSocket message:', error);
-          }
-        };
-
-        this.ws.onclose = (event) => {
-          this.isConnecting = false;
-          console.log('WebSocket disconnected:', event.code, event.reason);
-          this.emit('disconnection', {
-            type: 'disconnection',
-            status: 'disconnected',
-            code: event.code,
-            reason: event.reason
-          });
-
-          // Auto-reconnect unless it was a manual close
-          if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
-            this.scheduleReconnect();
-          }
-        };
-
-        this.ws.onerror = (error) => {
-          this.isConnecting = false;
-          console.error('WebSocket error:', error);
-          this.emit('error', {
-            type: 'error',
-            message: 'WebSocket connection error'
-          });
-          reject(error);
-        };
-
-        // Connection timeout
-        setTimeout(() => {
-          if (this.isConnecting) {
-            this.isConnecting = false;
-            this.ws?.close();
-            reject(new Error('Connection timeout'));
-          }
-        }, config.wsReconnectInterval);
-
-      } catch (error) {
-        this.isConnecting = false;
-        reject(error);
-      }
-    });
+    } catch (error) {
+      console.error('WebSocket connection error:', error);
+      this.handleError(error);
+    } finally {
+      this.isConnecting = false;
+    }
   }
 
   disconnect() {
@@ -149,9 +194,55 @@ export class WebSocketClient {
     }
   }
 
-  private handleMessage(message: WebSocketMessage) {
-    console.log('WebSocket message received:', message);
-    this.emit(message.type, message);
+  private notifyHandlers(type: string, data: any) {
+    const handlers = this.eventHandlers.get(type) || [];
+    handlers.forEach(handler => handler({ type, data }));
+  }
+
+  private handleOpen() {
+    console.log('WebSocket connected');
+    this.reconnectAttempts = 0;
+    this.notifyHandlers('connection', { status: 'connected' });
+  }
+
+  private handleClose(event: CloseEvent) {
+    this.stopHeartbeat();
+    this.notifyHandlers('connection', {
+      status: 'disconnected',
+      code: event.code,
+      reason: event.reason
+    });
+
+    if (this.reconnectAttempts < this.WS_CONFIG.RECONNECT_MAX_ATTEMPTS) {
+      const delay = Math.min(
+        this.WS_CONFIG.RECONNECT_BASE_DELAY * Math.pow(2, this.reconnectAttempts),
+        30000
+      );
+      this.reconnectAttempts++;
+      setTimeout(() => this.connect(), delay);
+    }
+  }
+
+  private handleError(error: any) {
+    console.error('WebSocket error:', error);
+    this.notifyHandlers('error', { error });
+  }
+
+  private handleMessage(event: MessageEvent) {
+    try {
+      const message = JSON.parse(event.data);
+
+      // Manejar heartbeat
+      if (message.type === 'heartbeat') {
+        this.lastHeartbeat = Date.now();
+        return;
+      }
+
+      // Buffering de mensajes
+      this.bufferMessage(message);
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
+    }
   }
 
   send(message: any): boolean {

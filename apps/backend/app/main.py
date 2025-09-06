@@ -32,7 +32,7 @@ app.include_router(market.router, prefix="/api/v1/market", tags=["market"])
 # app.include_router(ai.router, prefix="/api/v1/ai", tags=["ai"])  # Temporarily commented out
 app.include_router(automation.router, prefix="/api/v1/automation", tags=["automation"])
 app.include_router(settings_router.router, prefix="/api/v1/settings", tags=["settings"])
-app.include_router(websocket.router, prefix="/api/v1", tags=["websocket"])
+app.include_router(websocket.router, prefix="/api/v1/ws", tags=["websocket"])
 
 @app.get("/")
 async def root() -> dict:

@@ -61,9 +61,9 @@ export const config: AppConfig = {
   apiTimeout: getNumberEnv('API_TIMEOUT', 30000),
 
   // WebSocket Configuration
-  wsUrl: getEnvVar('WS_URL', 'ws://localhost:8000/api/v1/ws'),
-  wsReconnectAttempts: getNumberEnv('WS_RECONNECT_ATTEMPTS', 5),
-  wsReconnectInterval: getNumberEnv('WS_RECONNECT_INTERVAL', 3000),
+  wsUrl: getEnvVar('WS_URL', 'ws://localhost:8080/api/v1/ws'),
+  wsReconnectAttempts: getNumberEnv('WS_RECONNECT_ATTEMPTS', 3),
+  wsReconnectInterval: getNumberEnv('WS_RECONNECT_INTERVAL', 5000),
 
   // Application Configuration
   environment: getEnvVar('ENVIRONMENT', 'development'),
